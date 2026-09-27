@@ -18,8 +18,8 @@ export default defineConfig({
         name: 'BEST — 100 Day Plan',
         short_name: 'BEST',
         description: "Fernando's 100-day hybrid athletic plan tracker",
-        theme_color: '#1a1c2c',
-        background_color: '#1a1c2c',
+        theme_color: '#88c870',
+        background_color: '#88c870',
         display: 'standalone',
         start_url: '.',
         icons: [

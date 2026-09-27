@@ -1,5 +1,5 @@
 import type { AppData } from '../types'
-import { HABIT_DEFS, PLAN_START_DATE } from '../data/plan'
+import { HABIT_DEFS, PLAN_START_DATE, SESSIONS_BY_TYPE, type DayType } from '../data/plan'
 import { getDayInfo } from './session'
 import { addDays } from './date'
 
@@ -62,4 +62,40 @@ export function heroStats(data: AppData, todayIso: string): HeroStats {
     levelXP: totalXP % XP_PER_LEVEL,
     streak,
   }
+}
+
+export interface Foe {
+  name: string
+  sprite: 'golem' | 'bird' | 'blaze' | 'slime'
+}
+
+/** The wild creature that stands for each kind of training day. */
+export const FOES: Record<DayType, Foe> = {
+  strengthA: { name: 'IRONCLOD', sprite: 'golem' },
+  strengthB: { name: 'IRONCLOD', sprite: 'golem' },
+  strengthC: { name: 'IRONCLOD', sprite: 'golem' },
+  aerobicEasy: { name: 'GUSTLET', sprite: 'bird' },
+  longEndurance: { name: 'GALEWING', sprite: 'bird' },
+  hardConditioning: { name: 'BLAZET', sprite: 'blaze' },
+  rest: { name: 'SNOOZLE', sprite: 'slime' },
+}
+
+/** Foe HP left, 0-1. It drops as the day's training gets logged. */
+export function foeHP(data: AppData, iso: string): number {
+  if (isOnPlan(data, iso)) {
+    const di = getDayInfo(iso)
+    const ex = SESSIONS_BY_TYPE[di.dayType]
+    if (!ex) return 0
+    const logged = Object.keys(data.workouts[iso]?.exercises ?? {}).length
+    const required = ex.filter((e) => !e.optional).length
+    return Math.max(0, 1 - logged / required)
+  }
+  return 1
+}
+
+/** Extra class for an HP bar so it turns yellow, then red, as it empties. */
+export function hpClass(fraction: number): string {
+  if (fraction <= 0.2) return ' low'
+  if (fraction <= 0.5) return ' mid'
+  return ''
 }

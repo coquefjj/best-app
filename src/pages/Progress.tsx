@@ -43,12 +43,32 @@ export default function Progress() {
       <div className="page-header">
         <Sprite name="trophy" scale={3} />
         <div>
-          <h1>World map</h1>
+          <h1>Town map</h1>
           <div className="subtle">Day {info.dayNum} of {PLAN_LENGTH_DAYS} · {info.phaseName}</div>
         </div>
       </div>
 
-      <div className="card gold">
+      <div className="card">
+        <h2>Badges</h2>
+        <div className="badge-case">
+          {PHASES.map((p, i) => {
+            const lastDay = Math.min(p.weeks[1] * 7, PLAN_LENGTH_DAYS)
+            const earned = info.dayNum > lastDay
+            const short = p.name.split('—')[1]?.trim() ?? p.name
+            return (
+              <div key={p.name} className={`badge-slot${earned ? ' earned' : ' locked'}`} title={p.note}>
+                <span style={{ filter: `hue-rotate(${i * 90}deg)`, display: 'block' }}>
+                  <Sprite name="badge" scale={4} />
+                </span>
+                {short}
+              </div>
+            )
+          })}
+        </div>
+      </div>
+
+      <div className="card">
+        <h2>Route · 100 days</h2>
         <div className="world-map">
           {Array.from({ length: PLAN_LENGTH_DAYS }, (_, i) => {
             const dayNum = i + 1
@@ -62,9 +82,9 @@ export default function Progress() {
             const past = iso < today
             const done = iso <= today && isOnPlan(data, iso)
             let sprite: SpriteName | null = null
-            if (isToday) sprite = 'hero'
+            if (isToday) sprite = 'partner'
             else if (dayNum === PLAN_LENGTH_DAYS) sprite = 'chest'
-            else if (found !== -1 && dayNum === phase.weeks[1] * 7) sprite = 'skull'
+            else if (found !== -1 && dayNum === phase.weeks[1] * 7) sprite = 'badge'
             else if (!done && getDayInfo(iso).deload && dayNum % 7 === 1) sprite = 'tent'
             const cls = ['tile', `w${phaseIdx + 1}`, done ? 'done' : past ? 'missed' : '', isToday ? 'today' : '']
               .filter(Boolean)
@@ -77,15 +97,15 @@ export default function Progress() {
           })}
         </div>
         <div className="legend">
-          <span><i className="swatch" style={{ background: 'var(--accent)' }} /> On plan</span>
-          <span><i className="swatch" style={{ background: '#3a1f2a', boxShadow: 'inset 0 0 0 2px var(--danger)' }} /> Missed</span>
-          <span><Sprite name="skull" scale={2} /> Phase boss</span>
-          <span><Sprite name="tent" scale={2} /> Deload camp</span>
+          <span><i className="swatch" style={{ background: 'var(--hp-green)' }} /> On plan</span>
+          <span><i className="swatch" style={{ background: '#f0c8c0', boxShadow: 'inset 0 0 0 2px var(--hp-red)' }} /> Missed</span>
+          <span><Sprite name="badge" scale={2} /> Badge battle</span>
+          <span><Sprite name="tent" scale={2} /> Deload rest stop</span>
         </div>
       </div>
 
       <div className="card">
-        <h2>This week's quests</h2>
+        <h2>This week</h2>
         <div className="row">
           <span className="subtle">{adherent} / {weekDates.length} days on plan</span>
           <span className="subtle">{adherencePct}%</span>

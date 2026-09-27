@@ -4,6 +4,7 @@ import { getDayInfo } from '../lib/session'
 import { formatHuman, addDays, todayISO } from '../lib/date'
 import { SESSIONS_BY_TYPE, AEROBIC_EASY_OPTIONS, HARD_CONDITIONING_OPTIONS, LONG_ENDURANCE_OPTIONS, MOBILITY_DAILY } from '../data/plan'
 import Sprite from '../components/Sprite'
+import { FOES } from '../lib/game'
 import type { AerobicLog, ExerciseLog, SetLog, WorkoutDayLog } from '../types'
 
 const MODALITY_OPTIONS: Record<string, string[]> = {
@@ -83,8 +84,9 @@ export default function Workout() {
       </div>
 
       <div className="page-header">
-        <Sprite name={info.dayType === 'rest' ? 'tent' : 'sword'} scale={3} />
+        <Sprite name={FOES[info.dayType].sprite} scale={3} />
         <div>
+          <div className="card-kicker" style={{ color: 'var(--ink)' }}>Wild {FOES[info.dayType].name}</div>
           <h1>{info.label}</h1>
           {info.deload && <span className="badge deload">Deload week: hold back on load</span>}
         </div>
@@ -92,13 +94,13 @@ export default function Workout() {
 
       {info.dayType === 'rest' && (
         <div className="card">
-          <p className="subtle">Rest day at camp. Active recovery only, resist filling it. Add a longer flexibility session below.</p>
+          <p className="subtle">SNOOZLE is fast asleep. Rest day: active recovery only, resist filling it. Add a longer flexibility session below.</p>
         </div>
       )}
 
       {modalityOptions && (
         <div className="card">
-          <h2>Choose your path</h2>
+          <h2>Choose your move</h2>
           <div className="pill-select">
             {modalityOptions.map((opt) => (
               <button
@@ -147,7 +149,7 @@ export default function Workout() {
 
       {exerciseDefs && (
         <div className="card">
-          <h2>Challenges</h2>
+          <h2>Moves</h2>
           {exerciseDefs.map((ex) => {
             const log = workout.exercises[ex.id]
             const lastLog = findLastLog(data.workouts, ex.id, iso)

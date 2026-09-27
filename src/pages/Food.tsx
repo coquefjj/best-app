@@ -86,7 +86,7 @@ export default function Food() {
 
       <div className="page-header">
         <Sprite name="meat" scale={3} />
-        <h1>The Tavern</h1>
+        <h1>Bag · Food</h1>
       </div>
 
       <div className="card">
@@ -109,7 +109,7 @@ export default function Food() {
 
       {data.savedMeals.length > 0 && (
         <div className="card">
-          <h2><Sprite name="chest" scale={2} /> Recipe book</h2>
+          <h2>Saved meals</h2>
           {data.savedMeals.map((m) => (
             <div className="food-entry" key={m.id}>
               <span onClick={() => addFromMeal(m)} style={{ cursor: 'pointer' }}>

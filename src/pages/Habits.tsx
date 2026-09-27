@@ -38,11 +38,11 @@ export default function Habits() {
 
       <div className="page-header">
         <Sprite name="potion" scale={3} />
-        <h1>Daily rituals</h1>
+        <h1>Trainer stats</h1>
       </div>
 
       <div className="card">
-        <h2><Sprite name="heart" scale={2} /> Vital stats</h2>
+        <h2><Sprite name="heart" scale={2} /> Vitals</h2>
         {HABIT_DEFS.filter((h) => h.type === 'number').map((h) => (
           <div className="field" key={h.id}>
             <label>{h.label}{h.unit ? ` (${h.unit})` : ''}</label>
@@ -56,7 +56,7 @@ export default function Habits() {
       </div>
 
       <div className="card">
-        <h2>Rituals</h2>
+        <h2>Daily habits</h2>
         {HABIT_DEFS.filter((h) => h.type === 'boolean').map((h) => (
           <div className={`checklist-item${habits[h.id] ? ' done' : ''}`} key={h.id} onClick={() => setHabit(h.id, !habits[h.id])}>
             <input type="checkbox" checked={!!habits[h.id]} onChange={() => setHabit(h.id, !habits[h.id])} onClick={(e) => e.stopPropagation()} />

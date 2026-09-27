@@ -1,8 +1,9 @@
+import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { todayISO, formatHuman } from '../lib/date'
 import { getDayInfo } from '../lib/session'
-import { heroStats, XP_PER_LEVEL } from '../lib/game'
+import { heroStats, XP_PER_LEVEL, FOES, foeHP, hpClass } from '../lib/game'
 import { HABIT_DEFS, PLAN_LENGTH_DAYS } from '../data/plan'
 import Sprite from '../components/Sprite'
 
@@ -46,68 +47,92 @@ export default function Today() {
     }))
   }
 
-  const exerciseCount = workout ? Object.keys(workout.exercises).length : 0
   const proteinPct = Math.min(100, Math.round((totals.protein / info.nutrition.protein) * 100))
   const caloriePct = Math.min(100, Math.round((totals.calories / info.nutrition.calories) * 100))
   const mobilityDone = workout?.mobilityDone ?? false
   const questsDone = quickHabits.filter((h) => habits[h.id]).length + (mobilityDone ? 1 : 0)
 
+  const foe = FOES[info.dayType]
+  const foeLeft = foeHP(data, iso)
+  const fainted = foeLeft === 0
+  const questTotal = quickHabits.length + 1
+  const questFrac = questsDone / questTotal
+
+  let message: ReactNode
+  if (!info.inPlan) {
+    message = <>No wild training out here. The 100-day journey is outside today's date.</>
+  } else if (fainted) {
+    message = <>The wild <strong>{foe.name}</strong> fainted! Today's training is done. Keep clearing side quests for EXP.</>
+  } else if (foeLeft < 1) {
+    message = <>The wild <strong>{foe.name}</strong> is weakened! Keep logging: {info.label}.</>
+  } else {
+    message = <>A wild <strong>{foe.name}</strong> appeared! Today: {info.label}. What will BEST do?</>
+  }
+
   return (
     <div className="page">
-      <div className="card gold">
-        <div className="hero">
-          <div className="hero-avatar">
-            <Sprite name="hero" scale={4} title="Your hero" />
+      <Link to={`/workout/${iso}`} className="battle" aria-label={`Start today's training: ${info.label}`}>
+        <div className="status-box foe">
+          <div className="name-row">
+            <span>{foe.name}</span>
+            <span>{info.inPlan ? `D${info.dayNum}` : '--'}</span>
           </div>
-          <div className="hero-info">
-            <div className="row">
-              <div className="hero-level">LV {hero.level}</div>
-              {info.inPlan && (
-                <span className={`badge${info.deload ? ' deload' : ''}`}>
-                  {info.deload ? 'Rest camp' : `Week ${info.weekNumber}`}
-                </span>
-              )}
-            </div>
-            <div className="card-title">{formatHuman(iso)}</div>
-            <div className="subtle">
-              {info.inPlan ? `Day ${info.dayNum} of ${PLAN_LENGTH_DAYS}` : 'Outside the 100-day plan'}
-            </div>
-            <div className="bar-label">
-              <span className="tag">XP</span>
-              <span className="subtle">{hero.levelXP} / {XP_PER_LEVEL}</span>
-            </div>
-            <div className="progress-bar xp"><div style={{ width: `${(hero.levelXP / XP_PER_LEVEL) * 100}%` }} /></div>
-            {hero.streak > 0 && (
-              <div className="streak" style={{ marginTop: 10 }}>
-                <Sprite name="flame" scale={2} /> {hero.streak} day streak
-              </div>
-            )}
+          <div className="hp-row">
+            <span className="hp-tag">HP</span>
+            <div className={`progress-bar${hpClass(foeLeft)}`}><div style={{ width: `${foeLeft * 100}%` }} /></div>
           </div>
         </div>
-      </div>
+        <div className={`foe-side${fainted ? ' fainted' : ''}`}>
+          <span style={{ position: 'relative' }}>
+            <Sprite name={foe.sprite} scale={5} title={foe.name} />
+            {foe.sprite === 'slime' && !fainted && <span className="zzz">Zz</span>}
+          </span>
+          <div className="platform" />
+        </div>
 
-      <Link to={`/workout/${iso}`} className="card">
-        <div className="card-kicker">Main quest</div>
-        <div className="row">
-          <div>
-            <div className="card-title">{info.label}</div>
-            {info.hasStrengthExercises ? (
-              <div className="subtle">{exerciseCount > 0 ? `${exerciseCount} exercise(s) logged` : 'Not started. Tap to begin'}</div>
-            ) : info.dayType === 'rest' ? (
-              <div className="subtle">Active recovery / mobility only</div>
-            ) : (
-              <div className="subtle">{workout?.aerobic ? `Logged: ${workout.aerobic.chosenOption}` : "Not started. Tap to choose today's session"}</div>
-            )}
+        <div className="me-side">
+          <Sprite name="partner" scale={6} title="Your partner" />
+          <div className="platform" />
+        </div>
+        <div className="status-box me">
+          <div className="name-row">
+            <span>BEST</span>
+            <span>Lv{hero.level}</span>
           </div>
-          <Sprite name={info.dayType === 'rest' ? 'tent' : 'sword'} scale={3} />
+          <div className="hp-row">
+            <span className="hp-tag">HP</span>
+            <div className={`progress-bar${hpClass(questFrac)}`}><div style={{ width: `${questFrac * 100}%` }} /></div>
+          </div>
+          <div className="hp-num">{questsDone}/{questTotal}</div>
+          <div className="progress-bar xp"><div style={{ width: `${(hero.levelXP / XP_PER_LEVEL) * 100}%` }} /></div>
         </div>
       </Link>
+      <div className="dialog">
+        <div className="dialog-text">
+          <div className="subtle" style={{ marginBottom: 4 }}>
+            {formatHuman(iso)} · {info.inPlan ? `Day ${info.dayNum} of ${PLAN_LENGTH_DAYS}` : 'Outside the plan'}
+            {info.inPlan && info.deload ? ' · Deload week' : ''}
+          </div>
+          {message}
+          {hero.streak > 0 && (
+            <div className="streak" style={{ marginTop: 10 }}>
+              <Sprite name="flame" scale={2} /> {hero.streak} day streak
+            </div>
+          )}
+        </div>
+        <nav className="battle-menu" aria-label="Actions">
+          <Link to={`/workout/${iso}`}>FIGHT</Link>
+          <Link to="/food">BAG</Link>
+          <Link to="/habits">STATS</Link>
+          <Link to="/progress">MAP</Link>
+        </nav>
+      </div>
 
       <div className="card">
         <h2>
-          <Sprite name="chest" scale={2} /> Side quests
+          Side quests
           <span className="subtle" style={{ marginLeft: 'auto', fontFamily: 'var(--font-body)', fontSize: '1rem' }}>
-            {questsDone}/{quickHabits.length + 1}
+            {questsDone}/{questTotal}
           </span>
         </h2>
         <div className={`checklist-item${mobilityDone ? ' done' : ''}`} onClick={toggleMobility}>
@@ -128,12 +153,12 @@ export default function Today() {
           </div>
         ))}
         <Link to="/habits" className="subtle" style={{ display: 'inline-block', marginTop: 8 }}>
-          Log weight, sleep &amp; more ▶
+          ▶ Log weight, sleep &amp; more
         </Link>
       </div>
 
       <div className="card">
-        <h2><Sprite name="meat" scale={2} /> Rations</h2>
+        <h2>Rations</h2>
         <div className="bar-label">
           <span className="tag">Protein</span>
           <span className="subtle">{Math.round(totals.protein)} / {info.nutrition.protein} g</span>
