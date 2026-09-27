@@ -912,17 +912,68 @@ input[type='checkbox']:checked {
     margin-bottom: 8px;
   }
 
-  .hero {
-    gap: 10px;
+  /* Shrink the battle scene so the dialog and FIGHT/BAG menu stay on screen */
+  .battle {
+    height: 176px;
   }
 
-  .hero-avatar {
-    padding: 4px;
+  .battle .foe-side {
+    right: 10px;
+    top: 26px;
   }
 
-  .hero-avatar .sprite {
-    width: 48px;
-    height: 48px;
+  .battle .foe-side .sprite {
+    width: 56px;
+    height: auto;
+  }
+
+  .battle .me-side {
+    left: 6px;
+    bottom: 8px;
+  }
+
+  .battle .me-side .sprite {
+    width: 64px;
+    height: auto;
+  }
+
+  .battle .platform {
+    width: 96px;
+    height: 24px;
+  }
+
+  .battle .foe-side .platform {
+    margin-top: -14px;
+  }
+
+  .battle .me-side .platform {
+    width: 108px;
+    margin-top: -16px;
+  }
+
+  .status-box {
+    width: 160px;
+    padding: 4px 8px 6px;
+  }
+
+  .status-box.foe {
+    left: 8px;
+    top: 8px;
+  }
+
+  .status-box.me {
+    right: 8px;
+    bottom: 10px;
+  }
+
+  .dialog-text {
+    padding: 10px;
+    font-size: 1rem;
+  }
+
+  .battle-menu {
+    gap: 8px 10px;
+    padding: 10px;
   }
 
   .checklist-item {
