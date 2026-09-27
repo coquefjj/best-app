@@ -4,30 +4,26 @@ import Workout from './pages/Workout'
 import Food from './pages/Food'
 import Habits from './pages/Habits'
 import Progress from './pages/Progress'
+import Sprite from './components/Sprite'
+import type { SpriteName } from './components/sprites'
+
+const NAV_ITEMS: { to: string; label: string; sprite: SpriteName; end?: boolean }[] = [
+  { to: '/', label: 'Today', sprite: 'house', end: true },
+  { to: '/workout', label: 'Train', sprite: 'sword' },
+  { to: '/food', label: 'Food', sprite: 'meat' },
+  { to: '/habits', label: 'Habits', sprite: 'potion' },
+  { to: '/progress', label: 'Map', sprite: 'trophy' },
+]
 
 function Nav() {
   return (
     <nav className="nav">
-      <NavLink to="/" end className={({ isActive }) => (isActive ? 'active' : '')}>
-        <span className="icon">🏠</span>
-        Today
-      </NavLink>
-      <NavLink to="/workout" className={({ isActive }) => (isActive ? 'active' : '')}>
-        <span className="icon">💪</span>
-        Workout
-      </NavLink>
-      <NavLink to="/food" className={({ isActive }) => (isActive ? 'active' : '')}>
-        <span className="icon">🍽️</span>
-        Food
-      </NavLink>
-      <NavLink to="/habits" className={({ isActive }) => (isActive ? 'active' : '')}>
-        <span className="icon">✅</span>
-        Habits
-      </NavLink>
-      <NavLink to="/progress" className={({ isActive }) => (isActive ? 'active' : '')}>
-        <span className="icon">📈</span>
-        Progress
-      </NavLink>
+      {NAV_ITEMS.map((item) => (
+        <NavLink key={item.to} to={item.to} end={item.end} className={({ isActive }) => (isActive ? 'active' : '')}>
+          <Sprite name={item.sprite} scale={2} />
+          {item.label}
+        </NavLink>
+      ))}
     </nav>
   )
 }

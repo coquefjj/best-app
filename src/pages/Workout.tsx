@@ -3,6 +3,7 @@ import { useStore } from '../lib/store'
 import { getDayInfo } from '../lib/session'
 import { formatHuman, addDays, todayISO } from '../lib/date'
 import { SESSIONS_BY_TYPE, AEROBIC_EASY_OPTIONS, HARD_CONDITIONING_OPTIONS, LONG_ENDURANCE_OPTIONS, MOBILITY_DAILY } from '../data/plan'
+import Sprite from '../components/Sprite'
 import type { AerobicLog, ExerciseLog, SetLog, WorkoutDayLog } from '../types'
 
 const MODALITY_OPTIONS: Record<string, string[]> = {
@@ -72,27 +73,32 @@ export default function Workout() {
 
   return (
     <div className="page">
-      <div className="top-bar" style={{ padding: 0, marginBottom: 12 }}>
-        <Link to={`/workout/${addDays(iso, -1)}`} className="subtle">← prev</Link>
+      <div className="top-bar">
+        <Link to={`/workout/${addDays(iso, -1)}`} className="arrow-btn" aria-label="Previous day">◀</Link>
         <div style={{ textAlign: 'center' }}>
           <strong>{formatHuman(iso)}</strong>
           {info.inPlan && <div className="subtle">Day {info.dayNum}</div>}
         </div>
-        <Link to={`/workout/${addDays(iso, 1)}`} className="subtle">next →</Link>
+        <Link to={`/workout/${addDays(iso, 1)}`} className="arrow-btn" aria-label="Next day">▶</Link>
       </div>
 
-      <h1>{info.label}</h1>
-      {info.deload && <span className="badge deload">Deload week — hold back on load</span>}
+      <div className="page-header">
+        <Sprite name={info.dayType === 'rest' ? 'tent' : 'sword'} scale={3} />
+        <div>
+          <h1>{info.label}</h1>
+          {info.deload && <span className="badge deload">Deload week: hold back on load</span>}
+        </div>
+      </div>
 
       {info.dayType === 'rest' && (
         <div className="card">
-          <p className="subtle">Rest day. Active recovery only — resist filling it. Add a longer flexibility session below.</p>
+          <p className="subtle">Rest day at camp. Active recovery only, resist filling it. Add a longer flexibility session below.</p>
         </div>
       )}
 
       {modalityOptions && (
         <div className="card">
-          <h2>Pick today's session</h2>
+          <h2>Choose your path</h2>
           <div className="pill-select">
             {modalityOptions.map((opt) => (
               <button
@@ -141,7 +147,7 @@ export default function Workout() {
 
       {exerciseDefs && (
         <div className="card">
-          <h2>Exercises</h2>
+          <h2>Challenges</h2>
           {exerciseDefs.map((ex) => {
             const log = workout.exercises[ex.id]
             const lastLog = findLastLog(data.workouts, ex.id, iso)
@@ -184,7 +190,7 @@ export default function Workout() {
                   const lastSet = lastLog?.sets[idx]
                   return (
                     <div className="set-row" key={idx}>
-                      <span className="subtle">#{idx + 1}</span>
+                      <span className="set-num">#{idx + 1}</span>
                       <input
                         type="number"
                         placeholder={lastSet?.weight != null ? `${lastSet.weight} kg last` : 'kg'}
@@ -212,8 +218,8 @@ export default function Workout() {
       )}
 
       <div className="card">
-        <div className="checklist-item" onClick={toggleMobility} style={{ cursor: 'pointer' }}>
-          <input type="checkbox" checked={workout.mobilityDone} onChange={toggleMobility} />
+        <div className={`checklist-item${workout.mobilityDone ? ' done' : ''}`} onClick={toggleMobility}>
+          <input type="checkbox" checked={workout.mobilityDone} onChange={toggleMobility} onClick={(e) => e.stopPropagation()} />
           <label>Daily mobility (10 min)</label>
         </div>
         <div className="subtle" style={{ marginTop: 6 }}>

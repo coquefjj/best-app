@@ -1,7 +1,10 @@
 import { useStore } from '../lib/store'
 import { todayISO, startOfWeek, addDays, formatHuman } from '../lib/date'
 import { getDayInfo } from '../lib/session'
-import { PLAN_LENGTH_DAYS } from '../data/plan'
+import { PLAN_LENGTH_DAYS, PHASES, PLAN_START_DATE } from '../data/plan'
+import { isOnPlan } from '../lib/game'
+import Sprite from '../components/Sprite'
+import type { SpriteName } from '../components/sprites'
 
 export default function Progress() {
   const { data } = useStore()
@@ -10,18 +13,7 @@ export default function Progress() {
   const weekStart = startOfWeek(today)
   const weekDates = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)).filter((d) => d <= today)
 
-  let adherent = 0
-  for (const d of weekDates) {
-    const di = getDayInfo(d)
-    const w = data.workouts[d]
-    if (di.dayType === 'rest') {
-      if (w?.mobilityDone) adherent++
-    } else if (di.hasStrengthExercises) {
-      if (w && Object.keys(w.exercises).length > 0) adherent++
-    } else if (w?.aerobic?.chosenOption) {
-      adherent++
-    }
-  }
+  const adherent = weekDates.filter((d) => isOnPlan(data, d)).length
   const adherencePct = weekDates.length ? Math.round((adherent / weekDates.length) * 100) : 0
 
   const weightEntries = Object.entries(data.habits)
@@ -48,11 +40,52 @@ export default function Progress() {
 
   return (
     <div className="page">
-      <h1>Progress</h1>
-      <div className="subtle">Day {info.dayNum} of {PLAN_LENGTH_DAYS} · {info.phaseName}</div>
+      <div className="page-header">
+        <Sprite name="trophy" scale={3} />
+        <div>
+          <h1>World map</h1>
+          <div className="subtle">Day {info.dayNum} of {PLAN_LENGTH_DAYS} · {info.phaseName}</div>
+        </div>
+      </div>
+
+      <div className="card gold">
+        <div className="world-map">
+          {Array.from({ length: PLAN_LENGTH_DAYS }, (_, i) => {
+            const dayNum = i + 1
+            const iso = addDays(PLAN_START_DATE, i)
+            const week = Math.ceil(dayNum / 7)
+            const found = PHASES.findIndex((p) => week >= p.weeks[0] && week <= p.weeks[1])
+            // Days past the last phase's final week still belong to the last world.
+            const phaseIdx = found === -1 ? PHASES.length - 1 : found
+            const phase = PHASES[phaseIdx]
+            const isToday = iso === today
+            const past = iso < today
+            const done = iso <= today && isOnPlan(data, iso)
+            let sprite: SpriteName | null = null
+            if (isToday) sprite = 'hero'
+            else if (dayNum === PLAN_LENGTH_DAYS) sprite = 'chest'
+            else if (found !== -1 && dayNum === phase.weeks[1] * 7) sprite = 'skull'
+            else if (!done && getDayInfo(iso).deload && dayNum % 7 === 1) sprite = 'tent'
+            const cls = ['tile', `w${phaseIdx + 1}`, done ? 'done' : past ? 'missed' : '', isToday ? 'today' : '']
+              .filter(Boolean)
+              .join(' ')
+            return (
+              <div key={dayNum} className={cls} title={`Day ${dayNum} · ${formatHuman(iso)}`}>
+                {sprite && <Sprite name={sprite} scale={1} />}
+              </div>
+            )
+          })}
+        </div>
+        <div className="legend">
+          <span><i className="swatch" style={{ background: 'var(--accent)' }} /> On plan</span>
+          <span><i className="swatch" style={{ background: '#3a1f2a', boxShadow: 'inset 0 0 0 2px var(--danger)' }} /> Missed</span>
+          <span><Sprite name="skull" scale={2} /> Phase boss</span>
+          <span><Sprite name="tent" scale={2} /> Deload camp</span>
+        </div>
+      </div>
 
       <div className="card">
-        <h2>This week's adherence</h2>
+        <h2>This week's quests</h2>
         <div className="row">
           <span className="subtle">{adherent} / {weekDates.length} days on plan</span>
           <span className="subtle">{adherencePct}%</span>
@@ -64,12 +97,12 @@ export default function Progress() {
         <h2>Weight trend (last 2 weeks)</h2>
         {recentWeights.length >= 2 ? (
           <>
-            <div className="subtle">{formatHuman(firstW.date)}: {firstW.weight} kg → {formatHuman(lastW.date)}: {lastW.weight} kg</div>
+            <div className="subtle">{formatHuman(firstW.date)}: {firstW.weight} kg ▶ {formatHuman(lastW.date)}: {lastW.weight} kg</div>
             <div style={{ marginTop: 4 }}>
               {weightDelta !== null && weightDelta <= 0
-                ? `${Math.abs(weightDelta)} kg down — on track (target ~0.3-0.5 kg/week)`
+                ? `${Math.abs(weightDelta)} kg down, on track (target ~0.3-0.5 kg/week)`
                 : weightDelta !== null
-                ? `${weightDelta} kg up — check calories if this continues`
+                ? `${weightDelta} kg up, check calories if this continues`
                 : 'Not enough change yet to tell'}
             </div>
           </>
@@ -82,7 +115,7 @@ export default function Progress() {
         <h2>Waist (every 2 weeks)</h2>
         {lastCheckIn ? (
           <div className="subtle">
-            Last: {formatHuman(lastCheckIn.date)} — {lastCheckIn.waistCm} cm
+            Last: {formatHuman(lastCheckIn.date)} · {lastCheckIn.waistCm} cm
             {waistDelta !== null && ` (${waistDelta <= 0 ? waistDelta : '+' + waistDelta} cm since last check-in)`}
           </div>
         ) : (
@@ -91,9 +124,9 @@ export default function Progress() {
       </div>
 
       {hrRising && (
-        <div className="card" style={{ borderColor: 'var(--warn)' }}>
-          <h2 style={{ color: 'var(--warn)' }}>Overreaching alarm</h2>
-          <p className="subtle">Resting heart rate has been rising. Combined with worsening sleep or dead legs, that's the plan's signal to drop a session or take an extra easy day — not a failure.</p>
+        <div className="card warn">
+          <h2><Sprite name="skull" scale={2} /> Overreaching alarm</h2>
+          <p className="subtle">Resting heart rate has been rising. Combined with worsening sleep or dead legs, that's the plan's signal to drop a session or take an extra easy day. Not a failure.</p>
         </div>
       )}
     </div>

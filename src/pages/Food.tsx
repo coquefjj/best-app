@@ -3,6 +3,7 @@ import { useStore } from '../lib/store'
 import { todayISO, formatHuman, addDays } from '../lib/date'
 import { getDayInfo } from '../lib/session'
 import type { FoodEntry, SavedMeal } from '../types'
+import Sprite from '../components/Sprite'
 import { Link, useParams } from 'react-router-dom'
 
 function uid() {
@@ -77,14 +78,19 @@ export default function Food() {
 
   return (
     <div className="page">
-      <div className="top-bar" style={{ padding: 0, marginBottom: 12 }}>
-        <Link to={`/food/${addDays(iso, -1)}`} className="subtle">← prev</Link>
+      <div className="top-bar">
+        <Link to={`/food/${addDays(iso, -1)}`} className="arrow-btn" aria-label="Previous day">◀</Link>
         <strong>{formatHuman(iso)}</strong>
-        <Link to={`/food/${addDays(iso, 1)}`} className="subtle">next →</Link>
+        <Link to={`/food/${addDays(iso, 1)}`} className="arrow-btn" aria-label="Next day">▶</Link>
+      </div>
+
+      <div className="page-header">
+        <Sprite name="meat" scale={3} />
+        <h1>The Tavern</h1>
       </div>
 
       <div className="card">
-        <h2>Today's totals</h2>
+        <h2>Today's rations</h2>
         <div className="stat-grid">
           <div>
             <div className="stat-value">{Math.round(totals.calories)}</div>
@@ -103,7 +109,7 @@ export default function Food() {
 
       {data.savedMeals.length > 0 && (
         <div className="card">
-          <h2>Saved meals</h2>
+          <h2><Sprite name="chest" scale={2} /> Recipe book</h2>
           {data.savedMeals.map((m) => (
             <div className="food-entry" key={m.id}>
               <span onClick={() => addFromMeal(m)} style={{ cursor: 'pointer' }}>
@@ -116,12 +122,12 @@ export default function Food() {
       )}
 
       <div className="card">
-        <h2>Logged today</h2>
+        <h2>Eaten today</h2>
         {entries.length === 0 && <div className="subtle">Nothing logged yet.</div>}
         {entries.map((e) => (
           <div className="food-entry" key={e.id}>
             <span>
-              {e.name} <span className="subtle">({e.mealSlot}) — {e.calories} kcal, {e.protein}g P</span>
+              {e.name} <span className="subtle">({e.mealSlot}) · {e.calories} kcal, {e.protein}g P</span>
             </span>
             <button className="icon-btn" onClick={() => removeEntry(e.id)}>✕</button>
           </div>
@@ -165,8 +171,8 @@ export default function Food() {
                 <input type="number" value={form.fat} onChange={(e) => setForm({ ...form, fat: e.target.value })} />
               </div>
             </div>
-            <div className="checklist-item">
-              <input type="checkbox" checked={saveAsMeal} onChange={(e) => setSaveAsMeal(e.target.checked)} />
+            <div className="checklist-item" onClick={() => setSaveAsMeal((v) => !v)}>
+              <input type="checkbox" checked={saveAsMeal} onChange={(e) => setSaveAsMeal(e.target.checked)} onClick={(e) => e.stopPropagation()} />
               <label>Save as a meal for quick logging later</label>
             </div>
             <div className="row" style={{ marginTop: 8 }}>
