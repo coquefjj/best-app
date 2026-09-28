@@ -4,6 +4,7 @@ import { todayISO, formatHuman, formatClock } from '../lib/date'
 import { getDayInfo } from '../lib/session'
 import { HABIT_DEFS, PLAN_LENGTH_DAYS } from '../data/plan'
 import RoomHeader from '../components/RoomHeader'
+import WaterGlasses from '../components/WaterGlasses'
 
 export default function Today() {
   const { data, setData } = useStore()
@@ -84,6 +85,10 @@ export default function Today() {
       </Link>
 
       <div className="card">
+        <WaterGlasses iso={iso} />
+      </div>
+
+      <div className="card">
         <h2>Daily checklist</h2>
         <div className={`checklist-item${mobilityDone ? ' done' : ''}`} onClick={toggleMobility}>
           <input type="checkbox" checked={mobilityDone} onChange={toggleMobility} onClick={(e) => e.stopPropagation()} />
@@ -101,7 +106,7 @@ export default function Today() {
           </div>
         ))}
         <Link to="/habits" className="subtle" style={{ display: 'inline-block', marginTop: 8 }}>
-          ▶ Log weight, sleep &amp; more
+          ▶ Log sleep, heart rate &amp; more
         </Link>
       </div>
 

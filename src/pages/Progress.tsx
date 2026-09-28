@@ -15,15 +15,6 @@ export default function Progress() {
   const adherent = weekDates.filter((d) => isOnPlan(data, d)).length
   const adherencePct = weekDates.length ? Math.round((adherent / weekDates.length) * 100) : 0
 
-  const weightEntries = Object.entries(data.habits)
-    .map(([date, h]) => ({ date, weight: h.morningWeight as number | undefined }))
-    .filter((e) => typeof e.weight === 'number')
-    .sort((a, b) => (a.date < b.date ? -1 : 1))
-
-  const recentWeights = weightEntries.slice(-14)
-  const firstW = recentWeights[0]
-  const lastW = recentWeights[recentWeights.length - 1]
-  const weightDelta = firstW && lastW && firstW !== lastW ? +(lastW.weight! - firstW.weight!).toFixed(1) : null
 
   const restingHrEntries = Object.entries(data.habits)
     .map(([date, h]) => ({ date, hr: h.restingHr as number | undefined }))
@@ -76,24 +67,6 @@ export default function Progress() {
           <span className="subtle">{adherencePct}%</span>
         </div>
         <div className="progress-bar"><div style={{ width: `${adherencePct}%` }} /></div>
-      </div>
-
-      <div className="card">
-        <h2>Weight trend (last 2 weeks)</h2>
-        {recentWeights.length >= 2 ? (
-          <>
-            <div className="subtle">{formatHuman(firstW.date)}: {firstW.weight} kg ▶ {formatHuman(lastW.date)}: {lastW.weight} kg</div>
-            <div style={{ marginTop: 4 }}>
-              {weightDelta !== null && weightDelta <= 0
-                ? `${Math.abs(weightDelta)} kg down, on track (target ~0.3-0.5 kg/week)`
-                : weightDelta !== null
-                ? `${weightDelta} kg up, check calories if this continues`
-                : 'Not enough change yet to tell'}
-            </div>
-          </>
-        ) : (
-          <div className="subtle">Log your morning weight daily in Habits to see a trend.</div>
-        )}
       </div>
 
       <div className="card">

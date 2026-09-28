@@ -4,6 +4,7 @@ import { todayISO, formatHuman, addDays } from '../lib/date'
 import { HABIT_DEFS } from '../data/plan'
 import { useState } from 'react'
 import RoomHeader from '../components/RoomHeader'
+import WaterGlasses from '../components/WaterGlasses'
 
 export default function Habits() {
   const { date } = useParams<{ date: string }>()
@@ -31,7 +32,7 @@ export default function Habits() {
   return (
     <div className="page room-page floor-bedroom">
 
-      <RoomHeader room="bedroom" title="Daily log" subtitle="Sleep, weight, heart rate and routines">
+      <RoomHeader room="bedroom" title="Daily log" subtitle="Water, sleep, heart rate and routines">
         <div className="top-bar">
           <Link to={`/habits/${addDays(iso, -1)}`} className="arrow-btn" aria-label="Previous day">◀</Link>
           <strong>{formatHuman(iso)}</strong>
@@ -40,8 +41,12 @@ export default function Habits() {
       </RoomHeader>
 
       <div className="card">
+        <WaterGlasses iso={iso} />
+      </div>
+
+      <div className="card">
         <h2>Numbers</h2>
-        {HABIT_DEFS.filter((h) => h.type === 'number').map((h) => (
+        {HABIT_DEFS.filter((h) => h.type === 'number' && h.id !== 'water').map((h) => (
           <div className="field" key={h.id}>
             <label>{h.label}{h.unit ? ` (${h.unit})` : ''}</label>
             <input

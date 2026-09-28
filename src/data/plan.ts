@@ -243,7 +243,6 @@ export const HABIT_DEFS = [
   { id: 'sleepHours', label: 'Sleep hours', type: 'number', unit: 'h' },
   { id: 'sleepScore', label: 'Sleep score', type: 'number', unit: '' },
   { id: 'restingHr', label: 'Resting heart rate', type: 'number', unit: 'bpm' },
-  { id: 'morningWeight', label: 'Morning weight', type: 'number', unit: 'kg' },
   { id: 'phoneUnder1h', label: 'Phone < 1 hour', type: 'boolean', unit: '' },
   { id: 'reading30', label: 'Reading 30 min', type: 'boolean', unit: '' },
   { id: 'meditation10', label: 'Meditation 10 min', type: 'boolean', unit: '' },
