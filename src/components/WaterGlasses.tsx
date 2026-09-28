@@ -8,26 +8,12 @@ export function glassesFromLitres(litres: unknown): number {
   return typeof litres === 'number' ? Math.round((litres * 1000) / GLASS_ML) : 0
 }
 
-function Glass({ full }: { full: boolean }) {
-  // 12x16 pixel glass drawn on a grid so it stays crisp at any size.
-  return (
-    <svg viewBox="0 0 12 16" shapeRendering="crispEdges" aria-hidden="true">
-      <path d="M1 1h10v1h-1v13H2V2H1z" fill="#3a2418" />
-      <rect x="3" y="2" width="6" height="12" fill={full ? '#4a9ee0' : '#fbf3e0'} />
-      {full && <rect x="3" y="2" width="6" height="2" fill="#8cc8f0" />}
-      {full && <rect x="4" y="5" width="1" height="6" fill="#bfe2f8" />}
-      {!full && <rect x="4" y="3" width="1" height="4" fill="#e8d4ac" />}
-    </svg>
-  )
-}
-
 export default function WaterGlasses({ iso }: { iso: string }) {
   const { data, setData } = useStore()
   const count = glassesFromLitres(data.habits[iso]?.water)
-  const shown = Math.max(WATER_GOAL_GLASSES, count + (count >= WATER_GOAL_GLASSES ? 1 : 0))
 
   const setCount = (n: number) => {
-    const next = Math.max(0, n)
+    const next = Math.min(WATER_GOAL_GLASSES, Math.max(0, n))
     setData((prev) => ({
       ...prev,
       habits: { ...prev.habits, [iso]: { ...prev.habits[iso], water: +((next * GLASS_ML) / 1000).toFixed(1) } },
@@ -47,7 +33,7 @@ export default function WaterGlasses({ iso }: { iso: string }) {
         <span className="subtle">{litres} / 2.0 L{reached ? ' ✓' : ''}</span>
       </div>
       <div className="water-glasses">
-        {Array.from({ length: shown }, (_, i) => (
+        {Array.from({ length: WATER_GOAL_GLASSES }, (_, i) => (
           <button
             key={i}
             type="button"
@@ -56,7 +42,7 @@ export default function WaterGlasses({ iso }: { iso: string }) {
             aria-pressed={i < count}
             onClick={() => tap(i)}
           >
-            <Glass full={i < count} />
+            <img src={`${import.meta.env.BASE_URL}img/water-glass.png`} alt="" draggable={false} />
           </button>
         ))}
       </div>
