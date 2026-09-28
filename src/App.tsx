@@ -10,10 +10,10 @@ import type { SpriteName } from './components/sprites'
 
 const NAV_ITEMS: { to: string; label: string; sprite: SpriteName; end?: boolean }[] = [
   { to: '/', label: 'Home', sprite: 'house', end: true },
-  { to: '/workout', label: 'Gym', sprite: 'dumbbell' },
-  { to: '/food', label: 'Kitchen', sprite: 'pot' },
-  { to: '/habits', label: 'Bathroom', sprite: 'bathtub' },
-  { to: '/progress', label: 'Studio', sprite: 'easel' },
+  { to: '/workout', label: 'Workout', sprite: 'dumbbell' },
+  { to: '/food', label: 'Nutrition', sprite: 'pot' },
+  { to: '/habits', label: 'Habits', sprite: 'bathtub' },
+  { to: '/progress', label: 'Learning', sprite: 'easel' },
 ]
 
 function Nav() {

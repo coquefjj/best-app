@@ -36,7 +36,7 @@ export default function Habits() {
         <Link to={`/habits/${addDays(iso, 1)}`} className="arrow-btn" aria-label="Next day">▶</Link>
       </div>
 
-      <RoomHeader room="bathroom" title="Daily habits" subtitle="Sleep, weight, heart rate and routines" />
+      <RoomHeader room="bathroom" title="Daily log" subtitle="Sleep, weight, heart rate and routines" />
 
       <div className="card">
         <h2>Numbers</h2>

@@ -6,9 +6,9 @@ export const IMG_H = 2048
 export type RoomId = 'gym' | 'bathroom' | 'kitchen' | 'studio' | 'entrance'
 
 export const ROOMS: Record<RoomId, { name: string; what: string; to: string; x: number; y: number; w: number; h: number }> = {
-  gym: { name: 'Gym', what: 'Workouts', to: '/workout', x: 67, y: 189, w: 457, h: 608 },
-  bathroom: { name: 'Bathroom', what: 'Sleep, weight & habits', to: '/habits', x: 666, y: 189, w: 425, h: 608 },
-  kitchen: { name: 'Kitchen', what: 'Food', to: '/food', x: 26, y: 875, w: 440, h: 638 },
-  studio: { name: 'Studio', what: 'Progress', to: '/progress', x: 722, y: 875, w: 407, h: 638 },
+  gym: { name: 'Workout', what: 'Training log', to: '/workout', x: 67, y: 189, w: 457, h: 608 },
+  bathroom: { name: 'Habits', what: 'Sleep, weight & routines', to: '/habits', x: 666, y: 189, w: 425, h: 608 },
+  kitchen: { name: 'Nutrition', what: 'Food log', to: '/food', x: 26, y: 875, w: 440, h: 638 },
+  studio: { name: 'Learning', what: 'Progress', to: '/progress', x: 722, y: 875, w: 407, h: 638 },
   entrance: { name: 'Today', what: "Today's plan", to: '/today', x: 500, y: 1180, w: 170, h: 440 },
 }
