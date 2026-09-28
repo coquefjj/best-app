@@ -3,6 +3,7 @@ import { useStore } from '../lib/store'
 import { getDayInfo } from '../lib/session'
 import { formatHuman, addDays, todayISO } from '../lib/date'
 import { SESSIONS_BY_TYPE, AEROBIC_EASY_OPTIONS, HARD_CONDITIONING_OPTIONS, LONG_ENDURANCE_OPTIONS, MOBILITY_DAILY } from '../data/plan'
+import RoomHeader from '../components/RoomHeader'
 import type { AerobicLog, ExerciseLog, SetLog, WorkoutDayLog } from '../types'
 
 const MODALITY_OPTIONS: Record<string, string[]> = {
@@ -71,22 +72,25 @@ export default function Workout() {
   const toggleMobility = () => update((w) => ({ ...w, mobilityDone: !w.mobilityDone }))
 
   return (
-    <div className="page">
-      <div className="top-bar" style={{ padding: 0, marginBottom: 12 }}>
-        <Link to={`/workout/${addDays(iso, -1)}`} className="subtle">← prev</Link>
-        <div style={{ textAlign: 'center' }}>
-          <strong>{formatHuman(iso)}</strong>
-          {info.inPlan && <div className="subtle">Day {info.dayNum}</div>}
+    <div className="page room-page floor-gym">
+      <RoomHeader
+        room="gym"
+        title={info.label}
+        subtitle={info.deload ? <span className="badge deload">Deload week: hold back on load</span> : undefined}
+      >
+        <div className="top-bar">
+          <Link to={`/workout/${addDays(iso, -1)}`} className="arrow-btn" aria-label="Previous day">◀</Link>
+          <div style={{ textAlign: 'center' }}>
+            <strong>{formatHuman(iso)}</strong>
+            {info.inPlan && <div className="subtle">Day {info.dayNum}</div>}
+          </div>
+          <Link to={`/workout/${addDays(iso, 1)}`} className="arrow-btn" aria-label="Next day">▶</Link>
         </div>
-        <Link to={`/workout/${addDays(iso, 1)}`} className="subtle">next →</Link>
-      </div>
-
-      <h1>{info.label}</h1>
-      {info.deload && <span className="badge deload">Deload week — hold back on load</span>}
+      </RoomHeader>
 
       {info.dayType === 'rest' && (
         <div className="card">
-          <p className="subtle">Rest day. Active recovery only — resist filling it. Add a longer flexibility session below.</p>
+          <p className="subtle">Rest day. Active recovery only, resist filling it. Add a longer flexibility session below.</p>
         </div>
       )}
 
@@ -184,7 +188,7 @@ export default function Workout() {
                   const lastSet = lastLog?.sets[idx]
                   return (
                     <div className="set-row" key={idx}>
-                      <span className="subtle">#{idx + 1}</span>
+                      <span className="set-num">#{idx + 1}</span>
                       <input
                         type="number"
                         placeholder={lastSet?.weight != null ? `${lastSet.weight} kg last` : 'kg'}
@@ -212,8 +216,8 @@ export default function Workout() {
       )}
 
       <div className="card">
-        <div className="checklist-item" onClick={toggleMobility} style={{ cursor: 'pointer' }}>
-          <input type="checkbox" checked={workout.mobilityDone} onChange={toggleMobility} />
+        <div className={`checklist-item${workout.mobilityDone ? ' done' : ''}`} onClick={toggleMobility}>
+          <input type="checkbox" checked={workout.mobilityDone} onChange={toggleMobility} onClick={(e) => e.stopPropagation()} />
           <label>Daily mobility (10 min)</label>
         </div>
         <div className="subtle" style={{ marginTop: 6 }}>

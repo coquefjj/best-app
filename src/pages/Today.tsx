@@ -3,6 +3,7 @@ import { useStore } from '../lib/store'
 import { todayISO, formatHuman } from '../lib/date'
 import { getDayInfo } from '../lib/session'
 import { HABIT_DEFS, PLAN_LENGTH_DAYS } from '../data/plan'
+import RoomHeader from '../components/RoomHeader'
 
 export default function Today() {
   const { data, setData } = useStore()
@@ -46,63 +47,72 @@ export default function Today() {
   const exerciseCount = workout ? Object.keys(workout.exercises).length : 0
   const proteinPct = Math.min(100, Math.round((totals.protein / info.nutrition.protein) * 100))
   const caloriePct = Math.min(100, Math.round((totals.calories / info.nutrition.calories) * 100))
+  const mobilityDone = workout?.mobilityDone ?? false
 
   return (
-    <div className="page">
-      <div className="row">
-        <div>
-          <h1>{formatHuman(iso)}</h1>
-          <div className="subtle">
-            {info.inPlan ? `Day ${info.dayNum} of ${PLAN_LENGTH_DAYS}` : 'Outside the 100-day plan'}
-          </div>
+    <div className="page room-page floor-hall">
+      <RoomHeader
+        room="entrance"
+        title={formatHuman(iso)}
+        subtitle={info.inPlan ? `Day ${info.dayNum} of ${PLAN_LENGTH_DAYS}` : 'Outside the plan'}
+      >
+        <div className="top-bar">
+          <Link to="/" className="arrow-btn" aria-label="Back to the house">◀</Link>
+          {info.inPlan ? (
+            <span className={`badge${info.deload ? ' deload' : ''}`}>{info.deload ? 'Deload' : `Week ${info.weekNumber}`}</span>
+          ) : (
+            <span />
+          )}
         </div>
-        {info.inPlan && (
-          <span className={`badge${info.deload ? ' deload' : ''}`}>
-            {info.deload ? 'Deload week' : `Week ${info.weekNumber}`}
-          </span>
-        )}
-      </div>
+      </RoomHeader>
 
-      <Link to={`/workout/${iso}`} className="card" style={{ display: 'block', textDecoration: 'none', color: 'inherit' }}>
-        <h2>{info.label}</h2>
+      <Link to={`/workout/${iso}`} className="card">
+        <div className="card-kicker">Today's training</div>
+        <div className="card-title">{info.label}</div>
         {info.hasStrengthExercises ? (
-          <div className="subtle">{exerciseCount > 0 ? `${exerciseCount} exercise(s) logged` : 'Not logged yet — tap to start'}</div>
+          <div className="subtle">{exerciseCount > 0 ? `${exerciseCount} exercise(s) logged` : 'Not logged yet. Tap to start'}</div>
         ) : info.dayType === 'rest' ? (
           <div className="subtle">Active recovery / mobility only</div>
         ) : (
-          <div className="subtle">{workout?.aerobic ? `Logged: ${workout.aerobic.chosenOption}` : 'Not logged yet — tap to choose today\'s session'}</div>
+          <div className="subtle">{workout?.aerobic ? `Logged: ${workout.aerobic.chosenOption}` : "Not logged yet. Tap to choose today's session"}</div>
         )}
       </Link>
 
       <div className="card">
-        <div className="checklist-item" onClick={toggleMobility} style={{ cursor: 'pointer' }}>
-          <input type="checkbox" checked={workout?.mobilityDone ?? false} onChange={toggleMobility} />
+        <h2>Daily checklist</h2>
+        <div className={`checklist-item${mobilityDone ? ' done' : ''}`} onClick={toggleMobility}>
+          <input type="checkbox" checked={mobilityDone} onChange={toggleMobility} onClick={(e) => e.stopPropagation()} />
           <label>Daily mobility (10 min)</label>
         </div>
         {quickHabits.map((h) => (
-          <div className="checklist-item" key={h.id} onClick={() => toggleHabit(h.id, !!habits[h.id])} style={{ cursor: 'pointer' }}>
-            <input type="checkbox" checked={!!habits[h.id]} onChange={() => toggleHabit(h.id, !!habits[h.id])} />
+          <div className={`checklist-item${habits[h.id] ? ' done' : ''}`} key={h.id} onClick={() => toggleHabit(h.id, !!habits[h.id])}>
+            <input
+              type="checkbox"
+              checked={!!habits[h.id]}
+              onChange={() => toggleHabit(h.id, !!habits[h.id])}
+              onClick={(e) => e.stopPropagation()}
+            />
             <label>{h.label}</label>
           </div>
         ))}
         <Link to="/habits" className="subtle" style={{ display: 'inline-block', marginTop: 8 }}>
-          Log weight, sleep &amp; more →
+          ▶ Log weight, sleep &amp; more
         </Link>
       </div>
 
       <div className="card">
-        <h2>Nutrition today</h2>
-        <div className="row">
-          <span className="subtle">Protein</span>
+        <h2>Nutrition</h2>
+        <div className="bar-label">
+          <span className="tag">Protein</span>
           <span className="subtle">{Math.round(totals.protein)} / {info.nutrition.protein} g</span>
         </div>
         <div className="progress-bar"><div style={{ width: `${proteinPct}%` }} /></div>
-        <div className="row" style={{ marginTop: 10 }}>
-          <span className="subtle">Calories</span>
+        <div className="bar-label">
+          <span className="tag">Calories</span>
           <span className="subtle">{Math.round(totals.calories)} / {info.nutrition.calories} kcal</span>
         </div>
-        <div className="progress-bar"><div style={{ width: `${caloriePct}%`, background: 'var(--accent-2)' }} /></div>
-        <Link to="/food" className="btn secondary full" style={{ marginTop: 12 }}>
+        <div className="progress-bar mp"><div style={{ width: `${caloriePct}%` }} /></div>
+        <Link to="/food" className="btn secondary full" style={{ marginTop: 16 }}>
           Log food
         </Link>
       </div>

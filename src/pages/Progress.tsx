@@ -1,7 +1,9 @@
 import { useStore } from '../lib/store'
 import { todayISO, startOfWeek, addDays, formatHuman } from '../lib/date'
 import { getDayInfo } from '../lib/session'
-import { PLAN_LENGTH_DAYS } from '../data/plan'
+import { PLAN_LENGTH_DAYS, PHASES, PLAN_START_DATE } from '../data/plan'
+import { isOnPlan } from '../lib/adherence'
+import RoomHeader from '../components/RoomHeader'
 
 export default function Progress() {
   const { data } = useStore()
@@ -10,18 +12,7 @@ export default function Progress() {
   const weekStart = startOfWeek(today)
   const weekDates = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)).filter((d) => d <= today)
 
-  let adherent = 0
-  for (const d of weekDates) {
-    const di = getDayInfo(d)
-    const w = data.workouts[d]
-    if (di.dayType === 'rest') {
-      if (w?.mobilityDone) adherent++
-    } else if (di.hasStrengthExercises) {
-      if (w && Object.keys(w.exercises).length > 0) adherent++
-    } else if (w?.aerobic?.chosenOption) {
-      adherent++
-    }
-  }
+  const adherent = weekDates.filter((d) => isOnPlan(data, d)).length
   const adherencePct = weekDates.length ? Math.round((adherent / weekDates.length) * 100) : 0
 
   const weightEntries = Object.entries(data.habits)
@@ -47,12 +38,39 @@ export default function Progress() {
   const waistDelta = lastCheckIn && prevCheckIn ? +(lastCheckIn.waistCm! - prevCheckIn.waistCm!).toFixed(1) : null
 
   return (
-    <div className="page">
-      <h1>Progress</h1>
-      <div className="subtle">Day {info.dayNum} of {PLAN_LENGTH_DAYS} · {info.phaseName}</div>
+    <div className="page room-page floor-studio">
+      <RoomHeader room="studio" title="Progress" subtitle={`Day ${info.dayNum} of ${PLAN_LENGTH_DAYS} · ${info.phaseName ?? ''}`} />
 
       <div className="card">
-        <h2>This week's adherence</h2>
+        <h2>100-day calendar</h2>
+        <div className="world-map">
+          {Array.from({ length: PLAN_LENGTH_DAYS }, (_, i) => {
+            const dayNum = i + 1
+            const iso = addDays(PLAN_START_DATE, i)
+            const week = Math.ceil(dayNum / 7)
+            const found = PHASES.findIndex((p) => week >= p.weeks[0] && week <= p.weeks[1])
+            // Days past the last phase's final week are shaded as the last phase.
+            const phaseIdx = found === -1 ? PHASES.length - 1 : found
+            const isToday = iso === today
+            const past = iso < today
+            const done = iso <= today && isOnPlan(data, iso)
+            const cls = ['tile', `w${phaseIdx + 1}`, done ? 'done' : past ? 'missed' : '', isToday ? 'today' : '']
+              .filter(Boolean)
+              .join(' ')
+            return (
+              <div key={dayNum} className={cls} title={`Day ${dayNum} · ${formatHuman(iso)}`} />
+            )
+          })}
+        </div>
+        <div className="legend">
+          <span><i className="swatch" style={{ background: 'var(--hp-green)' }} /> On plan</span>
+          <span><i className="swatch" style={{ background: '#f0c8c0', boxShadow: 'inset 0 0 0 2px var(--hp-red)' }} /> Missed</span>
+          <span><i className="swatch" style={{ outline: '3px solid var(--orange)', outlineOffset: -3 }} /> Today</span>
+        </div>
+      </div>
+
+      <div className="card">
+        <h2>This week</h2>
         <div className="row">
           <span className="subtle">{adherent} / {weekDates.length} days on plan</span>
           <span className="subtle">{adherencePct}%</span>
@@ -64,12 +82,12 @@ export default function Progress() {
         <h2>Weight trend (last 2 weeks)</h2>
         {recentWeights.length >= 2 ? (
           <>
-            <div className="subtle">{formatHuman(firstW.date)}: {firstW.weight} kg → {formatHuman(lastW.date)}: {lastW.weight} kg</div>
+            <div className="subtle">{formatHuman(firstW.date)}: {firstW.weight} kg ▶ {formatHuman(lastW.date)}: {lastW.weight} kg</div>
             <div style={{ marginTop: 4 }}>
               {weightDelta !== null && weightDelta <= 0
-                ? `${Math.abs(weightDelta)} kg down — on track (target ~0.3-0.5 kg/week)`
+                ? `${Math.abs(weightDelta)} kg down, on track (target ~0.3-0.5 kg/week)`
                 : weightDelta !== null
-                ? `${weightDelta} kg up — check calories if this continues`
+                ? `${weightDelta} kg up, check calories if this continues`
                 : 'Not enough change yet to tell'}
             </div>
           </>
@@ -82,7 +100,7 @@ export default function Progress() {
         <h2>Waist (every 2 weeks)</h2>
         {lastCheckIn ? (
           <div className="subtle">
-            Last: {formatHuman(lastCheckIn.date)} — {lastCheckIn.waistCm} cm
+            Last: {formatHuman(lastCheckIn.date)} · {lastCheckIn.waistCm} cm
             {waistDelta !== null && ` (${waistDelta <= 0 ? waistDelta : '+' + waistDelta} cm since last check-in)`}
           </div>
         ) : (
@@ -91,9 +109,9 @@ export default function Progress() {
       </div>
 
       {hrRising && (
-        <div className="card" style={{ borderColor: 'var(--warn)' }}>
-          <h2 style={{ color: 'var(--warn)' }}>Overreaching alarm</h2>
-          <p className="subtle">Resting heart rate has been rising. Combined with worsening sleep or dead legs, that's the plan's signal to drop a session or take an extra easy day — not a failure.</p>
+        <div className="card warn">
+          <h2>Overreaching alarm</h2>
+          <p className="subtle">Resting heart rate has been rising. Combined with worsening sleep or dead legs, that's the plan's signal to drop a session or take an extra easy day. Not a failure.</p>
         </div>
       )}
     </div>
