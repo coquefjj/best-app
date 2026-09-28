@@ -77,14 +77,15 @@ export default function Food() {
   }
 
   return (
-    <div className="page">
-      <div className="top-bar">
-        <Link to={`/food/${addDays(iso, -1)}`} className="arrow-btn" aria-label="Previous day">◀</Link>
-        <strong>{formatHuman(iso)}</strong>
-        <Link to={`/food/${addDays(iso, 1)}`} className="arrow-btn" aria-label="Next day">▶</Link>
-      </div>
+    <div className="page room-page floor-kitchen">
 
-      <RoomHeader room="kitchen" title="Food log" subtitle={`Target today: ${info.nutrition.calories} kcal · ${info.nutrition.protein} g protein`} />
+      <RoomHeader room="kitchen" title="Food log" subtitle={`Target today: ${info.nutrition.calories} kcal · ${info.nutrition.protein} g protein`}>
+        <div className="top-bar">
+          <Link to={`/food/${addDays(iso, -1)}`} className="arrow-btn" aria-label="Previous day">◀</Link>
+          <strong>{formatHuman(iso)}</strong>
+          <Link to={`/food/${addDays(iso, 1)}`} className="arrow-btn" aria-label="Next day">▶</Link>
+        </div>
+      </RoomHeader>
 
       <div className="card">
         <h2>Totals</h2>

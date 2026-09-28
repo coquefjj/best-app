@@ -29,14 +29,15 @@ export default function Habits() {
   const existingCheckIn = data.checkIns.find((c) => c.date === iso)
 
   return (
-    <div className="page">
-      <div className="top-bar">
-        <Link to={`/habits/${addDays(iso, -1)}`} className="arrow-btn" aria-label="Previous day">◀</Link>
-        <strong>{formatHuman(iso)}</strong>
-        <Link to={`/habits/${addDays(iso, 1)}`} className="arrow-btn" aria-label="Next day">▶</Link>
-      </div>
+    <div className="page room-page floor-bath">
 
-      <RoomHeader room="bathroom" title="Daily log" subtitle="Sleep, weight, heart rate and routines" />
+      <RoomHeader room="bathroom" title="Daily log" subtitle="Sleep, weight, heart rate and routines">
+        <div className="top-bar">
+          <Link to={`/habits/${addDays(iso, -1)}`} className="arrow-btn" aria-label="Previous day">◀</Link>
+          <strong>{formatHuman(iso)}</strong>
+          <Link to={`/habits/${addDays(iso, 1)}`} className="arrow-btn" aria-label="Next day">▶</Link>
+        </div>
+      </RoomHeader>
 
       <div className="card">
         <h2>Numbers</h2>

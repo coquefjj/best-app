@@ -72,21 +72,21 @@ export default function Workout() {
   const toggleMobility = () => update((w) => ({ ...w, mobilityDone: !w.mobilityDone }))
 
   return (
-    <div className="page">
-      <div className="top-bar">
-        <Link to={`/workout/${addDays(iso, -1)}`} className="arrow-btn" aria-label="Previous day">◀</Link>
-        <div style={{ textAlign: 'center' }}>
-          <strong>{formatHuman(iso)}</strong>
-          {info.inPlan && <div className="subtle">Day {info.dayNum}</div>}
-        </div>
-        <Link to={`/workout/${addDays(iso, 1)}`} className="arrow-btn" aria-label="Next day">▶</Link>
-      </div>
-
+    <div className="page room-page floor-gym">
       <RoomHeader
         room="gym"
         title={info.label}
         subtitle={info.deload ? <span className="badge deload">Deload week: hold back on load</span> : undefined}
-      />
+      >
+        <div className="top-bar">
+          <Link to={`/workout/${addDays(iso, -1)}`} className="arrow-btn" aria-label="Previous day">◀</Link>
+          <div style={{ textAlign: 'center' }}>
+            <strong>{formatHuman(iso)}</strong>
+            {info.inPlan && <div className="subtle">Day {info.dayNum}</div>}
+          </div>
+          <Link to={`/workout/${addDays(iso, 1)}`} className="arrow-btn" aria-label="Next day">▶</Link>
+        </div>
+      </RoomHeader>
 
       {info.dayType === 'rest' && (
         <div className="card">

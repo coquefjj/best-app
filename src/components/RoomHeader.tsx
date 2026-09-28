@@ -2,7 +2,18 @@ import type { ReactNode } from 'react'
 import { HOUSE_IMG, IMG_H, IMG_W, ROOMS, type RoomId } from './rooms'
 
 /** Page header with a framed crop of the room from the house artwork. */
-export default function RoomHeader({ room, title, subtitle }: { room: RoomId; title: ReactNode; subtitle?: ReactNode }) {
+export default function RoomHeader({
+  room,
+  title,
+  subtitle,
+  children,
+}: {
+  room: RoomId
+  title: ReactNode
+  subtitle?: ReactNode
+  /** Extra controls shown on the wall above the header, such as day navigation. */
+  children?: ReactNode
+}) {
   const r = ROOMS[room]
   const thumb = {
     backgroundImage: `url(${HOUSE_IMG})`,
@@ -11,12 +22,15 @@ export default function RoomHeader({ room, title, subtitle }: { room: RoomId; ti
     aspectRatio: `${r.w} / ${r.h}`,
   }
   return (
-    <div className="room-header">
-      <div className="room-thumb" style={thumb} aria-hidden="true" />
-      <div className="room-header-text">
-        <div className="room-header-kicker">{r.name}</div>
-        <h1>{title}</h1>
-        {subtitle && <div className="subtle">{subtitle}</div>}
+    <div className="room-wall">
+      {children}
+      <div className="room-header">
+        <div className="room-thumb" style={thumb} aria-hidden="true" />
+        <div className="room-header-text">
+          <div className="room-header-kicker">{r.name}</div>
+          <h1>{title}</h1>
+          {subtitle && <div className="subtle">{subtitle}</div>}
+        </div>
       </div>
     </div>
   )

@@ -3,6 +3,7 @@ import { useStore } from '../lib/store'
 import { todayISO, formatHuman } from '../lib/date'
 import { getDayInfo } from '../lib/session'
 import { HABIT_DEFS, PLAN_LENGTH_DAYS } from '../data/plan'
+import RoomHeader from '../components/RoomHeader'
 
 export default function Today() {
   const { data, setData } = useStore()
@@ -49,19 +50,21 @@ export default function Today() {
   const mobilityDone = workout?.mobilityDone ?? false
 
   return (
-    <div className="page">
-      <div className="top-bar">
-        <Link to="/" className="arrow-btn" aria-label="Back to the house">◀</Link>
-        <div>
-          <strong>{formatHuman(iso)}</strong>
-          <div className="subtle">{info.inPlan ? `Day ${info.dayNum} of ${PLAN_LENGTH_DAYS}` : 'Outside the plan'}</div>
+    <div className="page room-page floor-hall">
+      <RoomHeader
+        room="entrance"
+        title={formatHuman(iso)}
+        subtitle={info.inPlan ? `Day ${info.dayNum} of ${PLAN_LENGTH_DAYS}` : 'Outside the plan'}
+      >
+        <div className="top-bar">
+          <Link to="/" className="arrow-btn" aria-label="Back to the house">◀</Link>
+          {info.inPlan ? (
+            <span className={`badge${info.deload ? ' deload' : ''}`}>{info.deload ? 'Deload' : `Week ${info.weekNumber}`}</span>
+          ) : (
+            <span />
+          )}
         </div>
-        {info.inPlan ? (
-          <span className={`badge${info.deload ? ' deload' : ''}`}>{info.deload ? 'Deload' : `Week ${info.weekNumber}`}</span>
-        ) : (
-          <span />
-        )}
-      </div>
+      </RoomHeader>
 
       <Link to={`/workout/${iso}`} className="card">
         <div className="card-kicker">Today's training</div>
