@@ -3,8 +3,7 @@ import { useStore } from '../lib/store'
 import { getDayInfo } from '../lib/session'
 import { formatHuman, addDays, todayISO } from '../lib/date'
 import { SESSIONS_BY_TYPE, AEROBIC_EASY_OPTIONS, HARD_CONDITIONING_OPTIONS, LONG_ENDURANCE_OPTIONS, MOBILITY_DAILY } from '../data/plan'
-import Sprite from '../components/Sprite'
-import { FOES } from '../lib/game'
+import RoomHeader from '../components/RoomHeader'
 import type { AerobicLog, ExerciseLog, SetLog, WorkoutDayLog } from '../types'
 
 const MODALITY_OPTIONS: Record<string, string[]> = {
@@ -83,24 +82,21 @@ export default function Workout() {
         <Link to={`/workout/${addDays(iso, 1)}`} className="arrow-btn" aria-label="Next day">▶</Link>
       </div>
 
-      <div className="page-header">
-        <Sprite name={FOES[info.dayType].sprite} scale={3} />
-        <div>
-          <div className="card-kicker" style={{ color: 'var(--ink)' }}>Wild {FOES[info.dayType].name}</div>
-          <h1>{info.label}</h1>
-          {info.deload && <span className="badge deload">Deload week: hold back on load</span>}
-        </div>
-      </div>
+      <RoomHeader
+        room="gym"
+        title={info.label}
+        subtitle={info.deload ? <span className="badge deload">Deload week: hold back on load</span> : undefined}
+      />
 
       {info.dayType === 'rest' && (
         <div className="card">
-          <p className="subtle">SNOOZLE is fast asleep. Rest day: active recovery only, resist filling it. Add a longer flexibility session below.</p>
+          <p className="subtle">Rest day. Active recovery only, resist filling it. Add a longer flexibility session below.</p>
         </div>
       )}
 
       {modalityOptions && (
         <div className="card">
-          <h2>Choose your move</h2>
+          <h2>Pick today's session</h2>
           <div className="pill-select">
             {modalityOptions.map((opt) => (
               <button
@@ -149,7 +145,7 @@ export default function Workout() {
 
       {exerciseDefs && (
         <div className="card">
-          <h2>Moves</h2>
+          <h2>Exercises</h2>
           {exerciseDefs.map((ex) => {
             const log = workout.exercises[ex.id]
             const lastLog = findLastLog(data.workouts, ex.id, iso)

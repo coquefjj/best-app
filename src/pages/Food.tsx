@@ -3,7 +3,7 @@ import { useStore } from '../lib/store'
 import { todayISO, formatHuman, addDays } from '../lib/date'
 import { getDayInfo } from '../lib/session'
 import type { FoodEntry, SavedMeal } from '../types'
-import Sprite from '../components/Sprite'
+import RoomHeader from '../components/RoomHeader'
 import { Link, useParams } from 'react-router-dom'
 
 function uid() {
@@ -84,13 +84,10 @@ export default function Food() {
         <Link to={`/food/${addDays(iso, 1)}`} className="arrow-btn" aria-label="Next day">▶</Link>
       </div>
 
-      <div className="page-header">
-        <Sprite name="meat" scale={3} />
-        <h1>Bag · Food</h1>
-      </div>
+      <RoomHeader room="kitchen" title="Food log" subtitle={`Target today: ${info.nutrition.calories} kcal · ${info.nutrition.protein} g protein`} />
 
       <div className="card">
-        <h2>Today's rations</h2>
+        <h2>Totals</h2>
         <div className="stat-grid">
           <div>
             <div className="stat-value">{Math.round(totals.calories)}</div>

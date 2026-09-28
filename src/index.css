@@ -3,29 +3,33 @@
 
 /* Handheld-RPG palette: white text boxes with dark rounded frames on grass */
 :root {
-  --ink: #283040;
-  --bg: #88c870;
-  --bg-2: #78b860;
-  --surface: #f8f8f8;
-  --surface-2: #e8eef0;
-  --border: #283040;
-  --frame-inner: #70a8d8;
-  --text: #283040;
-  --text-dim: #687080;
-  --accent: #48c068;
-  --accent-dark: #208848;
-  --accent-2: #40a0f0;
-  --gold: #f8c030;
-  --orange: #f08030;
-  --danger: #e04838;
-  --warn: #f8c030;
-  --ok: #48c068;
-  --hp-green: #58d080;
-  --hp-yellow: #f8c030;
-  --hp-red: #f05030;
-  --status-bg: #f8f8d8;
+  /* Cozy wood-and-grass palette taken from the house artwork */
+  --ink: #3a2418;
+  --bg: #5e9c3c;
+  --bg-2: #4e8a32;
+  --surface: #f6ead0;
+  --surface-2: #e8d4ac;
+  --border: #3a2418;
+  --frame-inner: #b87a40;
+  --text: #3a2418;
+  --text-dim: #7a5a40;
+  --accent: #5a9a3a;
+  --accent-dark: #3c7026;
+  --accent-2: #4a78b8;
+  --gold: #e8b048;
+  --orange: #c8643a;
+  --danger: #c04830;
+  --warn: #e8b048;
+  --ok: #5a9a3a;
+  --hp-green: #6ab04a;
+  --hp-yellow: #e8b048;
+  --hp-red: #d05838;
+  --status-bg: #fbf3e0;
+  --wood: #a86a38;
+  --wood-dark: #6e4424;
   --font-pixel: 'Press Start 2P', monospace;
   --font-body: 'Jersey 10', monospace;
+  --nav-h: calc(61px + env(safe-area-inset-bottom));
   color-scheme: light;
 }
 
@@ -41,7 +45,7 @@ body {
   margin: 0;
   background-color: var(--bg);
   /* Tall-grass tile */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' shape-rendering='crispEdges'%3E%3Cpath fill='%2378b860' d='M4 10h2v2H4zM6 8h2v2H6zM8 10h2v2H8zM20 26h2v2h-2zM22 24h2v2h-2zM24 26h2v2h-2z'/%3E%3Cpath fill='%23a0d888' d='M18 6h2v2h-2zM2 22h2v2H2z'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' shape-rendering='crispEdges'%3E%3Cpath fill='%234e8a32' d='M4 10h2v2H4zM6 8h2v2H6zM8 10h2v2H8zM20 26h2v2h-2zM22 24h2v2h-2zM24 26h2v2h-2z'/%3E%3Cpath fill='%2372b048' d='M18 6h2v2h-2zM2 22h2v2H2z'/%3E%3C/svg%3E");
   color: var(--text);
   font-family: var(--font-body);
   font-size: 22px;
@@ -111,8 +115,8 @@ a {
   position: relative;
   background: var(--surface);
   border: 4px solid var(--border);
-  border-radius: 10px;
-  box-shadow: inset 0 0 0 3px var(--surface), inset 0 0 0 6px var(--frame-inner), 0 4px 0 0 rgba(40, 48, 64, 0.35);
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 3px var(--surface), inset 0 0 0 6px var(--frame-inner), 0 4px 0 0 rgba(30, 20, 10, 0.4);
   padding: 16px 16px;
   margin-bottom: 14px;
 }
@@ -192,7 +196,7 @@ a.card:active {
 /* HP bar: dark track, colored fill that turns yellow then red as it empties */
 .progress-bar {
   height: 12px;
-  background: #506858;
+  background: #6e5038;
   border: 3px solid var(--ink);
   border-radius: 6px;
   overflow: hidden;
@@ -222,7 +226,7 @@ a.card:active {
   height: 8px;
   border-width: 2px;
   border-radius: 0;
-  background: #506070;
+  background: #6e5038;
 }
 
 .progress-bar.xp > div {
@@ -371,7 +375,7 @@ input[type='checkbox']:checked {
   box-shadow: 0 0 0 2px var(--frame-inner);
 }
 
-/* Bottom menu */
+/* Bottom menu: dark wood bar */
 .nav {
   position: fixed;
   bottom: 0;
@@ -379,11 +383,9 @@ input[type='checkbox']:checked {
   transform: translateX(-50%);
   width: 100%;
   max-width: 480px;
-  background: var(--surface);
-  border: 4px solid var(--ink);
-  border-bottom: none;
-  border-radius: 12px 12px 0 0;
-  box-shadow: inset 0 3px 0 0 var(--surface), inset 0 6px 0 0 var(--frame-inner);
+  background: var(--wood-dark);
+  border-top: 4px solid var(--ink);
+  box-shadow: inset 0 3px 0 0 var(--wood), 0 -2px 0 0 rgba(30, 20, 10, 0.3);
   display: flex;
   z-index: 10;
   padding: 6px 4px env(safe-area-inset-bottom);
@@ -394,7 +396,7 @@ input[type='checkbox']:checked {
   text-align: center;
   padding: 6px 2px 8px;
   text-decoration: none;
-  color: var(--text-dim);
+  color: #e0c89c;
   font-family: var(--font-pixel);
   font-size: 0.4rem;
   text-transform: uppercase;
@@ -410,7 +412,9 @@ input[type='checkbox']:checked {
 }
 
 .nav a.active {
-  color: var(--ink);
+  color: var(--gold);
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 4px;
 }
 
 .nav a.active::before {
@@ -533,7 +537,7 @@ input[type='checkbox']:checked {
 .pill-select button.selected {
   background: var(--accent-2);
   color: var(--surface);
-  box-shadow: inset 0 -3px 0 0 #2878c0;
+  box-shadow: inset 0 -3px 0 0 #2e5890;
 }
 
 .stat-grid {
@@ -583,201 +587,13 @@ input[type='checkbox']:checked {
   padding: 4px;
 }
 
-/* Today: battle scene */
-.battle {
-  display: block;
-  text-decoration: none;
-  color: inherit;
-  border: 4px solid var(--ink);
-  border-radius: 10px 10px 0 0;
-  overflow: hidden;
-  background:
-    linear-gradient(#f8f0c8 0 30%, #f0e8b8 30% 60%, #e0f0b0 60% 100%);
-  position: relative;
-  height: 280px;
-}
-
-.battle .platform {
-  position: absolute;
-  width: 150px;
-  height: 36px;
-  border-radius: 50%;
-  background: #a8d878;
-  box-shadow: inset 0 -8px 0 0 #80b858, 0 0 0 3px #c8e8a0;
-}
-
-.battle .foe-side {
-  position: absolute;
-  right: 14px;
-  top: 34px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.battle .foe-side .platform {
-  position: static;
-  margin-top: -22px;
-}
-
-.battle .foe-side .sprite {
-  position: relative;
-  z-index: 1;
-}
-
-.battle .me-side {
-  position: absolute;
-  left: 8px;
-  bottom: 12px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.battle .me-side .platform {
-  position: static;
-  width: 170px;
-  margin-top: -26px;
-}
-
-.battle .me-side .sprite {
-  position: relative;
-  z-index: 1;
-  animation: bob 1s steps(2) infinite;
-}
-
-.battle .foe-side.fainted .sprite {
-  opacity: 0.25;
-  transform: translateY(18px) scaleY(0.6);
-  filter: grayscale(1);
-}
-
-.status-box {
-  position: absolute;
-  background: var(--status-bg);
-  border: 3px solid var(--ink);
-  border-radius: 8px 2px 8px 2px;
-  padding: 6px 10px 8px;
-  width: 190px;
-  box-shadow: 4px 4px 0 0 rgba(40, 48, 64, 0.25);
-}
-
-.status-box.foe {
-  left: 10px;
-  top: 14px;
-}
-
-.status-box.me {
-  right: 10px;
-  bottom: 18px;
-}
-
-.status-box .name-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  font-family: var(--font-pixel);
-  font-size: 0.5rem;
-  margin-bottom: 6px;
-}
-
-.status-box .hp-row {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.status-box .hp-row .progress-bar {
-  flex: 1;
-  height: 10px;
-  border-width: 2px;
-}
-
-.hp-tag {
-  background: var(--ink);
-  color: var(--gold);
-  padding: 2px 4px;
-  border-radius: 3px;
-}
-
-.status-box .hp-num {
-  text-align: right;
-  font-size: 0.95rem;
-  margin-top: 2px;
-}
-
-.zzz {
-  position: absolute;
-  top: -8px;
-  right: -6px;
-  font-family: var(--font-pixel);
-  font-size: 0.5rem;
-  color: var(--frame-inner);
-  animation: bob 1.2s steps(2) infinite;
-}
-
-.dialog {
-  background: var(--surface);
-  border: 4px solid var(--ink);
-  border-top: none;
-  border-radius: 0 0 10px 10px;
-  box-shadow: inset 0 0 0 3px var(--surface), inset 0 0 0 6px var(--frame-inner), 0 4px 0 0 rgba(40, 48, 64, 0.35);
-  display: grid;
-  grid-template-columns: 1fr auto;
-  margin-bottom: 14px;
-}
-
-.dialog-text {
-  padding: 16px 14px;
-  font-size: 1.1rem;
-  line-height: 1.35;
-}
-
-.dialog-text strong {
-  font-weight: 400;
-}
-
-.battle-menu {
-  display: grid;
-  grid-template-columns: auto auto;
-  align-content: center;
-  gap: 10px 14px;
-  padding: 14px 16px 14px 14px;
-  border-left: 4px solid var(--ink);
-}
-
-.battle-menu a {
-  font-family: var(--font-pixel);
-  font-size: 0.55rem;
-  color: var(--ink);
-  text-decoration: none;
-  padding-left: 14px;
-  position: relative;
-}
-
-.battle-menu a:first-child::before, .battle-menu a:active::before {
-  content: '▶';
-  position: absolute;
-  left: 0;
-  animation: nudge 0.8s steps(2) infinite;
-}
-
-.streak {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-family: var(--font-pixel);
-  font-size: 0.45rem;
-  color: var(--orange);
-}
-
 /* Map */
 .world-map {
   display: grid;
   grid-template-columns: repeat(10, 1fr);
   gap: 3px;
   background: var(--ink);
-  border-radius: 6px;
+  border-radius: 3px;
   padding: 3px;
 }
 
@@ -789,23 +605,14 @@ input[type='checkbox']:checked {
   border-radius: 3px;
 }
 
-.tile.w1 { background: #a8d878; }
-.tile.w2 { background: #e8d890; }
-.tile.w3 { background: #98c8e8; }
-.tile.w4 { background: #d8b0e0; }
+.tile.w1 { background: #e8d4ac; }
+.tile.w2 { background: #dcc096; }
+.tile.w3 { background: #d0ac80; }
+.tile.w4 { background: #c49a6c; }
 
 .tile.done {
   background: var(--hp-green);
   box-shadow: inset -3px -3px 0 0 var(--accent-dark);
-}
-
-.tile.done::after {
-  content: '';
-  width: 30%;
-  height: 30%;
-  background: var(--surface);
-  border-radius: 50%;
-  border: 2px solid var(--ink);
 }
 
 .tile.missed {
@@ -817,15 +624,6 @@ input[type='checkbox']:checked {
   outline: 3px solid var(--orange);
   z-index: 1;
   animation: blink 1s steps(1) infinite;
-}
-
-.tile .sprite {
-  width: 84%;
-  height: 84%;
-}
-
-.tile:has(.sprite)::after {
-  display: none;
 }
 
 @keyframes blink {
@@ -854,36 +652,6 @@ input[type='checkbox']:checked {
   border-radius: 3px;
 }
 
-.badge-case {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  text-align: center;
-}
-
-.badge-slot {
-  background: var(--surface-2);
-  border: 3px solid var(--ink);
-  border-radius: 8px;
-  padding: 10px 4px 6px;
-  font-size: 0.8rem;
-  color: var(--text-dim);
-}
-
-.badge-slot .sprite {
-  display: block;
-  margin: 0 auto 6px;
-}
-
-.badge-slot.locked .sprite {
-  filter: brightness(0) opacity(0.25);
-}
-
-.badge-slot.earned {
-  background: var(--status-bg);
-  color: var(--ink);
-}
-
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation: none !important;
@@ -891,34 +659,99 @@ input[type='checkbox']:checked {
   }
 }
 
-/* Landing: the house */
+/* Room page header: framed crop of the room from the house */
+.room-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0 2px 16px;
+}
+
+.room-thumb {
+  width: 76px;
+  flex-shrink: 0;
+  background-repeat: no-repeat;
+  border: 4px solid var(--ink);
+  border-radius: 3px;
+  box-shadow: inset 0 0 0 2px var(--frame-inner), 0 4px 0 0 rgba(30, 20, 10, 0.4);
+}
+
+.room-header-text {
+  min-width: 0;
+}
+
+.room-header-kicker {
+  font-family: var(--font-pixel);
+  font-size: 0.5rem;
+  color: var(--gold);
+  text-shadow: 1px 1px 0 var(--ink);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.room-header .subtle {
+  color: #f6ead0;
+  text-shadow: 1px 1px 0 rgba(30, 20, 10, 0.6);
+  margin-top: 4px;
+}
+
+/* Landing: the house artwork with tappable rooms */
+.app-shell:has(.home) {
+  padding-bottom: 0;
+}
+
+/* The house fills the screen above the menu; any extra width or height is
+   cropped evenly so the rooms stay centered. */
+.home {
+  position: relative;
+  width: 100%;
+  height: calc(100dvh - var(--nav-h));
+  overflow: hidden;
+  background: #4e8a32;
+}
+
+.house {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  height: max(100%, calc(100vw * 2048 / 1152));
+  max-height: calc(480px * 2048 / 1152);
+  min-height: 100%;
+}
+
+.house-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+}
+
 .home-sign {
+  position: absolute;
+  top: 1.2%;
+  left: 50%;
+  transform: translateX(-50%);
   text-align: center;
   background: var(--surface);
   border: 4px solid var(--ink);
-  border-radius: 10px;
-  box-shadow: inset 0 0 0 3px var(--surface), inset 0 0 0 6px var(--frame-inner), 0 4px 0 0 rgba(40, 48, 64, 0.35);
-  padding: 12px 10px 10px;
-  margin: 0 20px 14px;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 3px var(--surface), inset 0 0 0 6px var(--frame-inner), 0 4px 0 0 rgba(30, 20, 10, 0.45);
+  padding: 10px 16px 8px;
+  white-space: nowrap;
+  z-index: 3;
 }
 
 .home-title {
   font-family: var(--font-pixel);
   font-size: 0.8rem;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.15em;
   margin-bottom: 4px;
 }
 
-.house {
-  position: relative;
-  width: 100%;
-  margin-bottom: 14px;
-}
-
-.house-art {
-  display: block;
-  width: 100%;
-  height: 100%;
+.home-sub {
+  font-size: 1rem;
+  color: var(--text-dim);
 }
 
 .room-hit {
@@ -929,7 +762,7 @@ input[type='checkbox']:checked {
   padding: 0;
   cursor: pointer;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
 }
 
@@ -938,7 +771,6 @@ input[type='checkbox']:checked {
   position: absolute;
   inset: 0;
   border: 3px dashed transparent;
-  border-radius: 2px;
 }
 
 .room-hit:hover, .room-hit:focus-visible {
@@ -947,7 +779,7 @@ input[type='checkbox']:checked {
 
 .room-hit:hover::after, .room-hit:focus-visible::after, .room-hit:active::after {
   border-color: var(--gold);
-  background: rgba(248, 192, 48, 0.12);
+  background: rgba(232, 176, 72, 0.14);
 }
 
 .room-hit:focus-visible {
@@ -955,8 +787,8 @@ input[type='checkbox']:checked {
 }
 
 .room-plate {
-  position: absolute;
-  bottom: -9px;
+  position: relative;
+  z-index: 1;
   font-family: var(--font-pixel);
   font-size: 0.5rem;
   line-height: 1;
@@ -964,55 +796,22 @@ input[type='checkbox']:checked {
   color: var(--ink);
   background: var(--surface);
   border: 3px solid var(--ink);
-  border-radius: 6px;
-  padding: 5px 7px;
-  box-shadow: 0 3px 0 0 rgba(40, 48, 64, 0.45);
+  border-radius: 3px;
+  box-shadow: inset 0 -3px 0 0 var(--surface-2), 0 3px 0 0 rgba(30, 20, 10, 0.5);
+  padding: 6px 8px 7px;
   pointer-events: none;
-  z-index: 1;
 }
 
 .room-hit:hover .room-plate, .room-hit:focus-visible .room-plate, .room-hit:active .room-plate {
   background: var(--gold);
+  box-shadow: inset 0 -3px 0 0 #c08830, 0 3px 0 0 rgba(30, 20, 10, 0.5);
+}
+
+.room-entrance {
+  align-items: flex-end;
 }
 
 .room-entrance .room-plate {
-  bottom: 30%;
-  font-size: 0.4rem;
-}
-
-.room-list {
-  padding: 8px 14px;
-}
-
-.room-row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 10px;
-  width: 100%;
-  background: none;
-  border: none;
-  border-bottom: 2px solid var(--surface-2);
-  padding: 10px 4px 10px 18px;
-  cursor: pointer;
-  text-align: left;
-  position: relative;
-}
-
-.room-row:last-child {
-  border-bottom: none;
-}
-
-.room-row-name {
-  font-family: var(--font-pixel);
-  font-size: 0.55rem;
-  text-transform: uppercase;
-}
-
-.room-row:hover::before, .room-row:focus-visible::before {
-  content: '▶';
-  position: absolute;
-  left: 0;
-  font-size: 0.8rem;
-  animation: nudge 0.8s steps(2) infinite;
+  margin-bottom: 36%;
+  font-size: 0.45rem;
 }

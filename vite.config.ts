@@ -9,17 +9,18 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg'],
+      includeAssets: ['favicon.png'],
       workbox: {
         // Precache the self-hosted pixel fonts so the app keeps its look offline.
-        globPatterns: ['**/*.{js,css,html,woff2,png,svg}'],
+        globPatterns: ['**/*.{js,css,html,woff2,png,svg,webp}'],
+        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
       },
       manifest: {
         name: 'BEST — 100 Day Plan',
         short_name: 'BEST',
         description: "Fernando's 100-day hybrid athletic plan tracker",
-        theme_color: '#88c870',
-        background_color: '#88c870',
+        theme_color: '#5e9c3c',
+        background_color: '#5e9c3c',
         display: 'standalone',
         start_url: '.',
         icons: [
