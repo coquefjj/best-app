@@ -51,6 +51,7 @@ export default function Food() {
 
   const addFromMeal = (meal: SavedMeal) => {
     addEntry({ name: meal.name, calories: meal.calories, protein: meal.protein, carbs: meal.carbs, fat: meal.fat, mealSlot: meal.mealSlot })
+    setShowForm(false)
   }
 
   const submitForm = () => {
@@ -65,7 +66,14 @@ export default function Food() {
     }
     addEntry(entry)
     if (saveAsMeal) {
-      setData((prev) => ({ ...prev, savedMeals: [...prev.savedMeals, { ...entry, id: uid() }] }))
+      // Saving under an existing name replaces that saved meal
+      setData((prev) => ({
+        ...prev,
+        savedMeals: [
+          ...prev.savedMeals.filter((m) => m.name.toLowerCase() !== entry.name.toLowerCase()),
+          { ...entry, id: uid() },
+        ],
+      }))
     }
     setForm({ name: '', calories: '', protein: '', carbs: '', fat: '', mealSlot: 'breakfast' })
     setSaveAsMeal(false)
@@ -105,20 +113,6 @@ export default function Food() {
         </div>
       </div>
 
-      {data.savedMeals.length > 0 && (
-        <div className="card">
-          <h2>Saved meals</h2>
-          {data.savedMeals.map((m) => (
-            <div className="food-entry" key={m.id}>
-              <span onClick={() => addFromMeal(m)} style={{ cursor: 'pointer' }}>
-                + {m.name} <span className="subtle">({m.calories} kcal, {m.protein}g P)</span>
-              </span>
-              <button className="icon-btn" onClick={() => removeSavedMeal(m.id)}>remove</button>
-            </div>
-          ))}
-        </div>
-      )}
-
       <div className="card">
         <h2>Eaten today</h2>
         {entries.length === 0 && <div className="subtle">Nothing logged yet.</div>}
@@ -137,6 +131,23 @@ export default function Food() {
           </button>
         ) : (
           <div style={{ marginTop: 12 }}>
+            <div className="quick-add">
+              <h3>Quick add</h3>
+              {data.savedMeals.length === 0 ? (
+                <div className="subtle">No saved meals yet. Tick "Save as a meal" below and it will show up here.</div>
+              ) : (
+                data.savedMeals.map((m) => (
+                  <div className="food-entry" key={m.id}>
+                    <button className="quick-meal" onClick={() => addFromMeal(m)}>
+                      <strong>+ {m.name}</strong>
+                      <span className="subtle">{m.mealSlot} · {m.calories} kcal · {m.protein}g P</span>
+                    </button>
+                    <button className="icon-btn" aria-label={`Delete saved meal ${m.name}`} onClick={() => removeSavedMeal(m.id)}>✕</button>
+                  </div>
+                ))
+              )}
+              <h3>Or enter a new one</h3>
+            </div>
             <div className="field">
               <label>Name</label>
               <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Chicken + rice" />

@@ -927,3 +927,43 @@ input[type='checkbox']:checked {
   margin-bottom: 36%;
   font-size: 0.45rem;
 }
+
+.quick-add h3 {
+  font-family: var(--font-pixel);
+  font-size: 0.55rem;
+  margin: 4px 0 6px;
+  color: var(--ink);
+}
+
+.quick-add h3 + .subtle,
+.quick-add .food-entry:last-of-type {
+  margin-bottom: 14px;
+}
+
+.quick-meal {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  text-align: left;
+  padding: 8px 10px;
+  background: var(--surface);
+  border: 3px solid var(--ink);
+  border-radius: 6px;
+  font-family: var(--font-body);
+  font-size: 1rem;
+  color: var(--ink);
+  cursor: pointer;
+  box-shadow: 0 3px 0 var(--frame-inner);
+}
+
+.quick-meal:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--frame-inner);
+}
+
+.quick-meal strong {
+  overflow-wrap: anywhere;
+}
