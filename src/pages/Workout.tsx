@@ -5,6 +5,9 @@ import { useState } from 'react'
 import { formatHuman, addDays, todayISO, formatClock, formatDuration, parseDuration } from '../lib/date'
 import { SESSIONS_BY_TYPE, AEROBIC_EASY_OPTIONS, HARD_CONDITIONING_OPTIONS, LONG_ENDURANCE_OPTIONS, MOBILITY_DAILY } from '../data/plan'
 import RoomHeader from '../components/RoomHeader'
+import MoveAnim from '../components/moves/MoveAnim'
+import MoveSheet from '../components/moves/MoveSheet'
+import { MOVES } from '../components/moves/moves'
 import type { AerobicLog, ExerciseLog, SetLog, WorkoutDayLog } from '../types'
 import type { PlanExercise } from '../data/plan'
 
@@ -115,8 +118,11 @@ export default function Workout() {
 
   const toggleMobility = () => update((w) => ({ ...w, mobilityDone: !w.mobilityDone }))
 
+  const [demo, setDemo] = useState<{ name: string; cue?: string } | null>(null)
+
   return (
     <div className="page room-page floor-gym">
+      {demo && <MoveSheet name={demo.name} cue={demo.cue} onClose={() => setDemo(null)} />}
       <RoomHeader
         room="gym"
         title={info.label}
@@ -198,15 +204,25 @@ export default function Workout() {
 
             return (
               <div className="exercise-block" key={ex.id}>
-                <h3>
-                  {chosen}
-                  {ex.optional && <span className="subtle"> (optional)</span>}
-                </h3>
-                <div className="subtle">
-                  Target: {ex.target.sets} x {ex.target.reps}
-                  {ex.note ? ` · ${ex.note}` : ''}
+                <div className="exercise-head">
+                  {MOVES[chosen] && (
+                    <button className="move-thumb" onClick={() => setDemo({ name: chosen, cue })} aria-label={`Show how to do ${chosen}`}>
+                      <MoveAnim move={MOVES[chosen]} size={64} label={chosen} />
+                      <span>How to</span>
+                    </button>
+                  )}
+                  <div>
+                    <h3>
+                      {chosen}
+                      {ex.optional && <span className="subtle"> (optional)</span>}
+                    </h3>
+                    <div className="subtle">
+                      Target: {ex.target.sets} x {ex.target.reps}
+                      {ex.note ? ` · ${ex.note}` : ''}
+                    </div>
+                    {cue && <div className="subtle">Cue: {cue}</div>}
+                  </div>
                 </div>
-                {cue && <div className="subtle">Cue: {cue}</div>}
 
                 {ex.options.length > 1 && (
                   <div className="pill-select">

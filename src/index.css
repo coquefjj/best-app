@@ -967,3 +967,78 @@ input[type='checkbox']:checked {
 .quick-meal strong {
   overflow-wrap: anywhere;
 }
+
+/* Exercise demos */
+.move-anim {
+  display: block;
+  image-rendering: pixelated;
+}
+
+.exercise-head {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.exercise-head > div {
+  min-width: 0;
+}
+
+.move-thumb {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 0;
+  background: var(--ink);
+  border: 3px solid var(--ink);
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 3px 0 var(--frame-inner);
+}
+
+.move-thumb span {
+  font-family: var(--font-pixel);
+  font-size: 0.4rem;
+  color: var(--surface);
+  padding: 2px 0 3px;
+}
+
+.move-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(40, 24, 14, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.move-sheet {
+  width: min(360px, 100%);
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  margin: 0;
+}
+
+.move-stage {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.move-stage .move-anim {
+  width: min(240px, 70vw) !important;
+  height: min(240px, 70vw) !important;
+  border: 3px solid var(--ink);
+  border-radius: 6px;
+}
+
+.move-points {
+  margin: 8px 0 14px;
+  padding-left: 20px;
+  line-height: 1.35;
+}
