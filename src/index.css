@@ -1042,3 +1042,8 @@ input[type='checkbox']:checked {
   padding-left: 20px;
   line-height: 1.35;
 }
+
+/* Strips are ~100px frames; smooth the downscale in the small thumbnail */
+.move-thumb .move-anim {
+  image-rendering: auto;
+}

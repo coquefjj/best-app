@@ -1,8 +1,6 @@
-// How-to sprite strips drawn by Fernando: public/img/moves/<file>, 64x64 px
-// frames laid out left to right. Spec: exercise-anims/sprite-spec.md in the
+// How-to sprite strips drawn by Fernando: public/img/moves/<file>, square
+// frames of any size laid out left to right. Spec: exercise-anims/sprite-spec.md in the
 // project files. A move only shows its "How to" once its PNG exists.
-
-export const FRAME = 64
 
 export interface Move {
   file: string
