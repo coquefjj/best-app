@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { FRAME, frameDurations, moveSrc, type Move } from './moves'
+import { frameDurations, moveSrc, type Move } from './moves'
 
 const frameCache = new Map<string, number>()
 
@@ -17,7 +17,8 @@ export function useMoveFrames(move: Move | undefined) {
     let alive = true
     const img = new Image()
     img.onload = () => {
-      const n = Math.max(1, Math.round(img.naturalWidth / FRAME))
+      // Frames are square, so the strip's height is the frame size
+      const n = Math.max(1, Math.round(img.naturalWidth / img.naturalHeight))
       frameCache.set(src, n)
       if (alive) setFrames(n)
     }
