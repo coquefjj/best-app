@@ -1,4 +1,5 @@
 import { HashRouter, Routes, Route, NavLink } from 'react-router-dom'
+import Home from './pages/Home'
 import Today from './pages/Today'
 import Workout from './pages/Workout'
 import Food from './pages/Food'
@@ -8,11 +9,11 @@ import Sprite from './components/Sprite'
 import type { SpriteName } from './components/sprites'
 
 const NAV_ITEMS: { to: string; label: string; sprite: SpriteName; end?: boolean }[] = [
-  { to: '/', label: 'Today', sprite: 'house', end: true },
-  { to: '/workout', label: 'Train', sprite: 'sword' },
-  { to: '/food', label: 'Food', sprite: 'meat' },
-  { to: '/habits', label: 'Habits', sprite: 'potion' },
-  { to: '/progress', label: 'Map', sprite: 'trophy' },
+  { to: '/', label: 'Home', sprite: 'house', end: true },
+  { to: '/workout', label: 'Gym', sprite: 'sword' },
+  { to: '/food', label: 'Kitchen', sprite: 'meat' },
+  { to: '/habits', label: 'Bedroom', sprite: 'potion' },
+  { to: '/progress', label: 'Studio', sprite: 'trophy' },
 ]
 
 function Nav() {
@@ -33,7 +34,8 @@ function App() {
     <HashRouter>
       <div className="app-shell">
         <Routes>
-          <Route path="/" element={<Today />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/today" element={<Today />} />
           <Route path="/workout" element={<Workout />} />
           <Route path="/workout/:date" element={<Workout />} />
           <Route path="/food" element={<Food />} />
