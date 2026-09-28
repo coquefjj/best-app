@@ -732,15 +732,19 @@ input[type='checkbox']:checked {
   padding-bottom: calc(var(--nav-h) + 24px);
 }
 
-.floor-gym, .floor-studio, .floor-hall {
+.floor-gym, .floor-office, .floor-bedroom, .floor-hall {
   background-color: #c68a4c;
   background-image:
     repeating-linear-gradient(180deg, transparent 0 22px, #a86a38 22px 24px),
     repeating-linear-gradient(90deg, transparent 0 96px, rgba(110, 68, 36, 0.35) 96px 98px);
 }
 
-.floor-studio {
+.floor-office {
   background-color: #d09656;
+}
+
+.floor-bedroom {
+  background-color: #cf9454;
 }
 
 .floor-hall {
@@ -752,13 +756,6 @@ input[type='checkbox']:checked {
   background-image:
     repeating-linear-gradient(90deg, transparent 0 30px, #c0a878 30px 32px),
     repeating-linear-gradient(180deg, transparent 0 30px, #c0a878 30px 32px);
-}
-
-.floor-bath {
-  background-color: #e6eef4;
-  background-image:
-    repeating-linear-gradient(90deg, transparent 0 22px, #c2d2de 22px 24px),
-    repeating-linear-gradient(180deg, transparent 0 22px, #c2d2de 22px 24px);
 }
 
 .room-wall {
@@ -830,8 +827,8 @@ input[type='checkbox']:checked {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
-  height: max(100%, calc(100vw * 2048 / 1152));
-  max-height: calc(480px * 2048 / 1152);
+  height: max(100%, calc(100vw * 16 / 9));
+  max-height: calc(480px * 16 / 9);
   min-height: 100%;
 }
 
