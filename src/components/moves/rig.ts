@@ -1,9 +1,12 @@
-// Tiny pixel "trainer" rig. Poses are joint targets on a 48x48 grid (side
+// Tiny pixel "trainer" rig. Poses are joint targets on a 48-unit grid (side
 // view, facing right, floor at y=44); limbs are solved with 2-bone IK and
 // rasterised as outlined capsules so every frame reads as hand-placed pixels.
 
-export const SIZE = 48
-export const FLOOR_Y = 44
+/** Poses are authored on a 48-unit grid and drawn onto a 64px canvas. */
+export const SIZE = 64
+export const FLOOR_Y = 60
+const K = 1.2
+const T = ([x, y]: Pt): Pt => [x * K + 3, (y - 44) * K + FLOOR_Y]
 
 type Pt = [number, number]
 
@@ -25,21 +28,28 @@ export interface Pose {
   guide?: number
 }
 
-const LEN = { torso: 13, head: 18, upper: 7, fore: 7, thigh: 9, shin: 9 }
+const LEN = { torso: 13, head: 18.5, upper: 7, fore: 7, thigh: 9, shin: 9 }
 
+// Colours sampled from Fernando's reference sprite (orange side ponytail,
+// yellow crop top, red suspenders, teal shorts, red-and-white sneakers).
 const PAL = {
-  outline: '#3a2418',
-  skin: '#f2c38e',
-  skinDark: '#d69c68',
-  shirt: '#d8402f',
-  shirtDark: '#a52c20',
-  shorts: '#2f5aa8',
-  shortsDark: '#23437e',
-  shoe: '#f6ead0',
-  shoeDark: '#cdbf9f',
-  hair: '#2b2530',
-  cap: '#d8402f',
-  capWhite: '#fbf6ea',
+  outline: '#140c0a',
+  skin: '#fccca1',
+  skinShade: '#e3a878',
+  skinFar: '#d19a70',
+  hair: '#fa8219',
+  hairLight: '#ffad66',
+  hairDark: '#994700',
+  top: '#fff373',
+  topShade: '#d6c956',
+  topFar: '#b0a341',
+  strap: '#ff1100',
+  shorts: '#21c4b6',
+  shortsFar: '#14878f',
+  shoe: '#ffffff',
+  shoeFar: '#d6d6d6',
+  sole: '#fc5d65',
+  eye: '#3a00fa',
   plate: '#4a4a52',
   plateHub: '#9aa0a8',
   guide: '#3f9a5a',
@@ -54,9 +64,11 @@ function newBuf(): Buf {
   return new Array(SIZE * SIZE).fill(null)
 }
 
-function capsule(buf: Buf, a: Pt, b: Pt, r: number, color: string) {
-  const [x1, y1] = a
-  const [x2, y2] = b
+/** Capsule in pose units (converted to canvas pixels here). */
+function capsule(buf: Buf, a0: Pt, b0: Pt, r0: number, color: string) {
+  const [x1, y1] = T(a0)
+  const [x2, y2] = T(b0)
+  const r = r0 * K
   const minX = Math.max(0, Math.floor(Math.min(x1, x2) - r - 1))
   const maxX = Math.min(SIZE - 1, Math.ceil(Math.max(x1, x2) + r + 1))
   const minY = Math.max(0, Math.floor(Math.min(y1, y2) - r - 1))
@@ -77,6 +89,11 @@ function capsule(buf: Buf, a: Pt, b: Pt, r: number, color: string) {
 }
 
 const disc = (buf: Buf, c: Pt, r: number, color: string) => capsule(buf, c, c, r, color)
+
+function dot(buf: Buf, p0: Pt, color: string) {
+  const [x, y] = T(p0).map(Math.floor)
+  if (x >= 0 && y >= 0 && x < SIZE && y < SIZE) buf[y * SIZE + x] = color
+}
 
 /** Two-bone IK: returns the middle joint (knee/elbow). */
 function solve(root: Pt, target: Pt, a: number, b: number, dir: number): [Pt, Pt] {
@@ -120,22 +137,28 @@ export function renderPose(p: Pose): Buf {
   const up: Pt = [Math.sin(rad), -Math.cos(rad)]
   const face: Pt = [-up[1], up[0]]
   const at = (from: Pt, v: Pt, k: number): Pt => [from[0] + v[0] * k, from[1] + v[1] * k]
-  const shoulder = at(p.hip, up, LEN.torso)
+  const off = (from: Pt, u: number, f: number): Pt => at(at(from, up, u), face, f)
+  const shoulder = at(p.hip, up, LEN.torso - 1)
   const head = at(p.hip, up, LEN.head)
   const knee = p.knee ?? -1
   const elbow = p.elbow ?? 1
   const foot = p.foot ?? [3, 0.5]
 
-  const leg = (l: Buf, ankle: Pt, dark: boolean) => {
+  const leg = (l: Buf, ankle: Pt, far: boolean) => {
     const [k, a] = solve(p.hip, ankle, LEN.thigh, LEN.shin, knee)
-    capsule(l, k, a, 1.3, dark ? PAL.skinDark : PAL.skin)
-    capsule(l, a, [a[0] + foot[0], a[1] + foot[1]], 1.4, dark ? PAL.shoeDark : PAL.shoe)
-    capsule(l, p.hip, k, 1.8, dark ? PAL.shortsDark : PAL.shorts)
+    const toe: Pt = [a[0] + foot[0], a[1] + foot[1]]
+    capsule(l, p.hip, k, 1.5, far ? PAL.skinFar : PAL.skin)
+    capsule(l, k, a, 1.35, far ? PAL.skinFar : PAL.skin)
+    capsule(l, [a[0], a[1] + 0.35], [toe[0], toe[1] + 0.35], 1.45, PAL.sole)
+    capsule(l, a, toe, 1.1, far ? PAL.shoeFar : PAL.shoe)
+    // Short shorts: only the top third of the thigh
+    capsule(l, p.hip, at(p.hip, [k[0] - p.hip[0], k[1] - p.hip[1]], 0.38), 2, far ? PAL.shortsFar : PAL.shorts)
   }
-  const arm = (l: Buf, hand: Pt, dark: boolean) => {
+  const arm = (l: Buf, hand: Pt, far: boolean) => {
     const [e, h] = solve(shoulder, hand, LEN.upper, LEN.fore, elbow)
-    capsule(l, e, h, 1.2, dark ? PAL.skinDark : PAL.skin)
-    capsule(l, shoulder, e, 1.5, dark ? PAL.shirtDark : PAL.shirt)
+    capsule(l, shoulder, e, 1.1, far ? PAL.skinFar : PAL.skin)
+    capsule(l, e, h, 1, far ? PAL.skinFar : PAL.skin)
+    disc(l, h, 1.3, far ? PAL.skinFar : PAL.skin)
   }
 
   stamp(buf, (l) => {
@@ -143,37 +166,46 @@ export function renderPose(p: Pose): Buf {
     arm(l, p.handF, true)
   })
   stamp(buf, (l) => {
-    capsule(l, p.hip, shoulder, 2.6, PAL.shirt)
-    capsule(l, at(p.hip, up, -0.5), at(p.hip, up, 2), 2.7, PAL.shorts)
-    capsule(l, shoulder, at(p.hip, up, LEN.torso + 2.5), 1.2, PAL.skin)
-    // Head: skin, hair at the back, cap on top with the brim facing forward
-    disc(l, head, 3.6, PAL.skin)
-    disc(l, at(head, face, -1.4), 2.6, PAL.hair)
-    capsule(l, at(at(head, up, 1.6), face, -2.2), at(at(head, up, 1.6), face, 1.6), 2, PAL.cap)
-    capsule(l, at(at(head, up, 1.2), face, 2), at(at(head, up, 1.2), face, 4), 0.7, PAL.cap)
-    capsule(l, at(at(head, up, 2.6), face, -0.4), at(at(head, up, 2.6), face, 0.6), 0.6, PAL.capWhite)
-    const eye = at(at(head, face, 1.6), up, -0.2)
-    l[Math.floor(eye[1]) * SIZE + Math.floor(eye[0])] = PAL.outline
+    // Side ponytail hangs behind the head
+    capsule(l, off(head, 1, -4), off(head, -3, -6.5), 1.9, PAL.hair)
+    capsule(l, off(head, -3, -6.5), off(head, -5, -6), 1.3, PAL.hair)
+    dot(l, off(head, -1, -5.6), PAL.hairLight)
+    dot(l, off(head, -4, -6.6), PAL.hairDark)
+    // Torso: bare midriff, yellow crop top with red strap, teal shorts
+    capsule(l, p.hip, shoulder, 3, PAL.skin)
+    capsule(l, at(p.hip, up, 4.8), shoulder, 3.4, PAL.top)
+    capsule(l, off(p.hip, 5.5, -2.6), off(shoulder, 0, -2.6), 0.6, PAL.topShade)
+    capsule(l, off(p.hip, -0.3, 0), off(p.hip, 3, 0), 3, PAL.shorts)
+    capsule(l, off(p.hip, 2.5, 1.2), off(shoulder, 0.8, 0.2), 0.45, PAL.strap)
+    // Head: skin, hair cap with bangs over the forehead
+    disc(l, at(head, face, 0.4), 4.9, PAL.skin)
+    capsule(l, off(head, 1.2, -1.2), off(head, 1.2, -1.2), 5, PAL.hair)
+    capsule(l, off(head, 3.2, -1), off(head, 2.6, 3.8), 1.8, PAL.hair)
+    capsule(l, off(head, 3.8, -2.5), off(head, 3.6, 1.5), 0.6, PAL.hairLight)
+    capsule(l, off(head, -1, -3.6), off(head, -3.2, -2.6), 1.2, PAL.hairDark)
+    // Face
+    capsule(l, off(head, -0.6, 0.2), off(head, -3.6, 3.6), 3.1, PAL.skin)
+    capsule(l, off(head, 0.3, 2.8), off(head, -0.8, 2.8), 0.55, PAL.outline)
+    dot(l, off(head, -1, 2.9), PAL.eye)
   })
   stamp(buf, (l) => leg(l, p.ankleN, false))
   if (p.prop === 'barbell') {
     const c: Pt = [(p.handN[0] + p.handF[0]) / 2, (p.handN[1] + p.handF[1]) / 2 + 1]
     stamp(buf, (l) => {
-      disc(l, c, 4.6, PAL.plate)
+      disc(l, c, 4, PAL.plate)
       disc(l, c, 1.2, PAL.plateHub)
     })
   }
   stamp(buf, (l) => arm(l, p.handN, false))
 
   if (p.guide && p.guide > 0.5) {
-    const from: Pt = [p.ankleN[0], p.ankleN[1] - 3]
+    const from: Pt = [p.ankleN[0], p.ankleN[1] - 4]
     const to = at(shoulder, up, 1)
-    const n = Math.round(Math.hypot(to[0] - from[0], to[1] - from[1]))
+    const n = Math.round(Math.hypot(to[0] - from[0], to[1] - from[1]) * K)
     for (let i = 0; i <= n; i++) {
       if (i % 4 > 1) continue
-      const x = Math.floor(from[0] + ((to[0] - from[0]) * i) / n)
-      const y = Math.floor(from[1] + ((to[1] - from[1]) * i) / n) - 4
-      if (x >= 0 && y >= 0 && x < SIZE && y < SIZE) buf[y * SIZE + x] = PAL.guide
+      const pt: Pt = [from[0] + ((to[0] - from[0]) * i) / n, from[1] + ((to[1] - from[1]) * i) / n - 3]
+      dot(buf, pt, PAL.guide)
     }
   }
   return buf
