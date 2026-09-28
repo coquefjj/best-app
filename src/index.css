@@ -350,6 +350,7 @@ input[type='checkbox']:checked {
   flex-direction: column;
   gap: 4px;
   margin-bottom: 12px;
+  min-width: 0;
 }
 
 .field label {
@@ -367,6 +368,7 @@ input[type='checkbox']:checked {
   padding: 6px 10px;
   font-size: 1.15rem;
   min-width: 0;
+  width: 100%;
 }
 
 .field input:focus, .field select:focus, .set-row input:focus {
@@ -500,6 +502,75 @@ input[type='checkbox']:checked {
   width: 100%;
   font-size: 1.05rem;
   padding: 4px 8px;
+}
+
+.set-row.no-weight {
+  grid-template-columns: 34px 1fr 28px;
+}
+
+.set-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.segmented {
+  display: inline-flex;
+  border: 3px solid var(--ink);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.segmented button,
+.toggle-chip {
+  background: var(--surface);
+  border: none;
+  padding: 3px 12px;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+
+.segmented button + button {
+  border-left: 3px solid var(--ink);
+}
+
+.toggle-chip {
+  border: 3px solid var(--ink);
+  border-radius: 999px;
+}
+
+.segmented button.selected,
+.toggle-chip.selected {
+  background: var(--accent-2);
+  color: var(--surface);
+}
+
+.set-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.btn.small {
+  font-size: 0.45rem;
+  padding: 8px 10px;
+}
+
+.done-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.badge.done {
+  background: var(--accent);
 }
 
 .set-num {
