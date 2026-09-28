@@ -1,4 +1,4 @@
-# BEST app
+# Quest
 
 A simple installable web app (PWA) that tracks Fernando's 100-day hybrid athletic plan: workouts, food/macros, daily behaviors, and progress.
 

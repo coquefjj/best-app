@@ -16,7 +16,7 @@ export default function Home() {
       <div className="house" style={{ aspectRatio: `${IMG_W} / ${IMG_H}` }}>
         <img className="house-img" src={HOUSE_IMG} alt="" draggable={false} />
         <div className="home-sign">
-          <div className="home-title">BEST</div>
+          <div className="home-title">QUEST</div>
           <div className="home-sub">
             {formatHuman(iso)} · {info.inPlan ? `Day ${info.dayNum} of ${PLAN_LENGTH_DAYS}` : 'Outside the plan'}
           </div>

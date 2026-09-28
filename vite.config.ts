@@ -16,8 +16,8 @@ export default defineConfig({
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
       },
       manifest: {
-        name: 'BEST — 100 Day Plan',
-        short_name: 'BEST',
+        name: 'Quest — 100 Day Plan',
+        short_name: 'Quest',
         description: "Fernando's 100-day hybrid athletic plan tracker",
         theme_color: '#5e9c3c',
         background_color: '#5e9c3c',
@@ -26,7 +26,7 @@ export default defineConfig({
         icons: [
           { src: 'icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'icon-512.png', sizes: '512x512', type: 'image/png' },
-          { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+          { src: 'icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
     }),
