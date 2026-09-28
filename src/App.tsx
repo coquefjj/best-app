@@ -12,7 +12,7 @@ const NAV_ITEMS: { to: string; label: string; sprite: SpriteName; end?: boolean 
   { to: '/', label: 'Home', sprite: 'house', end: true },
   { to: '/workout', label: 'Workout', sprite: 'dumbbell' },
   { to: '/food', label: 'Nutrition', sprite: 'pot' },
-  { to: '/habits', label: 'Habits', sprite: 'bathtub' },
+  { to: '/habits', label: 'Habits', sprite: 'bed' },
   { to: '/progress', label: 'Learning', sprite: 'easel' },
 ]
 

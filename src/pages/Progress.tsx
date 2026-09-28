@@ -38,8 +38,8 @@ export default function Progress() {
   const waistDelta = lastCheckIn && prevCheckIn ? +(lastCheckIn.waistCm! - prevCheckIn.waistCm!).toFixed(1) : null
 
   return (
-    <div className="page room-page floor-studio">
-      <RoomHeader room="studio" title="Progress" subtitle={`Day ${info.dayNum} of ${PLAN_LENGTH_DAYS} · ${info.phaseName ?? ''}`} />
+    <div className="page room-page floor-office">
+      <RoomHeader room="office" title="Progress" subtitle={`Day ${info.dayNum} of ${PLAN_LENGTH_DAYS} · ${info.phaseName ?? ''}`} />
 
       <div className="card">
         <h2>100-day calendar</h2>

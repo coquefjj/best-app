@@ -29,9 +29,9 @@ export default function Habits() {
   const existingCheckIn = data.checkIns.find((c) => c.date === iso)
 
   return (
-    <div className="page room-page floor-bath">
+    <div className="page room-page floor-bedroom">
 
-      <RoomHeader room="bathroom" title="Daily log" subtitle="Sleep, weight, heart rate and routines">
+      <RoomHeader room="bedroom" title="Daily log" subtitle="Sleep, weight, heart rate and routines">
         <div className="top-bar">
           <Link to={`/habits/${addDays(iso, -1)}`} className="arrow-btn" aria-label="Previous day">◀</Link>
           <strong>{formatHuman(iso)}</strong>
