@@ -971,6 +971,9 @@ input[type='checkbox']:checked {
 /* Exercise demos */
 .move-anim {
   display: block;
+  flex: none;
+  background-color: var(--surface);
+  background-repeat: no-repeat;
   image-rendering: pixelated;
 }
 
@@ -1031,10 +1034,7 @@ input[type='checkbox']:checked {
 }
 
 .move-stage .move-anim {
-  width: min(240px, 70vw) !important;
-  height: min(240px, 70vw) !important;
-  border: 3px solid var(--ink);
-  border-radius: 6px;
+  outline: 3px solid var(--ink);
 }
 
 .move-points {

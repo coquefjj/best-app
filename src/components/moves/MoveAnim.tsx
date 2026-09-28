@@ -1,49 +1,66 @@
-import { useEffect, useRef } from 'react'
-import { SIZE, blend, paint, renderPose } from './rig'
-import type { Move } from './moves'
+import { useEffect, useState } from 'react'
+import { FRAME, frameDurations, moveSrc, type Move } from './moves'
 
-const FPS = 10
+const frameCache = new Map<string, number>()
 
-function poseAt(move: Move, t: number) {
-  const total = move.keys.reduce((s, k) => s + k.hold + k.move, 0)
-  let ms = t % total
-  for (let i = 0; i < move.keys.length; i++) {
-    const k = move.keys[i]
-    if (ms < k.hold) return k.pose
-    ms -= k.hold
-    if (ms < k.move) {
-      const next = move.keys[(i + 1) % move.keys.length].pose
-      const x = ms / k.move
-      return blend(k.pose, next, x * x * (3 - 2 * x))
-    }
-    ms -= k.move
-  }
-  return move.keys[0].pose
-}
-
-export default function MoveAnim({ move, size, label }: { move: Move; size: number; label: string }) {
-  const ref = useRef<HTMLCanvasElement>(null)
+/** Number of frames in the move's strip, or null while loading / if it doesn't exist yet. */
+export function useMoveFrames(move: Move | undefined) {
+  const src = move ? moveSrc(move) : ''
+  const [frames, setFrames] = useState<number | null>(() => frameCache.get(src) ?? null)
 
   useEffect(() => {
-    const ctx = ref.current?.getContext('2d')
-    if (!ctx) return
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    let raf = 0
-    let lastFrame = -1
-    const start = performance.now()
-    const tick = (now: number) => {
-      // Step at a low frame rate for a hand-animated feel
-      const frame = Math.floor(((now - start) / 1000) * FPS)
-      if (frame !== lastFrame) {
-        lastFrame = frame
-        paint(ctx, renderPose(poseAt(move, (frame * 1000) / FPS)))
-      }
-      raf = requestAnimationFrame(tick)
+    if (!src) return
+    if (frameCache.has(src)) {
+      setFrames(frameCache.get(src)!)
+      return
     }
-    if (reduce) paint(ctx, renderPose(move.keys[move.keys.length - 1].pose))
-    else raf = requestAnimationFrame(tick)
-    return () => cancelAnimationFrame(raf)
-  }, [move])
+    let alive = true
+    const img = new Image()
+    img.onload = () => {
+      const n = Math.max(1, Math.round(img.naturalWidth / FRAME))
+      frameCache.set(src, n)
+      if (alive) setFrames(n)
+    }
+    img.src = src
+    return () => {
+      alive = false
+    }
+  }, [src])
 
-  return <canvas ref={ref} className="move-anim" width={SIZE} height={SIZE} style={{ width: size, height: size }} role="img" aria-label={`${label} demonstration`} />
+  return move ? frames : null
+}
+
+export default function MoveAnim({ move, frames, size, label }: { move: Move; frames: number; size: number; label: string }) {
+  const [frame, setFrame] = useState(0)
+
+  useEffect(() => {
+    if (frames < 2 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const durations = frameDurations(frames)
+    let i = 0
+    let timer = 0
+    const next = () => {
+      timer = window.setTimeout(() => {
+        i = (i + 1) % frames
+        setFrame(i)
+        next()
+      }, durations[i])
+    }
+    next()
+    return () => window.clearTimeout(timer)
+  }, [frames])
+
+  return (
+    <div
+      className="move-anim"
+      role="img"
+      aria-label={`${label} demonstration`}
+      style={{
+        width: size,
+        height: size,
+        backgroundImage: `url(${moveSrc(move)})`,
+        backgroundSize: `${frames * size}px ${size}px`,
+        backgroundPosition: `${-frame * size}px 0`,
+      }}
+    />
+  )
 }
