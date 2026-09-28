@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useStore } from '../lib/store'
-import { todayISO, formatHuman } from '../lib/date'
+import { todayISO, formatHuman, formatClock } from '../lib/date'
 import { getDayInfo } from '../lib/session'
 import { HABIT_DEFS, PLAN_LENGTH_DAYS } from '../data/plan'
 import RoomHeader from '../components/RoomHeader'
@@ -36,9 +36,9 @@ export default function Today() {
       workouts: {
         ...prev.workouts,
         [iso]: {
+          ...prev.workouts[iso],
           mobilityDone: !(prev.workouts[iso]?.mobilityDone ?? false),
           exercises: prev.workouts[iso]?.exercises ?? {},
-          aerobic: prev.workouts[iso]?.aerobic,
         },
       },
     }))
@@ -69,7 +69,12 @@ export default function Today() {
       <Link to={`/workout/${iso}`} className="card">
         <div className="card-kicker">Today's training</div>
         <div className="card-title">{info.label}</div>
-        {info.hasStrengthExercises ? (
+        {workout?.completedAt ? (
+          <div className="done-line">
+            <span className="badge done">✓ Done</span>
+            <span className="subtle">Finished at {formatClock(workout.completedAt)}</span>
+          </div>
+        ) : info.hasStrengthExercises ? (
           <div className="subtle">{exerciseCount > 0 ? `${exerciseCount} exercise(s) logged` : 'Not logged yet. Tap to start'}</div>
         ) : info.dayType === 'rest' ? (
           <div className="subtle">Active recovery / mobility only</div>

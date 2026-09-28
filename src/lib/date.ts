@@ -45,3 +45,27 @@ export function startOfWeek(iso: string): string {
   const back = wd === 0 ? 6 : wd - 1
   return addDays(iso, -back)
 }
+
+/** Local clock time (e.g. "7:42 PM") for an ISO timestamp. */
+export function formatClock(isoTimestamp: string): string {
+  return new Date(isoTimestamp).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
+}
+
+/** Seconds as "m:ss". */
+export function formatDuration(totalSeconds: number): string {
+  const m = Math.floor(totalSeconds / 60)
+  const s = totalSeconds % 60
+  return `${m}:${String(s).padStart(2, '0')}`
+}
+
+/** Parses "m:ss" (or a plain number of seconds) into seconds; null if blank or invalid. */
+export function parseDuration(text: string): number | null {
+  const t = text.trim()
+  if (!t) return null
+  const parts = t.split(/[:.]/)
+  if (parts.length > 2 || parts.some((p) => !/^\d+$/.test(p))) return null
+  if (parts.length === 1) return Number(parts[0])
+  const [m, s] = parts.map(Number)
+  if (s >= 60) return null
+  return m * 60 + s
+}

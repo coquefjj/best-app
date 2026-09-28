@@ -3,12 +3,18 @@ import type { HabitId } from './data/plan'
 export interface SetLog {
   weight: number | null
   reps: number | null
+  /** Used instead of reps when the exercise is logged by time. */
+  seconds?: number | null
   done: boolean
 }
 
 export interface ExerciseLog {
   chosenOption: string
   sets: SetLog[]
+  /** 'reps' when missing (logs saved before time-based sets existed). */
+  mode?: 'reps' | 'time'
+  /** Whether sets take a weight; true when missing. */
+  weighted?: boolean
 }
 
 export interface AerobicLog {
@@ -23,6 +29,8 @@ export interface WorkoutDayLog {
   exercises: Record<string, ExerciseLog>
   aerobic?: AerobicLog
   notes?: string
+  /** Set by "Finish workout"; ISO timestamp of when it was finished. */
+  completedAt?: string
 }
 
 export interface FoodEntry {
