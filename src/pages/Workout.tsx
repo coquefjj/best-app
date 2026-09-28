@@ -5,9 +5,8 @@ import { useState } from 'react'
 import { formatHuman, addDays, todayISO, formatClock, formatDuration, parseDuration } from '../lib/date'
 import { SESSIONS_BY_TYPE, AEROBIC_EASY_OPTIONS, HARD_CONDITIONING_OPTIONS, LONG_ENDURANCE_OPTIONS, MOBILITY_DAILY } from '../data/plan'
 import RoomHeader from '../components/RoomHeader'
-import MoveAnim from '../components/moves/MoveAnim'
+import MoveThumb from '../components/moves/MoveThumb'
 import MoveSheet from '../components/moves/MoveSheet'
-import { MOVES } from '../components/moves/moves'
 import type { AerobicLog, ExerciseLog, SetLog, WorkoutDayLog } from '../types'
 import type { PlanExercise } from '../data/plan'
 
@@ -205,12 +204,7 @@ export default function Workout() {
             return (
               <div className="exercise-block" key={ex.id}>
                 <div className="exercise-head">
-                  {MOVES[chosen] && (
-                    <button className="move-thumb" onClick={() => setDemo({ name: chosen, cue })} aria-label={`Show how to do ${chosen}`}>
-                      <MoveAnim move={MOVES[chosen]} size={64} label={chosen} />
-                      <span>How to</span>
-                    </button>
-                  )}
+                  <MoveThumb name={chosen} onOpen={() => setDemo({ name: chosen, cue })} />
                   <div>
                     <h3>
                       {chosen}

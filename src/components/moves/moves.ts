@@ -1,47 +1,63 @@
-import type { Pose } from './rig'
+// How-to sprite strips drawn by Fernando: public/img/moves/<file>, 64x64 px
+// frames laid out left to right. Spec: exercise-anims/sprite-spec.md in the
+// project files. A move only shows its "How to" once its PNG exists.
 
-export interface Key {
-  pose: Pose
-  /** ms to hold this pose before moving on */
-  hold: number
-  /** ms to move from this pose to the next one */
-  move: number
-}
+export const FRAME = 64
 
 export interface Move {
-  keys: Key[]
-  points: string[]
+  file: string
+  points?: string[]
 }
-
-const rdlTop: Pose = { hip: [25.5, 24], torso: 3, ankleN: [26, 41], ankleF: [27, 41], handN: [27, 26], handF: [28, 26], prop: 'barbell' }
-const rdlBottom: Pose = { ...rdlTop, hip: [17, 25.5], torso: 74, handN: [29.8, 35.5], handF: [30.8, 35.5] }
-
-const pushTop: Pose = { hip: [23.5, 32.1], torso: 60, ankleN: [8, 41], ankleF: [9, 41], handN: [34, 41], handF: [35, 41], foot: [1, 1.5] }
-const pushBottom: Pose = { ...pushTop, hip: [25.5, 37.3], torso: 78 }
-
-const plank: Pose = { hip: [23.3, 37.7], torso: 78, ankleN: [6, 41], ankleF: [7, 41], handN: [43, 42], handF: [44, 42], foot: [1, 1.5] }
 
 /** Keyed by the exercise name used in the plan. */
 export const MOVES: Record<string, Move> = {
   'Romanian deadlift': {
-    keys: [
-      { pose: rdlTop, hold: 500, move: 1100 },
-      { pose: rdlBottom, hold: 350, move: 700 },
-    ],
+    file: 'romanian-deadlift.png',
     points: ['Push hips back, knees stay soft', 'Bar slides down close to your legs', 'Flat back, stop when hamstrings are tight', 'Squeeze glutes to stand tall'],
   },
-  'Push-up progression': {
-    keys: [
-      { pose: pushTop, hold: 400, move: 900 },
-      { pose: pushBottom, hold: 250, move: 600 },
-    ],
-    points: ['Hands just outside shoulders', 'Body in one straight line', 'Elbows about 45° from your sides', 'Chest to the floor, then press away'],
-  },
+  'Light hinge': { file: 'romanian-deadlift.png' },
+  'Single-leg RDL': { file: 'single-leg-rdl.png' },
+  'Nordic hamstring curl': { file: 'nordic-hamstring-curl.png' },
+  'Eccentric machine leg curl': { file: 'eccentric-leg-curl.png' },
+  'Hip thrust': { file: 'hip-thrust.png' },
+  'Reverse lunge': { file: 'reverse-lunge.png' },
+  'Bulgarian split squat': { file: 'bulgarian-split-squat.png' },
+  'Copenhagen plank': { file: 'copenhagen-plank.png' },
+  'Adductor squeeze': { file: 'adductor-squeeze.png' },
+  'Banded lateral walk': { file: 'banded-lateral-walk.png' },
+  'Side-lying abduction': { file: 'side-lying-abduction.png' },
+  'Tibialis raise': { file: 'tibialis-raise.png' },
+  'Hanging knee raise': { file: 'hanging-knee-raise.png' },
   Plank: {
-    keys: [
-      { pose: { ...plank, guide: 0 }, hold: 700, move: 0 },
-      { pose: { ...plank, guide: 1 }, hold: 700, move: 0 },
-    ],
+    file: 'plank.png',
     points: ['Elbows under shoulders', 'Straight line from heels to head', 'Squeeze glutes, brace like a punch is coming', 'Breathe slowly, don’t let hips sag'],
   },
+  'Single-leg calf raise': { file: 'single-leg-calf-raise.png' },
+  'DB bench press': { file: 'db-bench-press.png' },
+  'Push-up progression': {
+    file: 'push-up.png',
+    points: ['Hands just outside shoulders', 'Body in one straight line', 'Elbows about 45° from your sides', 'Chest to the floor, then press away'],
+  },
+  'Pull-up': { file: 'pull-up.png' },
+  'Lat pulldown': { file: 'lat-pulldown.png' },
+  'Overhead press': { file: 'overhead-press.png' },
+  'Row (cable/DB)': { file: 'row.png' },
+  'Lateral raises': { file: 'lateral-raises.png' },
+  'Biceps + triceps': { file: 'biceps-curl.png' },
+  'Trap-bar deadlift': { file: 'trap-bar-deadlift.png' },
+  'Incline DB press': { file: 'incline-db-press.png' },
+  'Chin-ups': { file: 'chin-up.png' },
+  'Face pulls': { file: 'face-pulls.png' },
+  'Dead bug': { file: 'dead-bug.png' },
+  'Side plank': { file: 'side-plank.png' },
+  'Pallof press': { file: 'pallof-press.png' },
+}
+
+export const moveSrc = (m: Move) => `${import.meta.env.BASE_URL}img/moves/${m.file}`
+
+/** How long each frame shows: pause at the start and end positions of a rep. */
+export function frameDurations(frames: number): number[] {
+  if (frames === 4) return [500, 220, 450, 220]
+  if (frames <= 2) return Array(frames).fill(800)
+  return Array(frames).fill(300)
 }
