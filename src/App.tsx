@@ -1,10 +1,10 @@
-import { HashRouter, Routes, Route, NavLink } from 'react-router-dom'
+import { HashRouter, Routes, Route, NavLink, Navigate } from 'react-router-dom'
 import Home from './pages/Home'
 import Today from './pages/Today'
 import Workout from './pages/Workout'
 import Food from './pages/Food'
 import Habits from './pages/Habits'
-import Progress from './pages/Progress'
+import Learning from './pages/Learning'
 import Sprite from './components/Sprite'
 import type { SpriteName } from './components/sprites'
 
@@ -13,7 +13,7 @@ const NAV_ITEMS: { to: string; label: string; sprite: SpriteName; end?: boolean 
   { to: '/workout', label: 'Workout', sprite: 'dumbbell' },
   { to: '/food', label: 'Nutrition', sprite: 'pot' },
   { to: '/habits', label: 'Habits', sprite: 'bed' },
-  { to: '/progress', label: 'Learning', sprite: 'easel' },
+  { to: '/learning', label: 'Learning', sprite: 'easel' },
 ]
 
 function Nav() {
@@ -42,7 +42,8 @@ function App() {
           <Route path="/food/:date" element={<Food />} />
           <Route path="/habits" element={<Habits />} />
           <Route path="/habits/:date" element={<Habits />} />
-          <Route path="/progress" element={<Progress />} />
+          <Route path="/learning" element={<Learning />} />
+          <Route path="/progress" element={<Navigate to="/learning" replace />} />
         </Routes>
       </div>
       <Nav />
