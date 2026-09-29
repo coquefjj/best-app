@@ -1291,3 +1291,56 @@ details.lift[open] > .lift-summary .lift-name::after {
 .day-next {
   left: 100%;
 }
+
+/* Cover screen (and landscape): the house is taller than the screen here, so show it
+   from the top at full width and let Home scroll instead of cropping the top rooms */
+@media (max-height: 500px) {
+  .home {
+    height: auto;
+    overflow: visible;
+  }
+
+  .house {
+    position: relative;
+    left: auto;
+    top: auto;
+    transform: none;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+  }
+
+  /* Icon-only menu; the labels stay for screen readers */
+  :root {
+    --nav-h: calc(44px + env(safe-area-inset-bottom));
+  }
+
+  .app-shell {
+    padding-bottom: calc(var(--nav-h) + 16px);
+  }
+
+  .nav {
+    padding-top: 4px;
+  }
+
+  .nav a {
+    padding: 4px 2px;
+    font-size: 0;
+    gap: 0;
+  }
+
+  /* Smaller room picture so the page content starts higher */
+  .room-wall {
+    padding: 8px 12px;
+    margin-bottom: 12px;
+  }
+
+  .room-wall .top-bar {
+    margin-bottom: 8px;
+  }
+
+  .room-thumb {
+    height: 56px;
+  }
+}
