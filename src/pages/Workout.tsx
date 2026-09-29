@@ -5,7 +5,7 @@ import { useState } from 'react'
 import { formatHuman, addDays, todayISO, formatClock, formatDuration, parseDuration } from '../lib/date'
 import { SESSIONS_BY_TYPE, AEROBIC_EASY_OPTIONS, HARD_CONDITIONING_OPTIONS, LONG_ENDURANCE_OPTIONS, MOBILITY_DAILY } from '../data/plan'
 import RoomHeader from '../components/RoomHeader'
-import { useDaySwipe, useSwipeInClass } from '../lib/useDaySwipe'
+import DaySwiper from '../components/DaySwiper'
 import MoveThumb from '../components/moves/MoveThumb'
 import MoveSheet from '../components/moves/MoveSheet'
 import type { AerobicLog, ExerciseLog, SetLog, WorkoutDayLog } from '../types'
@@ -57,9 +57,10 @@ function TimeInput({ seconds, placeholder, onChange }: { seconds: number | null;
 
 export default function Workout() {
   const { date } = useParams<{ date: string }>()
-  const iso = date ?? todayISO()
-  const swipe = useDaySwipe('workout', iso)
-  const swipeIn = useSwipeInClass()
+  return <DaySwiper base="workout" iso={date ?? todayISO()} renderDay={(iso) => <WorkoutDay iso={iso} />} />
+}
+
+function WorkoutDay({ iso }: { iso: string }) {
   const { data, setData } = useStore()
   const info = getDayInfo(iso)
   const workout = data.workouts[iso] ?? emptyWorkout()
@@ -123,7 +124,7 @@ export default function Workout() {
   const [demo, setDemo] = useState<{ name: string; cue?: string } | null>(null)
 
   return (
-    <div key={iso} className={`page room-page floor-gym${swipeIn}`} {...swipe}>
+    <div className="page room-page floor-gym">
       {demo && <MoveSheet name={demo.name} cue={demo.cue} onClose={() => setDemo(null)} />}
       <RoomHeader
         room="gym"

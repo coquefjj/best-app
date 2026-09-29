@@ -4,7 +4,7 @@ import { todayISO, formatHuman, addDays } from '../lib/date'
 import { getDayInfo } from '../lib/session'
 import type { FoodEntry, SavedMeal } from '../types'
 import RoomHeader from '../components/RoomHeader'
-import { useDaySwipe, useSwipeInClass } from '../lib/useDaySwipe'
+import DaySwiper from '../components/DaySwiper'
 import { Link, useParams } from 'react-router-dom'
 
 function uid() {
@@ -15,9 +15,10 @@ const MEAL_SLOTS: FoodEntry['mealSlot'][] = ['breakfast', 'lunch', 'dinner', 'sn
 
 export default function Food() {
   const { date } = useParams<{ date: string }>()
-  const iso = date ?? todayISO()
-  const swipe = useDaySwipe('food', iso)
-  const swipeIn = useSwipeInClass()
+  return <DaySwiper base="food" iso={date ?? todayISO()} renderDay={(iso) => <FoodDay iso={iso} />} />
+}
+
+function FoodDay({ iso }: { iso: string }) {
   const { data, setData } = useStore()
   const info = getDayInfo(iso)
   const entries = data.food[iso]?.entries ?? []
@@ -88,7 +89,7 @@ export default function Food() {
   }
 
   return (
-    <div key={iso} className={`page room-page floor-kitchen${swipeIn}`} {...swipe}>
+    <div className="page room-page floor-kitchen">
 
       <RoomHeader room="kitchen" title="Food log" subtitle={`Target today: ${info.nutrition.calories} kcal · ${info.nutrition.protein} g protein`}>
         <div className="top-bar">

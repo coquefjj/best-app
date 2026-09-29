@@ -1249,23 +1249,45 @@ details.lift[open] > .lift-summary .lift-name::after {
   }
 }
 
-/* Day swipe on Workout, Nutrition and Habits: slide the new day in from the swipe side */
-.room-page {
+/* Day pager on Workout, Nutrition and Habits (see DaySwiper): yesterday and tomorrow sit
+   just off screen on either side and slide in with your finger */
+.day-swiper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: clip;
   touch-action: pan-y pinch-zoom;
 }
 
-.swipe-in-next {
-  animation: swipe-in-next 0.18s ease-out;
+.day-strip {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  will-change: transform;
 }
 
-.swipe-in-prev {
-  animation: swipe-in-prev 0.18s ease-out;
+.day-current {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
-@keyframes swipe-in-next {
-  from { transform: translateX(28px); opacity: 0.4; }
+.day-current > .page {
+  flex: 1;
 }
 
-@keyframes swipe-in-prev {
-  from { transform: translateX(-28px); opacity: 0.4; }
+.day-side {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  pointer-events: none;
+}
+
+.day-prev {
+  right: 100%;
+}
+
+.day-next {
+  left: 100%;
 }
