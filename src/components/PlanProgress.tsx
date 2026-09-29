@@ -1,20 +1,17 @@
 import { useStore } from '../lib/store'
 import { todayISO, startOfWeek, addDays, formatHuman } from '../lib/date'
-import { getDayInfo } from '../lib/session'
 import { PLAN_LENGTH_DAYS, PHASES, PLAN_START_DATE } from '../data/plan'
 import { isOnPlan } from '../lib/adherence'
-import RoomHeader from '../components/RoomHeader'
 
-export default function Progress() {
+/** The 100-day calendar and this week's adherence, shown under the house on Home. */
+export default function PlanProgress() {
   const { data } = useStore()
   const today = todayISO()
-  const info = getDayInfo(today)
   const weekStart = startOfWeek(today)
   const weekDates = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i)).filter((d) => d <= today)
 
   const adherent = weekDates.filter((d) => isOnPlan(data, d)).length
   const adherencePct = weekDates.length ? Math.round((adherent / weekDates.length) * 100) : 0
-
 
   const restingHrEntries = Object.entries(data.habits)
     .map(([date, h]) => ({ date, hr: h.restingHr as number | undefined }))
@@ -23,14 +20,16 @@ export default function Progress() {
   const recentHr = restingHrEntries.slice(-7)
   const hrRising = recentHr.length >= 3 && recentHr[recentHr.length - 1].hr! > recentHr[0].hr! + 3
 
-  const checkIns = [...data.checkIns].sort((a, b) => (a.date < b.date ? -1 : 1))
-  const lastCheckIn = checkIns[checkIns.length - 1]
-  const prevCheckIn = checkIns[checkIns.length - 2]
-  const waistDelta = lastCheckIn && prevCheckIn ? +(lastCheckIn.waistCm! - prevCheckIn.waistCm!).toFixed(1) : null
-
   return (
-    <div className="page room-page floor-office">
-      <RoomHeader room="office" title="Progress" subtitle={`Day ${info.dayNum} of ${PLAN_LENGTH_DAYS} · ${info.phaseName ?? ''}`} />
+    <div className="home-progress">
+      <div className="card">
+        <h2>This week</h2>
+        <div className="row">
+          <span className="subtle">{adherent} / {weekDates.length} days on plan</span>
+          <span className="subtle">{adherencePct}%</span>
+        </div>
+        <div className="progress-bar"><div style={{ width: `${adherencePct}%` }} /></div>
+      </div>
 
       <div className="card">
         <h2>100-day calendar</h2>
@@ -58,27 +57,6 @@ export default function Progress() {
           <span><i className="swatch" style={{ background: '#f0c8c0', boxShadow: 'inset 0 0 0 2px var(--hp-red)' }} /> Missed</span>
           <span><i className="swatch" style={{ outline: '3px solid var(--orange)', outlineOffset: -3 }} /> Today</span>
         </div>
-      </div>
-
-      <div className="card">
-        <h2>This week</h2>
-        <div className="row">
-          <span className="subtle">{adherent} / {weekDates.length} days on plan</span>
-          <span className="subtle">{adherencePct}%</span>
-        </div>
-        <div className="progress-bar"><div style={{ width: `${adherencePct}%` }} /></div>
-      </div>
-
-      <div className="card">
-        <h2>Waist (every 2 weeks)</h2>
-        {lastCheckIn ? (
-          <div className="subtle">
-            Last: {formatHuman(lastCheckIn.date)} · {lastCheckIn.waistCm} cm
-            {waistDelta !== null && ` (${waistDelta <= 0 ? waistDelta : '+' + waistDelta} cm since last check-in)`}
-          </div>
-        ) : (
-          <div className="subtle">No check-in logged yet.</div>
-        )}
       </div>
 
       {hrRising && (

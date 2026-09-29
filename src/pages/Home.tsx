@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { todayISO, formatHuman } from '../lib/date'
 import { getDayInfo } from '../lib/session'
 import { PLAN_LENGTH_DAYS } from '../data/plan'
+import PlanProgress from '../components/PlanProgress'
 import { HOUSE_IMG, IMG_H, IMG_W, ROOMS, type RoomId } from '../components/rooms'
 
 const pct = (v: number, of: number) => `${(v / of) * 100}%`
@@ -12,6 +13,7 @@ export default function Home() {
   const info = getDayInfo(iso)
 
   return (
+    <>
     <div className="home">
       <div className="house" style={{ aspectRatio: `${IMG_W} / ${IMG_H}` }}>
         <img className="house-img" src={HOUSE_IMG} alt="" draggable={false} />
@@ -36,6 +38,9 @@ export default function Home() {
           )
         })}
       </div>
+      <div className="home-more" aria-hidden="true">▼ Plan progress</div>
     </div>
+    <PlanProgress />
+    </>
   )
 }
