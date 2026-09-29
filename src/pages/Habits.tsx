@@ -3,11 +3,14 @@ import { useStore } from '../lib/store'
 import { todayISO, formatHuman, addDays } from '../lib/date'
 import { HABIT_DEFS } from '../data/plan'
 import RoomHeader from '../components/RoomHeader'
+import { useDaySwipe, useSwipeInClass } from '../lib/useDaySwipe'
 import WaterGlasses from '../components/WaterGlasses'
 
 export default function Habits() {
   const { date } = useParams<{ date: string }>()
   const iso = date ?? todayISO()
+  const swipe = useDaySwipe('habits', iso)
+  const swipeIn = useSwipeInClass()
   const { data, setData } = useStore()
   const habits = data.habits[iso] ?? {}
 
@@ -16,7 +19,7 @@ export default function Habits() {
   }
 
   return (
-    <div className="page room-page floor-bedroom">
+    <div key={iso} className={`page room-page floor-bedroom${swipeIn}`} {...swipe}>
 
       <RoomHeader room="bedroom" title="Daily log" subtitle="Water, sleep, heart rate and routines">
         <div className="top-bar">

@@ -1248,3 +1248,24 @@ details.lift[open] > .lift-summary .lift-name::after {
     max-width: 180px;
   }
 }
+
+/* Day swipe on Workout, Nutrition and Habits: slide the new day in from the swipe side */
+.room-page {
+  touch-action: pan-y pinch-zoom;
+}
+
+.swipe-in-next {
+  animation: swipe-in-next 0.18s ease-out;
+}
+
+.swipe-in-prev {
+  animation: swipe-in-prev 0.18s ease-out;
+}
+
+@keyframes swipe-in-next {
+  from { transform: translateX(28px); opacity: 0.4; }
+}
+
+@keyframes swipe-in-prev {
+  from { transform: translateX(-28px); opacity: 0.4; }
+}
