@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
-import { EMPTY_DATA, type AppData, type WorkoutDayLog } from '../types'
+import { EMPTY_DATA, type AppData, type HabitDayLog, type WorkoutDayLog } from '../types'
 
 const STORAGE_KEY = 'best-app:v1'
 
@@ -28,7 +28,23 @@ function migrate(data: AppData): AppData {
     }
     workouts[date] = { ...w, exercises }
   }
-  return { ...data, workouts }
+  const habits: Record<string, HabitDayLog> = {}
+  for (const [date, h] of Object.entries(data.habits ?? {})) habits[date] = migrateHabits(h)
+  return { ...data, workouts, habits }
+}
+
+/**
+ * Until Sep 29 2026 reading, meditation and phone were fixed yes/no targets. Turn a ticked
+ * "Reading 30 min" into 30 minutes and "Meditation 10 min" into 10, and carry
+ * "Phone < 1 hour" over to its replacement, "No social media", so streaks keep their history.
+ */
+function migrateHabits(day: HabitDayLog): HabitDayLog {
+  const { reading30, meditation10, phoneUnder1h, ...rest } = day as HabitDayLog & Record<string, unknown>
+  const out: HabitDayLog = { ...rest }
+  if (reading30 === true && out.readingMin == null) out.readingMin = 30
+  if (meditation10 === true && out.meditationMin == null) out.meditationMin = 10
+  if (phoneUnder1h === true && out.noSocialMedia == null) out.noSocialMedia = true
+  return out
 }
 
 interface StoreContextValue {

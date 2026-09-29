@@ -8,6 +8,7 @@ import RoomHeader from '../components/RoomHeader'
 import DaySwiper from '../components/DaySwiper'
 import MoveThumb from '../components/moves/MoveThumb'
 import MoveSheet from '../components/moves/MoveSheet'
+import StrengthProgress from '../components/StrengthProgress'
 import type { AerobicLog, ExerciseLog, SetLog, WorkoutDayLog } from '../types'
 import type { PlanExercise } from '../data/plan'
 
@@ -122,6 +123,7 @@ function WorkoutDay({ iso }: { iso: string }) {
   const toggleMobility = () => update((w) => ({ ...w, mobilityDone: !w.mobilityDone }))
 
   const [demo, setDemo] = useState<{ name: string; cue?: string } | null>(null)
+  const [showProgress, setShowProgress] = useState(false)
 
   return (
     <div className="page room-page floor-gym">
@@ -344,6 +346,16 @@ function WorkoutDay({ iso }: { iso: string }) {
           )}
         </div>
       )}
+
+      <button
+        className={`btn secondary full progress-toggle${showProgress ? ' open' : ''}`}
+        aria-expanded={showProgress}
+        onClick={() => setShowProgress((v) => !v)}
+      >
+        <span>Progress</span>
+        <span aria-hidden="true">{showProgress ? '▲' : '▼'}</span>
+      </button>
+      {showProgress && <StrengthProgress />}
     </div>
   )
 }

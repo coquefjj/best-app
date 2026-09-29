@@ -1,7 +1,7 @@
+import { useRef } from 'react'
 import { useStore } from '../lib/store'
 import { formatHuman } from '../lib/date'
-import RoomHeader from '../components/RoomHeader'
-import StepChart from '../components/StepChart'
+import StepChart from './StepChart'
 import {
   MUSCLE_GROUPS,
   bestSession,
@@ -80,7 +80,8 @@ function LiftRow({ lift, color }: { lift: LiftHistory; color: string }) {
   )
 }
 
-export default function Learning() {
+/** Best lifts by muscle group; opened from the Progress button at the bottom of Workout. */
+export default function StrengthProgress() {
   const { data } = useStore()
   const histories = liftHistories(data)
   const groups = MUSCLE_GROUPS.map((g) => {
@@ -88,12 +89,13 @@ export default function Learning() {
     return { ...g, lifts, notLogged: g.lifts.filter((name) => !histories.has(name)) }
   })
 
+  // Workout keeps yesterday and tomorrow rendered beside today, so look groups up in this copy only.
+  const boxRef = useRef<HTMLDivElement>(null)
   const jumpTo = (id: MuscleGroupId) =>
-    document.getElementById(`group-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    boxRef.current?.querySelector(`[data-group="${id}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
 
   return (
-    <div className="page room-page floor-office">
-      <RoomHeader room="office" title="Strength" subtitle="Best lifts by muscle group" />
+    <div className="strength" ref={boxRef}>
 
       <div className="card muscle-map-card">
         <img className="muscle-map" src={MAP_IMG} alt="Muscle groups: arms and shoulders, back, chest, legs and glutes" />
@@ -109,7 +111,7 @@ export default function Learning() {
       </div>
 
       {groups.map((g) => (
-        <div key={g.id} id={`group-${g.id}`} className="card muscle-group" style={{ ['--group' as string]: g.color }}>
+        <div key={g.id} data-group={g.id} className="card muscle-group" style={{ ['--group' as string]: g.color }}>
           <h2>
             <i className="swatch" style={{ background: g.color }} />
             {g.name}

@@ -22,7 +22,7 @@ export default function Today() {
     { calories: 0, protein: 0 },
   )
 
-  const quickHabits = HABIT_DEFS.filter((h) => h.type === 'boolean')
+  const quickHabits = HABIT_DEFS.filter((h) => h.group === 'habit' && h.type === 'boolean')
 
   const toggleHabit = (id: string, current: boolean) => {
     setData((prev) => ({
@@ -105,8 +105,11 @@ export default function Today() {
             <label>{h.label}</label>
           </div>
         ))}
-        <Link to="/habits" className="subtle" style={{ display: 'inline-block', marginTop: 8 }}>
-          ▶ Log sleep, heart rate &amp; more
+        <Link to="/habits" className="subtle" style={{ display: 'block', marginTop: 8 }}>
+          ▶ Log phone, reading &amp; meditation time
+        </Link>
+        <Link to="/recovery" className="subtle" style={{ display: 'block', marginTop: 6 }}>
+          ▶ Log sleep &amp; heart rate
         </Link>
       </div>
 

@@ -1344,3 +1344,113 @@ details.lift[open] > .lift-summary .lift-name::after {
     height: 56px;
   }
 }
+
+/* Habits (office): each habit with today's entry and a days-in-a-row streak */
+.habit {
+  padding: 12px 0;
+  border-bottom: 2px solid var(--surface-2);
+}
+
+.habit:first-child {
+  padding-top: 0;
+}
+
+.habit:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.habit-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 40px;
+}
+
+.habit-name {
+  font-size: 1.35rem;
+  flex: 1;
+}
+
+.habit-time {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.habit-time input {
+  width: 72px;
+  padding: 8px 10px;
+  font-family: var(--font-body);
+  font-size: 1.2rem;
+  text-align: right;
+  color: var(--text);
+  background: var(--status-bg);
+  border: 3px solid var(--ink);
+  border-radius: 8px;
+}
+
+.habit-time input:focus {
+  outline: none;
+  border-color: var(--accent-2);
+}
+
+.habit-streak {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 4px 0 6px;
+}
+
+.streak-num {
+  font-family: var(--font-pixel);
+  font-size: 0.7rem;
+  color: var(--orange);
+}
+
+.habit:not(.done) .streak-num {
+  color: var(--text-dim);
+}
+
+.streak-strip {
+  display: grid;
+  grid-template-columns: repeat(14, 1fr);
+  gap: 3px;
+}
+
+.streak-strip i {
+  display: block;
+  aspect-ratio: 1;
+  max-height: 18px;
+  background: var(--surface-2);
+  border: 2px solid rgba(58, 36, 24, 0.25);
+  border-radius: 3px;
+}
+
+.streak-strip i.on {
+  background: var(--accent);
+  border-color: var(--accent-dark);
+}
+
+.streak-strip i.today {
+  border-color: var(--ink);
+}
+
+.habits-note {
+  margin: 0 4px;
+  color: var(--surface);
+  text-shadow: 1px 1px 0 var(--ink);
+}
+
+/* Workout: Progress button at the bottom that opens strength progress */
+.progress-toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.progress-toggle.open {
+  margin-bottom: 12px;
+}

@@ -4,7 +4,7 @@ import Today from './pages/Today'
 import Workout from './pages/Workout'
 import Food from './pages/Food'
 import Habits from './pages/Habits'
-import Learning from './pages/Learning'
+import Recovery from './pages/Recovery'
 import Sprite from './components/Sprite'
 import type { SpriteName } from './components/sprites'
 
@@ -12,8 +12,8 @@ const NAV_ITEMS: { to: string; label: string; sprite: SpriteName; end?: boolean 
   { to: '/', label: 'Home', sprite: 'house', end: true },
   { to: '/workout', label: 'Workout', sprite: 'dumbbell' },
   { to: '/food', label: 'Nutrition', sprite: 'pot' },
-  { to: '/habits', label: 'Habits', sprite: 'bed' },
-  { to: '/learning', label: 'Learning', sprite: 'easel' },
+  { to: '/recovery', label: 'Recovery', sprite: 'bed' },
+  { to: '/habits', label: 'Habits', sprite: 'easel' },
 ]
 
 function Nav() {
@@ -42,8 +42,11 @@ function App() {
           <Route path="/food/:date" element={<Food />} />
           <Route path="/habits" element={<Habits />} />
           <Route path="/habits/:date" element={<Habits />} />
-          <Route path="/learning" element={<Learning />} />
-          <Route path="/progress" element={<Navigate to="/learning" replace />} />
+          <Route path="/recovery" element={<Recovery />} />
+          <Route path="/recovery/:date" element={<Recovery />} />
+          {/* Strength progress now lives at the bottom of Workout */}
+          <Route path="/learning" element={<Navigate to="/workout" replace />} />
+          <Route path="/progress" element={<Navigate to="/workout" replace />} />
         </Routes>
       </div>
       <Nav />

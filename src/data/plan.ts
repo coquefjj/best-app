@@ -238,15 +238,21 @@ export function isHardDay(dayType: DayType): boolean {
   return dayType === 'strengthA' || dayType === 'hardConditioning' || dayType === 'strengthC' || dayType === 'longEndurance' || dayType === 'strengthB'
 }
 
+/**
+ * Daily log fields. `recovery` ones live in the bedroom (Recovery); `habit` ones are the
+ * habits in the office (Habits), each with a days-in-a-row streak.
+ * `minutes` habits take whatever time you did; the streak counts days, not minutes.
+ */
 export const HABIT_DEFS = [
-  { id: 'water', label: 'Water', type: 'number', unit: 'L' },
-  { id: 'sleepHours', label: 'Sleep hours', type: 'number', unit: 'h' },
-  { id: 'sleepScore', label: 'Sleep score', type: 'number', unit: '' },
-  { id: 'restingHr', label: 'Resting heart rate', type: 'number', unit: 'bpm' },
-  { id: 'phoneUnder1h', label: 'Phone < 1 hour', type: 'boolean', unit: '' },
-  { id: 'reading30', label: 'Reading 30 min', type: 'boolean', unit: '' },
-  { id: 'meditation10', label: 'Meditation 10 min', type: 'boolean', unit: '' },
-  { id: 'noAlcohol', label: 'No alcohol', type: 'boolean', unit: '' },
+  { id: 'water', label: 'Water', type: 'number', unit: 'L', group: 'recovery' },
+  { id: 'sleepHours', label: 'Sleep hours', type: 'number', unit: 'h', group: 'recovery' },
+  { id: 'sleepScore', label: 'Sleep score', type: 'number', unit: '', group: 'recovery' },
+  { id: 'restingHr', label: 'Resting heart rate', type: 'number', unit: 'bpm', group: 'recovery' },
+  { id: 'phoneMin', label: 'Phone time', type: 'minutes', unit: 'min', group: 'habit' },
+  { id: 'readingMin', label: 'Reading', type: 'minutes', unit: 'min', group: 'habit' },
+  { id: 'meditationMin', label: 'Meditation', type: 'minutes', unit: 'min', group: 'habit' },
+  { id: 'noSocialMedia', label: 'No social media', type: 'boolean', unit: '', group: 'habit' },
+  { id: 'noAlcohol', label: 'No alcohol', type: 'boolean', unit: '', group: 'habit' },
 ] as const
 
 export type HabitId = (typeof HABIT_DEFS)[number]['id']
