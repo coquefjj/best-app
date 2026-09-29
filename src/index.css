@@ -1454,3 +1454,70 @@ details.lift[open] > .lift-summary .lift-name::after {
 .progress-toggle.open {
   margin-bottom: 12px;
 }
+
+/* Habits: edit mode (add, rename, remove) */
+.habits-edit-btn {
+  margin-bottom: 16px;
+}
+
+.habit-edit-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 2px solid var(--surface-2);
+}
+
+.habit-edit-row:last-child {
+  border-bottom: none;
+}
+
+.habit-edit-row input {
+  flex: 1;
+  min-width: 0;
+  background: var(--status-bg);
+  border: 3px solid var(--ink);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 1.15rem;
+  color: var(--text);
+}
+
+.habit-edit-row input:focus {
+  outline: none;
+  border-color: var(--accent-2);
+}
+
+.habit-edit-type {
+  flex-shrink: 0;
+  width: 52px;
+  text-align: center;
+}
+
+.habit-remove {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  background: var(--surface);
+  color: var(--danger);
+  border: 3px solid var(--ink);
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.habit-type {
+  display: flex;
+  margin-bottom: 14px;
+}
+
+.habit-type button {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 1.1rem;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}

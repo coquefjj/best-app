@@ -36,7 +36,7 @@ function RecoveryDay({ iso }: { iso: string }) {
 
       <div className="card">
         <h2>Sleep &amp; heart</h2>
-        {HABIT_DEFS.filter((h) => h.group === 'recovery' && h.id !== 'water').map((h) => (
+        {HABIT_DEFS.filter((h) => h.id !== 'water').map((h) => (
           <div className="field" key={h.id}>
             <label>{h.label}{h.unit ? ` (${h.unit})` : ''}</label>
             <input

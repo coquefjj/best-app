@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { todayISO, formatHuman, formatClock } from '../lib/date'
 import { getDayInfo } from '../lib/session'
-import { HABIT_DEFS, PLAN_LENGTH_DAYS } from '../data/plan'
+import { PLAN_LENGTH_DAYS } from '../data/plan'
 import RoomHeader from '../components/RoomHeader'
 import WaterGlasses from '../components/WaterGlasses'
 
@@ -22,7 +22,7 @@ export default function Today() {
     { calories: 0, protein: 0 },
   )
 
-  const quickHabits = HABIT_DEFS.filter((h) => h.group === 'habit' && h.type === 'boolean')
+  const quickHabits = data.habitList.filter((h) => h.type === 'boolean')
 
   const toggleHabit = (id: string, current: boolean) => {
     setData((prev) => ({
@@ -106,7 +106,7 @@ export default function Today() {
           </div>
         ))}
         <Link to="/habits" className="subtle" style={{ display: 'block', marginTop: 8 }}>
-          ▶ Log phone, reading &amp; meditation time
+          ▶ Log habit times &amp; streaks
         </Link>
         <Link to="/recovery" className="subtle" style={{ display: 'block', marginTop: 6 }}>
           ▶ Log sleep &amp; heart rate

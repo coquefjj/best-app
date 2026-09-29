@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
+import { DEFAULT_HABITS } from '../data/plan'
 import { EMPTY_DATA, type AppData, type HabitDayLog, type WorkoutDayLog } from '../types'
 
 const STORAGE_KEY = 'best-app:v1'
@@ -30,7 +31,9 @@ function migrate(data: AppData): AppData {
   }
   const habits: Record<string, HabitDayLog> = {}
   for (const [date, h] of Object.entries(data.habits ?? {})) habits[date] = migrateHabits(h)
-  return { ...data, workouts, habits }
+  // Phone time was one of the starting habits until Fernando dropped it on Sep 29 2026.
+  const habitList = data.habitList ?? DEFAULT_HABITS
+  return { ...data, workouts, habits, habitList }
 }
 
 /**

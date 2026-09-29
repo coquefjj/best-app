@@ -1,4 +1,4 @@
-import type { HabitId } from './data/plan'
+import { DEFAULT_HABITS } from './data/plan'
 
 export interface SetLog {
   weight: number | null
@@ -57,7 +57,16 @@ export interface SavedMeal {
   mealSlot: FoodEntry['mealSlot']
 }
 
-export type HabitDayLog = Partial<Record<HabitId, number | boolean>>
+/** One day's recovery numbers and habit entries, keyed by field or habit id. */
+export type HabitDayLog = Partial<Record<string, number | boolean>>
+
+/** A habit on the Habits page; its daily entries live in `habits[date][id]`. */
+export interface Habit {
+  id: string
+  label: string
+  /** 'minutes' takes any time you did; 'boolean' is a yes/no tick. */
+  type: 'minutes' | 'boolean'
+}
 
 export interface ProgressCheckIn {
   date: string
@@ -71,6 +80,8 @@ export interface AppData {
   savedMeals: SavedMeal[]
   habits: Record<string, HabitDayLog>
   checkIns: ProgressCheckIn[]
+  /** Habits you track, in order. Removing one keeps its old entries in `habits`. */
+  habitList: Habit[]
 }
 
 export const EMPTY_DATA: AppData = {
@@ -79,4 +90,5 @@ export const EMPTY_DATA: AppData = {
   savedMeals: [],
   habits: {},
   checkIns: [],
+  habitList: DEFAULT_HABITS,
 }
