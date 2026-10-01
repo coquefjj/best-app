@@ -106,7 +106,7 @@ export default function NutritionProgress() {
   const firstISO = addDays(today, -(range - 1))
 
   const inRange = avgBase.filter((d) => d.calories >= d.target.calorieRange[0] && d.calories <= d.target.calorieRange[1]).length
-  const proteinHit = avgBase.filter((d) => d.protein >= d.target.protein * 0.9).length
+  const proteinHit = avgBase.filter((d) => d.protein >= d.target.proteinMin).length
   const avg = (k: 'calories' | 'protein' | 'carbs' | 'fat') => average(avgBase.map((d) => d[k]))
   const avgTarget = (k: 'calories' | 'protein' | 'carbs' | 'fat') => average(avgBase.map((d) => d.target[k]))
 

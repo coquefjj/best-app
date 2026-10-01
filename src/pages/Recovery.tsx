@@ -7,6 +7,7 @@ import RoomHeader from '../components/RoomHeader'
 import DaySwiper from '../components/DaySwiper'
 import WaterGlasses from '../components/WaterGlasses'
 import RecoveryProgress from '../components/RecoveryProgress'
+import TargetSettings from '../components/TargetSettings'
 
 export default function Recovery() {
   const { date } = useParams<{ date: string }>()
@@ -51,6 +52,15 @@ function RecoveryDay({ iso }: { iso: string }) {
           </div>
         ))}
       </div>
+
+      <TargetSettings
+        rows={[
+          { label: 'Water', unit: 'L', target: 'waterL', min: 'waterMinL', step: 0.2 },
+          { label: 'Sleep', unit: 'h', target: 'sleepHours', min: 'sleepHoursMin', step: 0.5 },
+          { label: 'Sleep score', unit: '', target: 'sleepScore', min: 'sleepScoreMin' },
+        ]}
+        note="The water target also sets how many glasses you fill. On the Home calendar a day is green when all three are on target, yellow when at least one reaches its minimum, red when none do."
+      />
 
       <button
         className={`btn secondary full progress-toggle${showProgress ? ' open' : ''}`}

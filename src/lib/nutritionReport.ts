@@ -1,6 +1,6 @@
 import type { AppData, FoodEntry } from '../types'
 import { addDays, hhmmToMinutes, todayISO } from './date'
-import { getDayInfo } from './session'
+import { nutritionTarget, type DayNutritionTarget } from './targets'
 import { MEAL_SLOTS } from '../data/meals'
 
 /** Foods eaten within this many minutes of each other count as one meal. */
@@ -19,7 +19,7 @@ export interface NutritionDay {
   protein: number
   carbs: number
   fat: number
-  target: { calories: number; calorieRange: [number, number]; protein: number; carbs: number; fat: number }
+  target: DayNutritionTarget
 }
 
 const dayMinutes = (time: string | undefined) => {
@@ -62,7 +62,7 @@ export function nutritionDays(data: AppData, days: number, end = todayISO()): (N
       protein: sum('protein'),
       carbs: sum('carbs'),
       fat: sum('fat'),
-      target: getDayInfo(date).nutrition,
+      target: nutritionTarget(data, date),
     })
   }
   return out

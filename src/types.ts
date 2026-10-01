@@ -86,6 +86,8 @@ export interface AppData {
   checkIns: ProgressCheckIn[]
   /** Habits you track, in order. Removing one keeps its old entries in `habits`. */
   habitList: Habit[]
+  /** Targets and minimums changed on the Nutrition and Recovery pages; defaults fill the rest. */
+  targets?: Partial<import('./lib/targets').Targets>
 }
 
 export const EMPTY_DATA: AppData = {

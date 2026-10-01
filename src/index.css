@@ -361,7 +361,7 @@ input[type='checkbox']:checked {
   color: var(--text-dim);
 }
 
-.field input, .field select, .field textarea, .set-row input:not([type='checkbox']) {
+.field input, .field select, .field textarea, .set-row input:not([type='checkbox']), .targets-cell input {
   background: var(--surface);
   border: 3px solid var(--ink);
   border-radius: 6px;
@@ -1688,4 +1688,100 @@ details.lift[open] > .lift-summary .lift-name::after {
   font-size: 0.45rem;
   margin-right: 6px;
   vertical-align: 2px;
+}
+
+/* Home calendar: per-section consistency views */
+.cal-views {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.cal-views button {
+  flex: 1 1 0;
+  min-width: 0;
+  background: var(--surface);
+  border: 3px solid var(--ink);
+  border-radius: 4px;
+  padding: 4px 2px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  box-shadow: inset 0 -3px 0 0 var(--surface-2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cal-views button.on {
+  background: var(--ink);
+  color: var(--surface);
+  box-shadow: none;
+}
+
+.tile.full,
+.tile-full {
+  background: var(--hp-green);
+  box-shadow: inset -3px -3px 0 0 var(--accent-dark);
+}
+
+.tile.partial,
+.tile-partial {
+  background: var(--hp-yellow);
+  box-shadow: inset -3px -3px 0 0 #b07e28;
+}
+
+.tile.failed,
+.tile-failed {
+  background: var(--hp-red);
+  box-shadow: inset -3px -3px 0 0 #8a3020;
+}
+
+/* Logged nothing: grey with a pixel dot, so it never reads as a miss. */
+.tile.nodata,
+.tile-nodata {
+  background: #d8d0c0 radial-gradient(circle, #9a8c78 0 2px, transparent 2.5px);
+}
+
+/* Nutrition and Recovery: Targets card */
+.targets-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 84px 84px;
+  gap: 8px 8px;
+  align-items: center;
+}
+
+.targets-row {
+  display: contents;
+}
+
+.targets-head {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.95rem;
+  color: var(--text-dim);
+}
+
+.targets-cell {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.targets-cell input {
+  width: 100%;
+  min-width: 0;
+  padding: 6px;
+}
+
+.targets-note {
+  margin: 10px 0 8px;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 380px) {
+  .targets-grid {
+    grid-template-columns: minmax(0, 1fr) 68px 68px;
+    gap: 6px;
+  }
 }

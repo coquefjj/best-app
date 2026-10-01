@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { todayISO, formatHuman, formatClock } from '../lib/date'
 import { getDayInfo } from '../lib/session'
+import { nutritionTarget } from '../lib/targets'
 import { PLAN_LENGTH_DAYS } from '../data/plan'
 import RoomHeader from '../components/RoomHeader'
 import WaterGlasses from '../components/WaterGlasses'
@@ -10,6 +11,7 @@ export default function Today() {
   const { data, setData } = useStore()
   const iso = todayISO()
   const info = getDayInfo(iso)
+  const nTarget = nutritionTarget(data, iso)
   const workout = data.workouts[iso]
   const habits = data.habits[iso] ?? {}
   const food = data.food[iso]?.entries ?? []
@@ -46,8 +48,8 @@ export default function Today() {
   }
 
   const exerciseCount = workout ? Object.keys(workout.exercises).length : 0
-  const proteinPct = Math.min(100, Math.round((totals.protein / info.nutrition.protein) * 100))
-  const caloriePct = Math.min(100, Math.round((totals.calories / info.nutrition.calories) * 100))
+  const proteinPct = Math.min(100, Math.round((totals.protein / nTarget.protein) * 100))
+  const caloriePct = Math.min(100, Math.round((totals.calories / nTarget.calories) * 100))
   const mobilityDone = workout?.mobilityDone ?? false
 
   return (
@@ -117,12 +119,12 @@ export default function Today() {
         <h2>Nutrition</h2>
         <div className="bar-label">
           <span className="tag">Protein</span>
-          <span className="subtle">{Math.round(totals.protein)} / {info.nutrition.protein} g</span>
+          <span className="subtle">{Math.round(totals.protein)} / {nTarget.protein} g</span>
         </div>
         <div className="progress-bar"><div style={{ width: `${proteinPct}%` }} /></div>
         <div className="bar-label">
           <span className="tag">Calories</span>
-          <span className="subtle">{Math.round(totals.calories)} / {info.nutrition.calories} kcal</span>
+          <span className="subtle">{Math.round(totals.calories)} / {nTarget.calories} kcal</span>
         </div>
         <div className="progress-bar mp"><div style={{ width: `${caloriePct}%` }} /></div>
         <Link to="/food" className="btn secondary full" style={{ marginTop: 16 }}>

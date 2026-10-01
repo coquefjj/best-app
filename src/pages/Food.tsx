@@ -1,11 +1,12 @@
 import { useState, type ReactNode } from 'react'
 import { useStore } from '../lib/store'
 import { todayISO, formatHuman, addDays, nowHHMM, hhmmToMinutes, formatMinutes } from '../lib/date'
-import { getDayInfo } from '../lib/session'
+import { nutritionTarget } from '../lib/targets'
 import type { FoodEntry, SavedMeal } from '../types'
 import RoomHeader from '../components/RoomHeader'
 import DaySwiper from '../components/DaySwiper'
 import NutritionProgress from '../components/NutritionProgress'
+import TargetSettings from '../components/TargetSettings'
 import { PICKABLE_SLOTS, nearestSlot, slotInfo } from '../data/meals'
 import { Link, useParams } from 'react-router-dom'
 
@@ -120,7 +121,7 @@ export default function Food() {
 
 function FoodDay({ iso }: { iso: string }) {
   const { data, setData } = useStore()
-  const info = getDayInfo(iso)
+  const target = nutritionTarget(data, iso)
   const entries = data.food[iso]?.entries ?? []
   // Earliest first; food logged before times were saved keeps its order at the top.
   const shown = [...entries].sort((a, b) => (hhmmToMinutes(a.time) ?? -1) - (hhmmToMinutes(b.time) ?? -1))
@@ -219,7 +220,7 @@ function FoodDay({ iso }: { iso: string }) {
   return (
     <div className="page room-page floor-kitchen">
 
-      <RoomHeader room="kitchen" title="Food log" subtitle={`Target today: ${info.nutrition.calories} kcal · ${info.nutrition.protein} g protein`}>
+      <RoomHeader room="kitchen" title="Food log" subtitle={`Target today: ${target.calories} kcal · ${target.protein} g protein`}>
         <div className="top-bar">
           <Link to={`/food/${addDays(iso, -1)}`} className="arrow-btn" aria-label="Previous day">◀</Link>
           <strong>{formatHuman(iso)}</strong>
@@ -232,11 +233,11 @@ function FoodDay({ iso }: { iso: string }) {
         <div className="stat-grid">
           <div>
             <div className="stat-value">{Math.round(totals.calories)}</div>
-            <div className="stat-label">kcal / {info.nutrition.calories}</div>
+            <div className="stat-label">kcal / {target.calories}</div>
           </div>
           <div>
             <div className="stat-value">{Math.round(totals.protein)}g</div>
-            <div className="stat-label">protein / {info.nutrition.protein}g</div>
+            <div className="stat-label">protein / {target.protein}g</div>
           </div>
           <div>
             <div className="stat-value">{Math.round(totals.carbs)}g / {Math.round(totals.fat)}g</div>
@@ -322,6 +323,16 @@ function FoodDay({ iso }: { iso: string }) {
           </div>
         )}
       </div>
+
+      <TargetSettings
+        rows={[
+          { label: 'Calories, easy day', unit: 'kcal', target: 'caloriesEasy' },
+          { label: 'Calories, hard day', unit: 'kcal', target: 'caloriesHard' },
+          { label: 'Calories within ±', unit: 'kcal', target: 'calorieTolerance', min: 'calorieMinTolerance', step: 10 },
+          { label: 'Protein', unit: 'g', target: 'protein', min: 'proteinMin' },
+        ]}
+        note="Easy days are Tuesday and Sunday. On the Home calendar a day is green when calories and protein are both on target, yellow when at least one reaches its minimum, red when neither does."
+      />
 
       <button
         className={`btn secondary full progress-toggle${showProgress ? ' open' : ''}`}
