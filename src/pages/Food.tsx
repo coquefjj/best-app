@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useStore } from '../lib/store'
 import { todayISO, formatHuman, addDays, nowHHMM, hhmmToMinutes, formatMinutes } from '../lib/date'
 import { getDayInfo } from '../lib/session'
@@ -33,13 +33,10 @@ function fromForm(f: MealForm): MealValues {
   }
 }
 
-function MealFields({ form, setForm }: { form: MealForm; setForm: (f: MealForm) => void }) {
+// Meal first, then the time eaten (when given), then the food itself
+function MealFields({ form, setForm, timeField }: { form: MealForm; setForm: (f: MealForm) => void; timeField?: ReactNode }) {
   return (
     <>
-      <div className="field">
-        <label>Name</label>
-        <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Chicken + rice" />
-      </div>
       <div className="field">
         <label>Meal</label>
         <select value={form.mealSlot} onChange={(e) => setForm({ ...form, mealSlot: e.target.value as FoodEntry['mealSlot'] })}>
@@ -48,6 +45,11 @@ function MealFields({ form, setForm }: { form: MealForm; setForm: (f: MealForm) 
           ))}
           {form.mealSlot === 'snack' && <option value="snack">Snack</option>}
         </select>
+      </div>
+      {timeField}
+      <div className="field">
+        <label>Name</label>
+        <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="e.g. Chicken + rice" />
       </div>
       <div className="row">
         <div className="field" style={{ flex: 1 }}>
@@ -73,6 +75,15 @@ function MealFields({ form, setForm }: { form: MealForm; setForm: (f: MealForm) 
   )
 }
 
+function TimeField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  return (
+    <div className="field">
+      <label>Time eaten</label>
+      <input type="time" value={value} onChange={(e) => onChange(e.target.value)} />
+    </div>
+  )
+}
+
 // Inline editor that replaces a row while it is being changed
 function MealEditor({ initial, onSave, onCancel, onDelete, note, withTime = false }: {
   initial: MealValues
@@ -91,13 +102,7 @@ function MealEditor({ initial, onSave, onCancel, onDelete, note, withTime = fals
   }
   return (
     <div className="meal-editor">
-      {withTime && (
-        <div className="field">
-          <label>Time eaten</label>
-          <input type="time" value={time} onChange={(e) => setTime(e.target.value)} />
-        </div>
-      )}
-      <MealFields form={form} setForm={setForm} />
+      <MealFields form={form} setForm={setForm} timeField={withTime && <TimeField value={time} onChange={setTime} />} />
       {note && <div className="subtle" style={{ marginBottom: 8 }}>{note}</div>}
       <div className="row">
         <button className="btn secondary" onClick={onCancel}>Cancel</button>
@@ -305,11 +310,7 @@ function FoodDay({ iso }: { iso: string }) {
               )}
               <h3>Or enter a new one</h3>
             </div>
-            <MealFields form={form} setForm={setNewForm} />
-            <div className="field">
-              <label>Time eaten</label>
-              <input type="time" value={newTime} onChange={(e) => setNewTime(e.target.value)} />
-            </div>
+            <MealFields form={form} setForm={setNewForm} timeField={<TimeField value={newTime} onChange={setNewTime} />} />
             <div className="checklist-item" onClick={() => setSaveAsMeal((v) => !v)}>
               <input type="checkbox" checked={saveAsMeal} onChange={(e) => setSaveAsMeal(e.target.checked)} onClick={(e) => e.stopPropagation()} />
               <label>Save as a meal for quick logging later</label>
