@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { todayISO, formatHuman, addDays } from '../lib/date'
@@ -5,6 +6,7 @@ import { HABIT_DEFS } from '../data/plan'
 import RoomHeader from '../components/RoomHeader'
 import DaySwiper from '../components/DaySwiper'
 import WaterGlasses from '../components/WaterGlasses'
+import RecoveryProgress from '../components/RecoveryProgress'
 
 export default function Recovery() {
   const { date } = useParams<{ date: string }>()
@@ -14,6 +16,7 @@ export default function Recovery() {
 function RecoveryDay({ iso }: { iso: string }) {
   const { data, setData } = useStore()
   const day = data.habits[iso] ?? {}
+  const [showProgress, setShowProgress] = useState(false)
 
   const setValue = (id: string, value: number | undefined) => {
     setData((prev) => ({ ...prev, habits: { ...prev.habits, [iso]: { ...prev.habits[iso], [id]: value } } }))
@@ -49,6 +52,15 @@ function RecoveryDay({ iso }: { iso: string }) {
         ))}
       </div>
 
+      <button
+        className={`btn secondary full progress-toggle${showProgress ? ' open' : ''}`}
+        aria-expanded={showProgress}
+        onClick={() => setShowProgress((v) => !v)}
+      >
+        <span>Progress</span>
+        <span aria-hidden="true">{showProgress ? '▲' : '▼'}</span>
+      </button>
+      {showProgress && <RecoveryProgress />}
     </div>
   )
 }

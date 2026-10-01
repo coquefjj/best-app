@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { useStore } from '../lib/store'
-import { todayISO, formatHuman, addDays } from '../lib/date'
+import { todayISO, formatHuman, addDays, nowHHMM, hhmmToMinutes, formatMinutes } from '../lib/date'
 import { getDayInfo } from '../lib/session'
 import type { FoodEntry, SavedMeal } from '../types'
 import RoomHeader from '../components/RoomHeader'
 import DaySwiper from '../components/DaySwiper'
+import NutritionProgress from '../components/NutritionProgress'
 import { Link, useParams } from 'react-router-dom'
 
 function uid() {
@@ -73,21 +74,34 @@ function MealFields({ form, setForm }: { form: MealForm; setForm: (f: MealForm) 
 }
 
 // Inline editor that replaces a row while it is being changed
-function MealEditor({ initial, onSave, onCancel, onDelete, note }: {
+function MealEditor({ initial, onSave, onCancel, onDelete, note, withTime = false }: {
   initial: MealValues
   onSave: (m: MealValues) => void
   onCancel: () => void
   onDelete: () => void
   note?: string
+  /** Show the time eaten (logged food only; saved meals have no time). */
+  withTime?: boolean
 }) {
   const [form, setForm] = useState(() => toForm(initial))
+  const [time, setTime] = useState(initial.time ?? '')
+  const save = () => {
+    if (!form.name.trim()) return
+    onSave(withTime ? { ...fromForm(form), time: time || undefined } : fromForm(form))
+  }
   return (
     <div className="meal-editor">
+      {withTime && (
+        <div className="field">
+          <label>Time eaten</label>
+          <input type="time" value={time} onChange={(e) => setTime(e.target.value)} />
+        </div>
+      )}
       <MealFields form={form} setForm={setForm} />
       {note && <div className="subtle" style={{ marginBottom: 8 }}>{note}</div>}
       <div className="row">
         <button className="btn secondary" onClick={onCancel}>Cancel</button>
-        <button className="btn" onClick={() => form.name.trim() && onSave(fromForm(form))}>Save</button>
+        <button className="btn" onClick={save}>Save</button>
       </div>
       <button className="btn danger full" style={{ marginTop: 8 }} onClick={onDelete}>Delete</button>
     </div>
@@ -103,6 +117,9 @@ function FoodDay({ iso }: { iso: string }) {
   const { data, setData } = useStore()
   const info = getDayInfo(iso)
   const entries = data.food[iso]?.entries ?? []
+  // Earliest first; food logged before times were saved keeps its order at the top.
+  const shown = [...entries].sort((a, b) => (hhmmToMinutes(a.time) ?? -1) - (hhmmToMinutes(b.time) ?? -1))
+  const [showProgress, setShowProgress] = useState(false)
   const [showForm, setShowForm] = useState(false)
   const [saveAsMeal, setSaveAsMeal] = useState(false)
   const [form, setForm] = useState<MealForm>(EMPTY_FORM)
@@ -125,7 +142,7 @@ function FoodDay({ iso }: { iso: string }) {
       ...prev,
       food: {
         ...prev.food,
-        [iso]: { entries: [...(prev.food[iso]?.entries ?? []), { ...entry, id: uid() }] },
+        [iso]: { entries: [...(prev.food[iso]?.entries ?? []), { ...entry, time: entry.time ?? nowHHMM(), id: uid() }] },
       },
     }))
   }
@@ -219,10 +236,11 @@ function FoodDay({ iso }: { iso: string }) {
       <div className="card">
         <h2>Eaten today</h2>
         {entries.length === 0 && <div className="subtle">Nothing logged yet.</div>}
-        {entries.map((e) =>
+        {shown.map((e) =>
           editingEntry === e.id ? (
             <MealEditor
               key={e.id}
+              withTime
               initial={e}
               onSave={(v) => updateEntry(e.id, v)}
               onCancel={() => setEditingEntry(null)}
@@ -231,6 +249,7 @@ function FoodDay({ iso }: { iso: string }) {
           ) : (
             <div className="food-entry" key={e.id}>
               <button className="entry-text" onClick={() => setEditingEntry(e.id)}>
+                {e.time && <span className="entry-time">{formatMinutes(hhmmToMinutes(e.time)!)}</span>}
                 {e.name} <span className="subtle">({e.mealSlot}) · {e.calories} kcal, {e.protein}g P · {e.carbs}g C · {e.fat}g F</span>
               </button>
               <button className="icon-btn edit" aria-label={`Edit ${e.name}`} onClick={() => setEditingEntry(e.id)}>✎</button>
@@ -286,6 +305,16 @@ function FoodDay({ iso }: { iso: string }) {
           </div>
         )}
       </div>
+
+      <button
+        className={`btn secondary full progress-toggle${showProgress ? ' open' : ''}`}
+        aria-expanded={showProgress}
+        onClick={() => setShowProgress((v) => !v)}
+      >
+        <span>Progress</span>
+        <span aria-hidden="true">{showProgress ? '▲' : '▼'}</span>
+      </button>
+      {showProgress && <NutritionProgress />}
     </div>
   )
 }

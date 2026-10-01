@@ -69,3 +69,22 @@ export function parseDuration(text: string): number | null {
   if (s >= 60) return null
   return m * 60 + s
 }
+
+/** Current local time as "HH:MM" (24 h). */
+export function nowHHMM(): string {
+  const d = new Date()
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+}
+
+/** Minutes since midnight for "HH:MM"; null if missing or malformed. */
+export function hhmmToMinutes(hhmm: string | undefined): number | null {
+  const m = /^(\d{1,2}):(\d{2})$/.exec(hhmm ?? '')
+  return m ? Number(m[1]) * 60 + Number(m[2]) : null
+}
+
+/** Minutes since midnight as a local clock time, e.g. "8:05 AM". Values past 24 h wrap. */
+export function formatMinutes(minutes: number): string {
+  const total = ((Math.round(minutes) % 1440) + 1440) % 1440
+  const d = new Date(2000, 0, 1, Math.floor(total / 60), total % 60)
+  return d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
+}

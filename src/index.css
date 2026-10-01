@@ -1562,3 +1562,130 @@ details.lift[open] > .lift-summary .lift-name::after {
   text-shadow: none;
   box-shadow: inset 0 -4px 0 0 rgba(0, 0, 0, 0.25), 0 3px 0 0 var(--ink);
 }
+
+/* Nutrition and Recovery: Progress reports at the bottom of the page */
+.range-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.range-toggle button {
+  flex: 1;
+  background: var(--surface);
+  border: 3px solid var(--ink);
+  border-radius: 4px;
+  padding: 6px 4px;
+  cursor: pointer;
+  box-shadow: inset 0 -3px 0 0 var(--surface-2);
+}
+
+.range-toggle button.on {
+  background: var(--ink);
+  color: var(--surface);
+  box-shadow: none;
+}
+
+.report-headline {
+  font-size: 1.2rem;
+  margin: -4px 0 8px;
+}
+
+.report-note {
+  margin-top: 6px;
+  font-size: 0.95rem;
+}
+
+.day-bars,
+.meal-timeline,
+.report-chart .step-chart {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.report-chart {
+  margin-top: 8px;
+}
+
+.chart-axis {
+  stroke: var(--ink);
+  stroke-width: 2;
+}
+
+.slot-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  margin: 6px 0 4px;
+  font-size: 0.95rem;
+}
+
+.slot-legend .swatch {
+  margin-right: 4px;
+  vertical-align: -1px;
+  box-shadow: inset 0 0 0 2px var(--ink);
+}
+
+.report-rows {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+}
+
+.report-rows li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0 8px;
+  border-top: 3px dashed var(--surface-2);
+  padding: 4px 0;
+}
+
+.report-row-name {
+  flex: 1;
+}
+
+.report-row-words {
+  flex-basis: 100%;
+  text-align: right;
+  font-size: 0.95rem;
+}
+
+.macro-meter {
+  margin-top: 8px;
+}
+
+.macro-meter-top {
+  display: flex;
+  justify-content: space-between;
+}
+
+.meter {
+  position: relative;
+  height: 14px;
+  background: var(--status-bg);
+  border: 3px solid var(--ink);
+  border-radius: 3px;
+}
+
+.meter-fill {
+  height: 100%;
+  background: var(--accent);
+}
+
+.meter-target {
+  position: absolute;
+  top: -5px;
+  bottom: -5px;
+  width: 3px;
+  background: var(--ink);
+}
+
+.entry-time {
+  font-family: var(--font-pixel);
+  font-size: 0.45rem;
+  margin-right: 6px;
+  vertical-align: 2px;
+}
