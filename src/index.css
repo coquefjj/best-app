@@ -361,7 +361,7 @@ input[type='checkbox']:checked {
   color: var(--text-dim);
 }
 
-.field input, .field select, .field textarea, .set-row input:not([type='checkbox']), .targets-cell input {
+.field input, .field select, .quick-pick select, .field textarea, .set-row input:not([type='checkbox']), .targets-cell input {
   background: var(--surface);
   border: 3px solid var(--ink);
   border-radius: 6px;
@@ -1784,4 +1784,17 @@ details.lift[open] > .lift-summary .lift-name::after {
     grid-template-columns: minmax(0, 1fr) 68px 68px;
     gap: 6px;
   }
+}
+
+/* Food: saved meals as one dropdown that fills the form */
+.quick-pick {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 14px;
+}
+
+.quick-pick select {
+  flex: 1;
+  min-width: 0;
 }

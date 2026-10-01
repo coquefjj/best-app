@@ -2,12 +2,12 @@ import { useState, type ReactNode } from 'react'
 import { useStore } from '../lib/store'
 import { todayISO, formatHuman, addDays, nowHHMM, hhmmToMinutes, formatMinutes } from '../lib/date'
 import { nutritionTarget } from '../lib/targets'
-import type { FoodEntry, SavedMeal } from '../types'
+import type { FoodEntry } from '../types'
 import RoomHeader from '../components/RoomHeader'
 import DaySwiper from '../components/DaySwiper'
 import NutritionProgress from '../components/NutritionProgress'
 import TargetSettings from '../components/TargetSettings'
-import { PICKABLE_SLOTS, nearestSlot, slotInfo } from '../data/meals'
+import { MEAL_SLOTS, PICKABLE_SLOTS, nearestSlot, slotInfo } from '../data/meals'
 import { Link, useParams } from 'react-router-dom'
 
 function uid() {
@@ -138,6 +138,7 @@ function FoodDay({ iso }: { iso: string }) {
   const openForm = () => {
     const slot = nearestSlot(hhmmToMinutes(nowHHMM())!)
     setForm({ ...EMPTY_FORM, mealSlot: slot })
+    setPickedId('')
     setNewTime(slotInfo(slot).time)
     setShowForm(true)
   }
@@ -186,11 +187,20 @@ function FoodDay({ iso }: { iso: string }) {
   const updateSavedMeal = (id: string, values: MealValues) => {
     setData((prev) => ({ ...prev, savedMeals: prev.savedMeals.map((m) => (m.id === id ? { ...values, id } : m)) }))
     setEditingMeal(null)
+    if (id === pickedId) setForm(toForm(values))
   }
 
-  const addFromMeal = (meal: SavedMeal) => {
-    addEntry({ name: meal.name, calories: meal.calories, protein: meal.protein, carbs: meal.carbs, fat: meal.fat, mealSlot: meal.mealSlot, time: slotInfo(meal.mealSlot).time })
-    setShowForm(false)
+  // Picking a saved meal fills the form below so the time (or anything else) can be changed before adding.
+  const [pickedId, setPickedId] = useState('')
+  const pickedMeal = data.savedMeals.find((m) => m.id === pickedId)
+  const pickMeal = (id: string) => {
+    setPickedId(id)
+    setEditingMeal(null)
+    const meal = data.savedMeals.find((m) => m.id === id)
+    if (!meal) return
+    setForm(toForm(meal))
+    setNewTime(slotInfo(meal.mealSlot).time)
+    setSaveAsMeal(false)
   }
 
   const submitForm = () => {
@@ -208,6 +218,7 @@ function FoodDay({ iso }: { iso: string }) {
       }))
     }
     setForm(EMPTY_FORM)
+    setPickedId('')
     setSaveAsMeal(false)
     setShowForm(false)
   }
@@ -215,6 +226,7 @@ function FoodDay({ iso }: { iso: string }) {
   const removeSavedMeal = (id: string) => {
     setData((prev) => ({ ...prev, savedMeals: prev.savedMeals.filter((m) => m.id !== id) }))
     setEditingMeal(null)
+    if (id === pickedId) setPickedId('')
   }
 
   return (
@@ -286,30 +298,39 @@ function FoodDay({ iso }: { iso: string }) {
               <h3>Quick add</h3>
               {data.savedMeals.length === 0 ? (
                 <div className="subtle">No saved meals yet. Tick "Save as a meal" below and it will show up here.</div>
+              ) : editingMeal && pickedMeal ? (
+                <MealEditor
+                  key={pickedMeal.id}
+                  initial={pickedMeal}
+                  note="Changes apply next time you log it. Food already logged stays as it was."
+                  onSave={(v) => updateSavedMeal(pickedMeal.id, v)}
+                  onCancel={() => setEditingMeal(null)}
+                  onDelete={() => removeSavedMeal(pickedMeal.id)}
+                />
               ) : (
-                data.savedMeals.map((m) =>
-                  editingMeal === m.id ? (
-                    <MealEditor
-                      key={m.id}
-                      initial={m}
-                      note="Changes apply next time you log it. Food already logged stays as it was."
-                      onSave={(v) => updateSavedMeal(m.id, v)}
-                      onCancel={() => setEditingMeal(null)}
-                      onDelete={() => removeSavedMeal(m.id)}
-                    />
-                  ) : (
-                    <div className="food-entry" key={m.id}>
-                      <button className="quick-meal" onClick={() => addFromMeal(m)}>
-                        <strong>+ {m.name}</strong>
-                        <span className="subtle">{slotInfo(m.mealSlot).label} · {m.calories} kcal · {m.protein}g P · {m.carbs}g C · {m.fat}g F</span>
-                      </button>
-                      <button className="icon-btn edit" aria-label={`Edit saved meal ${m.name}`} onClick={() => setEditingMeal(m.id)}>✎</button>
-                      <button className="icon-btn" aria-label={`Delete saved meal ${m.name}`} onClick={() => removeSavedMeal(m.id)}>✕</button>
-                    </div>
-                  ),
-                )
+                <div className="quick-pick">
+                  <select value={pickedMeal?.id ?? ''} onChange={(e) => pickMeal(e.target.value)} aria-label="Saved meal">
+                    <option value="">Pick a saved meal…</option>
+                    {MEAL_SLOTS.map((slot) => {
+                      const meals = data.savedMeals.filter((m) => m.mealSlot === slot.id)
+                      return meals.length ? (
+                        <optgroup key={slot.id} label={slot.label}>
+                          {meals.map((m) => (
+                            <option key={m.id} value={m.id}>{m.name} · {m.calories} kcal</option>
+                          ))}
+                        </optgroup>
+                      ) : null
+                    })}
+                  </select>
+                  {pickedMeal && (
+                    <>
+                      <button className="icon-btn edit" aria-label={`Edit saved meal ${pickedMeal.name}`} onClick={() => setEditingMeal(pickedMeal.id)}>✎</button>
+                      <button className="icon-btn" aria-label={`Delete saved meal ${pickedMeal.name}`} onClick={() => removeSavedMeal(pickedMeal.id)}>✕</button>
+                    </>
+                  )}
+                </div>
               )}
-              <h3>Or enter a new one</h3>
+              <h3>{pickedMeal ? 'Check and add' : 'Or enter a new one'}</h3>
             </div>
             <MealFields form={form} setForm={setNewForm} timeField={<TimeField value={newTime} onChange={setNewTime} />} />
             <div className="checklist-item" onClick={() => setSaveAsMeal((v) => !v)}>
