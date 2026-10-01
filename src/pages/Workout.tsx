@@ -182,6 +182,15 @@ function WorkoutDay({ iso }: { iso: string }) {
                 />
               </div>
               <div className="field">
+                <label>Calories burned (kcal, optional)</label>
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  value={workout.aerobic.caloriesBurned ?? ''}
+                  onChange={(e) => setAerobic({ caloriesBurned: e.target.value === '' ? null : Number(e.target.value) })}
+                />
+              </div>
+              <div className="field">
                 <label>Effort</label>
                 <select
                   value={workout.aerobic.effort ?? ''}

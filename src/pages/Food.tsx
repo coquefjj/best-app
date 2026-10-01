@@ -118,6 +118,7 @@ function FoodDay({ iso }: { iso: string }) {
     }),
     { calories: 0, protein: 0, carbs: 0, fat: 0 },
   )
+  const burned = data.workouts[iso]?.aerobic?.caloriesBurned ?? 0
 
   const addEntry = (entry: Omit<FoodEntry, 'id'>) => {
     setData((prev) => ({
@@ -208,6 +209,11 @@ function FoodDay({ iso }: { iso: string }) {
             <div className="stat-label">carbs / fat</div>
           </div>
         </div>
+        {burned > 0 && (
+          <div className="subtle burned-line">
+            Burned in workout: {Math.round(burned)} kcal · Net: {Math.round(totals.calories - burned)} kcal
+          </div>
+        )}
       </div>
 
       <div className="card">

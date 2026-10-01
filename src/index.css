@@ -627,6 +627,11 @@ input[type='checkbox']:checked {
   color: var(--text-dim);
 }
 
+.burned-line {
+  margin-top: 8px;
+  text-align: center;
+}
+
 .food-entry {
   display: flex;
   justify-content: space-between;

@@ -22,6 +22,8 @@ export interface AerobicLog {
   durationMin: number | null
   distanceKm: number | null
   effort: 'easy' | 'moderate' | 'hard' | null
+  /** Optional, typed in from a watch or machine. */
+  caloriesBurned?: number | null
 }
 
 export interface WorkoutDayLog {
