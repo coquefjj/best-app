@@ -9,15 +9,9 @@ import {
   timingRows,
   type NutritionDay,
 } from '../lib/nutritionReport'
-import type { FoodEntry } from '../types'
+import { MEAL_SLOTS, slotInfo } from '../data/meals'
 import { ChartDates, DayBars, RangeToggle, type RangeDays } from './ReportBits'
 
-const SLOT_COLORS: Record<FoodEntry['mealSlot'], string> = {
-  breakfast: 'var(--gold)',
-  lunch: 'var(--orange)',
-  dinner: 'var(--accent-2)',
-  snack: 'var(--surface-2)',
-}
 
 /** "Mon 28" for a row label. */
 const shortDay = (iso: string) =>
@@ -64,7 +58,7 @@ function MealTimeline({ days }: { days: NutritionDay[] }) {
                 y={Math.round(cy - dot / 2)}
                 width={dot}
                 height={dot}
-                fill={SLOT_COLORS[m.slot]}
+                fill={slotInfo(m.slot).color}
                 stroke="var(--ink)"
                 strokeWidth={2}
               />
@@ -146,10 +140,10 @@ export default function NutritionProgress() {
               <>
                 <MealTimeline days={timed} />
                 <div className="slot-legend">
-                  {(Object.keys(SLOT_COLORS) as FoodEntry['mealSlot'][]).map((s) => (
-                    <span key={s}>
-                      <i className="swatch" style={{ background: SLOT_COLORS[s] }} />
-                      {s}
+                  {MEAL_SLOTS.filter((s) => timed.some((d) => d.mealTimes.some((m) => m.slot === s.id))).map((s) => (
+                    <span key={s.id}>
+                      <i className="swatch" style={{ background: s.color }} />
+                      {s.label}
                     </span>
                   ))}
                 </div>

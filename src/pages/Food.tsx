@@ -6,13 +6,12 @@ import type { FoodEntry, SavedMeal } from '../types'
 import RoomHeader from '../components/RoomHeader'
 import DaySwiper from '../components/DaySwiper'
 import NutritionProgress from '../components/NutritionProgress'
+import { PICKABLE_SLOTS, nearestSlot, slotInfo } from '../data/meals'
 import { Link, useParams } from 'react-router-dom'
 
 function uid() {
   return Math.random().toString(36).slice(2, 10)
 }
-
-const MEAL_SLOTS: FoodEntry['mealSlot'][] = ['breakfast', 'lunch', 'dinner', 'snack']
 
 type MealForm = { name: string; calories: string; protein: string; carbs: string; fat: string; mealSlot: FoodEntry['mealSlot'] }
 type MealValues = Omit<FoodEntry, 'id'>
@@ -44,9 +43,10 @@ function MealFields({ form, setForm }: { form: MealForm; setForm: (f: MealForm) 
       <div className="field">
         <label>Meal</label>
         <select value={form.mealSlot} onChange={(e) => setForm({ ...form, mealSlot: e.target.value as FoodEntry['mealSlot'] })}>
-          {MEAL_SLOTS.map((s) => (
-            <option key={s} value={s}>{s}</option>
+          {PICKABLE_SLOTS.map((s) => (
+            <option key={s.id} value={s.id}>{s.label}</option>
           ))}
+          {form.mealSlot === 'snack' && <option value="snack">Snack</option>}
         </select>
       </div>
       <div className="row">
@@ -123,6 +123,18 @@ function FoodDay({ iso }: { iso: string }) {
   const [showForm, setShowForm] = useState(false)
   const [saveAsMeal, setSaveAsMeal] = useState(false)
   const [form, setForm] = useState<MealForm>(EMPTY_FORM)
+  // New food starts at its meal's preset time; picking another meal moves it to that preset.
+  const [newTime, setNewTime] = useState('')
+  const setNewForm = (f: MealForm) => {
+    if (f.mealSlot !== form.mealSlot) setNewTime(slotInfo(f.mealSlot).time)
+    setForm(f)
+  }
+  const openForm = () => {
+    const slot = nearestSlot(hhmmToMinutes(nowHHMM())!)
+    setForm({ ...EMPTY_FORM, mealSlot: slot })
+    setNewTime(slotInfo(slot).time)
+    setShowForm(true)
+  }
   const [editingEntry, setEditingEntry] = useState<string | null>(null)
   const [editingMeal, setEditingMeal] = useState<string | null>(null)
 
@@ -171,14 +183,14 @@ function FoodDay({ iso }: { iso: string }) {
   }
 
   const addFromMeal = (meal: SavedMeal) => {
-    addEntry({ name: meal.name, calories: meal.calories, protein: meal.protein, carbs: meal.carbs, fat: meal.fat, mealSlot: meal.mealSlot })
+    addEntry({ name: meal.name, calories: meal.calories, protein: meal.protein, carbs: meal.carbs, fat: meal.fat, mealSlot: meal.mealSlot, time: slotInfo(meal.mealSlot).time })
     setShowForm(false)
   }
 
   const submitForm = () => {
     if (!form.name.trim()) return
     const entry = fromForm(form)
-    addEntry(entry)
+    addEntry({ ...entry, time: newTime || undefined })
     if (saveAsMeal) {
       // Saving under an existing name replaces that saved meal
       setData((prev) => ({
@@ -250,7 +262,7 @@ function FoodDay({ iso }: { iso: string }) {
             <div className="food-entry" key={e.id}>
               <button className="entry-text" onClick={() => setEditingEntry(e.id)}>
                 {e.time && <span className="entry-time">{formatMinutes(hhmmToMinutes(e.time)!)}</span>}
-                {e.name} <span className="subtle">({e.mealSlot}) · {e.calories} kcal, {e.protein}g P · {e.carbs}g C · {e.fat}g F</span>
+                {e.name} <span className="subtle">({slotInfo(e.mealSlot).label.toLowerCase()}) · {e.calories} kcal, {e.protein}g P · {e.carbs}g C · {e.fat}g F</span>
               </button>
               <button className="icon-btn edit" aria-label={`Edit ${e.name}`} onClick={() => setEditingEntry(e.id)}>✎</button>
               <button className="icon-btn" aria-label={`Delete ${e.name}`} onClick={() => removeEntry(e.id)}>✕</button>
@@ -259,7 +271,7 @@ function FoodDay({ iso }: { iso: string }) {
         )}
 
         {!showForm ? (
-          <button className="btn secondary full" style={{ marginTop: 12 }} onClick={() => setShowForm(true)}>
+          <button className="btn secondary full" style={{ marginTop: 12 }} onClick={openForm}>
             + Add food
           </button>
         ) : (
@@ -283,7 +295,7 @@ function FoodDay({ iso }: { iso: string }) {
                     <div className="food-entry" key={m.id}>
                       <button className="quick-meal" onClick={() => addFromMeal(m)}>
                         <strong>+ {m.name}</strong>
-                        <span className="subtle">{m.mealSlot} · {m.calories} kcal · {m.protein}g P · {m.carbs}g C · {m.fat}g F</span>
+                        <span className="subtle">{slotInfo(m.mealSlot).label} · {m.calories} kcal · {m.protein}g P · {m.carbs}g C · {m.fat}g F</span>
                       </button>
                       <button className="icon-btn edit" aria-label={`Edit saved meal ${m.name}`} onClick={() => setEditingMeal(m.id)}>✎</button>
                       <button className="icon-btn" aria-label={`Delete saved meal ${m.name}`} onClick={() => removeSavedMeal(m.id)}>✕</button>
@@ -293,7 +305,11 @@ function FoodDay({ iso }: { iso: string }) {
               )}
               <h3>Or enter a new one</h3>
             </div>
-            <MealFields form={form} setForm={setForm} />
+            <MealFields form={form} setForm={setNewForm} />
+            <div className="field">
+              <label>Time eaten</label>
+              <input type="time" value={newTime} onChange={(e) => setNewTime(e.target.value)} />
+            </div>
             <div className="checklist-item" onClick={() => setSaveAsMeal((v) => !v)}>
               <input type="checkbox" checked={saveAsMeal} onChange={(e) => setSaveAsMeal(e.target.checked)} onClick={(e) => e.stopPropagation()} />
               <label>Save as a meal for quick logging later</label>

@@ -1,14 +1,13 @@
 import type { AppData, FoodEntry } from '../types'
 import { addDays, hhmmToMinutes, todayISO } from './date'
 import { getDayInfo } from './session'
+import { MEAL_SLOTS } from '../data/meals'
 
 /** Foods eaten within this many minutes of each other count as one meal. */
 export const MEAL_GAP_MIN = 30
 
 /** Times before this hour count as the end of the previous day (a late snack after midnight). */
 const DAY_ROLLOVER_MIN = 4 * 60
-
-export const TIMED_SLOTS: FoodEntry['mealSlot'][] = ['breakfast', 'lunch', 'dinner']
 
 export interface NutritionDay {
   date: string
@@ -86,18 +85,18 @@ export interface TimingRow {
   spread: number
 }
 
-/** Usual time and spread for breakfast, lunch, dinner, the first and last meal, over days with timed food. */
+/** Usual time and spread for each meal logged with a time, then the first and last meal, over days with timed food. */
 export function timingRows(days: NutritionDay[]): TimingRow[] {
   const rows: TimingRow[] = []
   const add = (label: string, times: number[]) => {
     const s = timeSpread(times)
     if (s) rows.push({ label, days: times.length, ...s })
   }
-  for (const slot of TIMED_SLOTS) {
+  for (const slot of MEAL_SLOTS) {
     add(
-      slot[0].toUpperCase() + slot.slice(1),
+      slot.label,
       days.flatMap((d) => {
-        const t = d.mealTimes.find((m) => m.slot === slot)
+        const t = d.mealTimes.find((m) => m.slot === slot.id)
         return t ? [t.minutes] : []
       }),
     )

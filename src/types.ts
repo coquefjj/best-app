@@ -42,7 +42,7 @@ export interface FoodEntry {
   protein: number
   carbs: number
   fat: number
-  mealSlot: 'breakfast' | 'lunch' | 'dinner' | 'snack'
+  mealSlot: 'preWorkout' | 'breakfast' | 'morningSnack' | 'lunch' | 'afternoonSnack' | 'dinner' | 'snack'
   /** Local time eaten as "HH:MM" (24 h), set when logged. Missing on food logged before Oct 1 2026. */
   time?: string
 }
