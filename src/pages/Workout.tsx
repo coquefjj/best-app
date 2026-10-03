@@ -157,6 +157,27 @@ function WorkoutDay({ iso }: { iso: string }) {
     })
   }
 
+  /** Card heading with the week's Travel switch on the right; on travel days, the session swap sits under it. */
+  const cardHead = (title: string) => (
+    <>
+      <h2 className="card-head">
+        <span>{title}</span>
+        <button className={`toggle-chip travel-btn${info.travel ? ' selected' : ''}`} aria-pressed={info.travel} onClick={toggleTravel}>
+          {info.travel ? '✓ ' : ''}Travel
+        </button>
+      </h2>
+      {info.travel && (
+        <div className="pill-select travel-swap" aria-label="Swap this travel day">
+          {TRAVEL_SESSIONS.map((t) => (
+            <button key={t.dayType} className={info.dayType === t.dayType ? 'selected' : ''} onClick={() => swapTravelDay(t.dayType)}>
+              {t.short}
+            </button>
+          ))}
+        </div>
+      )}
+    </>
+  )
+
   const [demo, setDemo] = useState<{ name: string; cue?: string } | null>(null)
   const [showProgress, setShowProgress] = useState(false)
 
@@ -184,37 +205,16 @@ function WorkoutDay({ iso }: { iso: string }) {
         </div>
       </RoomHeader>
 
-      <div className="card travel-card">
-        <div className="travel-row">
-          <button className={`toggle-chip${info.travel ? ' selected' : ''}`} aria-pressed={info.travel} onClick={toggleTravel}>
-            {info.travel ? '✓ ' : ''}Travel week
-          </button>
-          {!info.travel && <span className="subtle">Away? Switch this week to dumbbells only</span>}
-        </div>
-        {info.travel && (
-          <>
-            <div className="subtle travel-hint">Dumbbells only this week. Swap this day to fit the trip. Aim for each DB session 1-2x plus 2-3 runs; packed trip minimum is 2 DB sessions + 2 runs.</div>
-            <div className="pill-select">
-              {TRAVEL_SESSIONS.map((t) => (
-                <button key={t.dayType} className={info.dayType === t.dayType ? 'selected' : ''} onClick={() => swapTravelDay(t.dayType)}>
-                  {t.short}
-                </button>
-              ))}
-            </div>
-            <div className="subtle travel-hint">Protein slips on the road: pack whey and order protein-forward.</div>
-          </>
-        )}
-      </div>
-
       {info.dayType === 'rest' && (
         <div className="card">
+          {cardHead('Rest day')}
           <p className="subtle">Rest day. Active recovery only, resist filling it. Add a longer flexibility session below.</p>
         </div>
       )}
 
       {modalityOptions && (
         <div className="card">
-          <h2>Pick today's session</h2>
+          {cardHead("Pick today's session")}
           <div className="pill-select">
             {modalityOptions.map((opt) => (
               <button
@@ -272,7 +272,7 @@ function WorkoutDay({ iso }: { iso: string }) {
 
       {exerciseDefs && (
         <div className="card">
-          <h2>Exercises</h2>
+          {cardHead('Exercises')}
           {exerciseDefs.map((ex) => {
             const log = workout.exercises[ex.id]
             const lastLog = findLastLog(data.workouts, ex.id, iso)
