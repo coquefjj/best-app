@@ -77,6 +77,25 @@ export const TRAVEL_SESSIONS: { dayType: DayType; short: string; label: string }
   { dayType: 'rest', short: 'Rest', label: 'Rest + long flexibility session' },
 ]
 
+/**
+ * Softer sessions a regular day can be swapped to when the planned one is too much
+ * (tired, sore, sick). The swap is recorded with its reason.
+ */
+export const SWAP_SESSIONS: { dayType: DayType; short: string }[] = [
+  { dayType: 'aerobicEasy', short: 'Easy cardio' },
+  { dayType: 'rest', short: 'Rest + mobility' },
+]
+
+export const SWAP_REASONS = [
+  { id: 'tired', label: 'Tired' },
+  { id: 'sore', label: 'Sore' },
+  { id: 'sick', label: 'Sick' },
+  { id: 'time', label: 'No time' },
+  { id: 'other', label: 'Other' },
+] as const
+
+export type SwapReason = (typeof SWAP_REASONS)[number]['id']
+
 export const TRAVEL_EASY_RUN_OPTIONS = ['Easy run']
 export const TRAVEL_QUALITY_RUN_OPTIONS = ['Hill repeats', 'Tempo run', 'Run intervals']
 export const TRAVEL_LONG_RUN_OPTIONS = ['Longer run']

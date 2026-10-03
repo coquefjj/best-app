@@ -92,6 +92,13 @@ export interface AppData {
   travelWeeks?: string[]
   /** A travel day swapped to a different travel session, keyed by ISO date. */
   travelDays?: Record<string, import('./data/plan').DayType>
+  /** A regular day swapped to a softer session, keyed by ISO date. Saved logs stay as they are. */
+  swaps?: Record<string, SessionSwap>
+}
+
+export interface SessionSwap {
+  to: import('./data/plan').DayType
+  reason: import('./data/plan').SwapReason | null
 }
 
 export const EMPTY_DATA: AppData = {

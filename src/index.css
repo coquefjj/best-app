@@ -213,6 +213,17 @@ a.card:active {
   text-transform: none;
 }
 
+.card-head-btns {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.swap-panel {
+  display: grid;
+  gap: 8px;
+}
+
 .travel-swap {
   margin-bottom: 16px;
   padding-bottom: 16px;

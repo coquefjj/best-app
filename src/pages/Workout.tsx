@@ -14,7 +14,10 @@ import {
   TRAVEL_EASY_RUN_OPTIONS,
   TRAVEL_QUALITY_RUN_OPTIONS,
   TRAVEL_LONG_RUN_OPTIONS,
+  SWAP_SESSIONS,
+  SWAP_REASONS,
   type DayType,
+  type SwapReason,
 } from '../data/plan'
 import RoomHeader from '../components/RoomHeader'
 import DaySwiper from '../components/DaySwiper'
@@ -157,15 +160,67 @@ function WorkoutDay({ iso }: { iso: string }) {
     })
   }
 
-  /** Card heading with the week's Travel switch on the right; on travel days, the session swap sits under it. */
+  // A swap only changes which session the day shows; logs for the planned session are kept.
+  const swap = info.travel ? undefined : data.swaps?.[iso]
+  const [swapOpen, setSwapOpen] = useState(false)
+  const plannedType = getDayInfo(iso, { ...data, swaps: undefined }).dayType
+  const swapTargets = SWAP_SESSIONS.filter((t) => t.dayType !== plannedType)
+  const setSwap = (to: DayType | null, reason: SwapReason | null = swap?.reason ?? null) => {
+    setData((prev) => {
+      const swaps = { ...prev.swaps }
+      if (to) swaps[iso] = { to, reason }
+      else delete swaps[iso]
+      return { ...prev, swaps }
+    })
+  }
+
+  /** Card heading with the Swap and week Travel buttons on the right; the pickers sit under it. */
   const cardHead = (title: string) => (
     <>
       <h2 className="card-head">
         <span>{title}</span>
-        <button className={`toggle-chip travel-btn${info.travel ? ' selected' : ''}`} aria-pressed={info.travel} onClick={toggleTravel}>
-          {info.travel ? '✓ ' : ''}Travel
-        </button>
+        <span className="card-head-btns">
+          {!info.travel && swapTargets.length > 0 && (
+            <button
+              className={`toggle-chip travel-btn${swap || swapOpen ? ' selected' : ''}`}
+              aria-expanded={swapOpen}
+              onClick={() => setSwapOpen((o) => !o)}
+            >
+              {swap ? '✓ ' : ''}Swap
+            </button>
+          )}
+          <button className={`toggle-chip travel-btn${info.travel ? ' selected' : ''}`} aria-pressed={info.travel} onClick={toggleTravel}>
+            {info.travel ? '✓ ' : ''}Travel
+          </button>
+        </span>
       </h2>
+      {!info.travel && swapOpen && (
+        <div className="travel-swap swap-panel">
+          <div className="subtle">Swap {swap ? info.swap?.fromLabel.split(' —')[0] : info.label.split(' —')[0]} for</div>
+          <div className="pill-select" aria-label="Swap to">
+            {swapTargets.map((t) => (
+              <button key={t.dayType} className={swap?.to === t.dayType ? 'selected' : ''} onClick={() => setSwap(t.dayType)}>
+                {t.short}
+              </button>
+            ))}
+          </div>
+          {swap && (
+            <>
+              <div className="subtle">Why?</div>
+              <div className="pill-select" aria-label="Why swap">
+                {SWAP_REASONS.map((r) => (
+                  <button key={r.id} className={swap.reason === r.id ? 'selected' : ''} onClick={() => setSwap(swap.to, swap.reason === r.id ? null : r.id)}>
+                    {r.label}
+                  </button>
+                ))}
+              </div>
+              <button className="btn secondary" onClick={() => { setSwap(null); setSwapOpen(false) }}>
+                Undo swap
+              </button>
+            </>
+          )}
+        </div>
+      )}
       {info.travel && (
         <div className="pill-select travel-swap" aria-label="Swap this travel day">
           {TRAVEL_SESSIONS.map((t) => (
@@ -190,6 +245,11 @@ function WorkoutDay({ iso }: { iso: string }) {
         subtitle={
           info.travel ? (
             <span className="badge travel">Travel week: maintain, don't progress</span>
+          ) : info.swap ? (
+            <span className="badge travel">
+              Swapped from {info.swap.fromLabel.split(' —')[0]}
+              {info.swap.reasonLabel ? ` · ${info.swap.reasonLabel}` : ''}
+            </span>
           ) : info.deload ? (
             <span className="badge deload">Deload week: hold back on load</span>
           ) : undefined
