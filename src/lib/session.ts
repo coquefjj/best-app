@@ -1,17 +1,5 @@
-import {
-  WEEKLY_TEMPLATE,
-  TRAVEL_TEMPLATE,
-  TRAVEL_SESSIONS,
-  SESSIONS_BY_TYPE,
-  SWAP_REASONS,
-  isHardDay,
-  NUTRITION_TARGETS,
-  getPhase,
-  getWeekNumber,
-  isDeloadWeek,
-  type DayType,
-  type SwapReason,
-} from '../data/plan'
+import { TRAVEL_TEMPLATE, SWAP_REASONS, getWeekNumber, type DayType, type SwapReason } from '../data/plan'
+import { activePlan, type DayMacros } from '../data/templates'
 import type { AppData } from '../types'
 import { dayOfPlan, weekdayOf, startOfWeek } from './date'
 
@@ -28,8 +16,10 @@ export interface DayInfo {
   /** Set when the day was swapped to a softer session: what was planned and why. */
   swap?: { fromLabel: string; reason: SwapReason | null; reasonLabel: string | undefined }
   phaseName: string | undefined
+  /** Hard days get the hard-day calorie target. */
+  hard: boolean
   hasStrengthExercises: boolean
-  nutrition: (typeof NUTRITION_TARGETS)['easy']
+  nutrition: DayMacros
 }
 
 type TravelData = Pick<AppData, 'travelWeeks' | 'travelDays' | 'swaps'>
@@ -38,30 +28,31 @@ export function isTravelWeek(data: TravelData | undefined, iso: string): boolean
   return !!data?.travelWeeks?.includes(startOfWeek(iso))
 }
 
-/** The day's session; pass the app data so travel weeks and swapped days show what was done. */
+/**
+ * The day's session in the active profile's plan; pass the app data so travel weeks and
+ * swapped days show what was done.
+ */
 export function getDayInfo(iso: string, data?: TravelData): DayInfo {
+  const plan = activePlan()
   const dayNum = dayOfPlan(iso)
-  const inPlan = dayNum >= 1 && dayNum <= 100
+  const inPlan = dayNum >= 1 && dayNum <= plan.lengthDays
   const weekday = weekdayOf(iso)
-  const travel = isTravelWeek(data, iso)
-  let dayType = WEEKLY_TEMPLATE[weekday].dayType
-  let label = WEEKLY_TEMPLATE[weekday].label
-  if (travel) {
-    dayType = data?.travelDays?.[iso] ?? TRAVEL_TEMPLATE[weekday]
-    label = TRAVEL_SESSIONS.find((s) => s.dayType === dayType)!.label
-  }
+  const travel = plan.travel && isTravelWeek(data, iso)
+  let dayType = plan.week[weekday]
+  if (travel) dayType = data?.travelDays?.[iso] ?? TRAVEL_TEMPLATE[weekday]
   // Travel days have their own session picker, so a swap only applies to regular weeks.
   const swapped = travel ? undefined : data?.swaps?.[iso]
   let swap: DayInfo['swap']
-  if (swapped && swapped.to !== dayType) {
-    swap = { fromLabel: label, reason: swapped.reason, reasonLabel: SWAP_REASONS.find((r) => r.id === swapped.reason)?.label }
+  if (swapped && swapped.to !== dayType && plan.sessions[swapped.to]) {
+    swap = { fromLabel: plan.sessions[dayType].label, reason: swapped.reason, reasonLabel: SWAP_REASONS.find((r) => r.id === swapped.reason)?.label }
     dayType = swapped.to
-    label = Object.values(WEEKLY_TEMPLATE).find((d) => d.dayType === dayType)!.label
   }
+  const session = plan.sessions[dayType]
+  const label = session.label
   const weekNumber = getWeekNumber(Math.max(dayNum, 1))
-  const deload = isDeloadWeek(weekNumber)
-  const phase = getPhase(Math.max(dayNum, 1))
-  const hard = isHardDay(dayType)
+  const deload = plan.deloadWeeks.includes(weekNumber)
+  const phase = plan.phases.find((p) => weekNumber >= p.weeks[0] && weekNumber <= p.weeks[1])
+  const hard = session.hard
 
   return {
     iso,
@@ -74,7 +65,8 @@ export function getDayInfo(iso: string, data?: TravelData): DayInfo {
     travel,
     swap,
     phaseName: phase?.name,
-    hasStrengthExercises: !!SESSIONS_BY_TYPE[dayType],
-    nutrition: hard ? NUTRITION_TARGETS.hard : NUTRITION_TARGETS.easy,
+    hard,
+    hasStrengthExercises: !!session.exercises,
+    nutrition: hard ? plan.nutrition.hard : plan.nutrition.easy,
   }
 }

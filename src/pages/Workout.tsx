@@ -3,22 +3,8 @@ import { useStore } from '../lib/store'
 import { getDayInfo } from '../lib/session'
 import { useState } from 'react'
 import { formatHuman, addDays, todayISO, formatClock, formatDuration, parseDuration, startOfWeek, weekdayOf } from '../lib/date'
-import {
-  SESSIONS_BY_TYPE,
-  AEROBIC_EASY_OPTIONS,
-  HARD_CONDITIONING_OPTIONS,
-  LONG_ENDURANCE_OPTIONS,
-  MOBILITY_DAILY,
-  TRAVEL_SESSIONS,
-  TRAVEL_TEMPLATE,
-  TRAVEL_EASY_RUN_OPTIONS,
-  TRAVEL_QUALITY_RUN_OPTIONS,
-  TRAVEL_LONG_RUN_OPTIONS,
-  SWAP_SESSIONS,
-  SWAP_REASONS,
-  type DayType,
-  type SwapReason,
-} from '../data/plan'
+import { MOBILITY_DAILY, TRAVEL_SESSIONS, TRAVEL_TEMPLATE, SWAP_SESSIONS, SWAP_REASONS, type DayType, type SwapReason } from '../data/plan'
+import { activePlan } from '../data/templates'
 import RoomHeader from '../components/RoomHeader'
 import DaySwiper from '../components/DaySwiper'
 import MoveThumb from '../components/moves/MoveThumb'
@@ -26,15 +12,6 @@ import MoveSheet from '../components/moves/MoveSheet'
 import StrengthProgress from '../components/StrengthProgress'
 import type { AerobicLog, ExerciseLog, SetLog, WorkoutDayLog } from '../types'
 import type { PlanExercise } from '../data/plan'
-
-const MODALITY_OPTIONS: Record<string, string[]> = {
-  aerobicEasy: AEROBIC_EASY_OPTIONS,
-  hardConditioning: HARD_CONDITIONING_OPTIONS,
-  longEndurance: LONG_ENDURANCE_OPTIONS,
-  travelEasyRun: TRAVEL_EASY_RUN_OPTIONS,
-  travelQualityRun: TRAVEL_QUALITY_RUN_OPTIONS,
-  travelLongRun: TRAVEL_LONG_RUN_OPTIONS,
-}
 
 function emptyWorkout(): WorkoutDayLog {
   return { mobilityDone: false, exercises: {} }
@@ -83,8 +60,9 @@ function WorkoutDay({ iso }: { iso: string }) {
   const { data, setData } = useStore()
   const info = getDayInfo(iso, data)
   const workout = data.workouts[iso] ?? emptyWorkout()
-  const exerciseDefs = SESSIONS_BY_TYPE[info.dayType]
-  const modalityOptions = MODALITY_OPTIONS[info.dayType]
+  const plan = activePlan()
+  const exerciseDefs = plan.sessions[info.dayType].exercises
+  const modalityOptions = plan.sessions[info.dayType].modalityOptions
 
   const update = (fn: (w: WorkoutDayLog) => WorkoutDayLog) => {
     setData((prev) => ({
@@ -103,10 +81,13 @@ function WorkoutDay({ iso }: { iso: string }) {
           ...w.exercises,
           [ex.id]: {
             mode: lastLog?.mode ?? defaultMode(ex),
-            weighted: lastLog?.weighted ?? true,
+            weighted: lastLog?.weighted ?? ex.weighted ?? true,
             ...current,
             chosenOption: optionName,
-            sets: current?.sets ?? Array.from({ length: parseInt(ex.target.sets) || 3 }, emptySet),
+            // The very first time, sets start at the plan's starting weight when it has one.
+            sets:
+              current?.sets ??
+              Array.from({ length: parseInt(ex.target.sets) || 3 }, () => ({ ...emptySet(), weight: lastLog ? null : ex.startKg ?? null })),
           },
         },
       }
@@ -164,7 +145,7 @@ function WorkoutDay({ iso }: { iso: string }) {
   const swap = info.travel ? undefined : data.swaps?.[iso]
   const [swapOpen, setSwapOpen] = useState(false)
   const plannedType = getDayInfo(iso, { ...data, swaps: undefined }).dayType
-  const swapTargets = SWAP_SESSIONS.filter((t) => t.dayType !== plannedType)
+  const swapTargets = SWAP_SESSIONS.filter((t) => plan.swapTo.includes(t.dayType) && t.dayType !== plannedType)
   const setSwap = (to: DayType | null, reason: SwapReason | null = swap?.reason ?? null) => {
     setData((prev) => {
       const swaps = { ...prev.swaps }
@@ -189,9 +170,11 @@ function WorkoutDay({ iso }: { iso: string }) {
               {swap ? '✓ ' : ''}Swap
             </button>
           )}
-          <button className={`toggle-chip travel-btn${info.travel ? ' selected' : ''}`} aria-pressed={info.travel} onClick={toggleTravel}>
-            {info.travel ? '✓ ' : ''}Travel
-          </button>
+          {plan.travel && (
+            <button className={`toggle-chip travel-btn${info.travel ? ' selected' : ''}`} aria-pressed={info.travel} onClick={toggleTravel}>
+              {info.travel ? '✓ ' : ''}Travel
+            </button>
+          )}
         </span>
       </h2>
       {!info.travel && swapOpen && (

@@ -18,6 +18,8 @@ function RecoveryDay({ iso }: { iso: string }) {
   const { data, setData } = useStore()
   const day = data.habits[iso] ?? {}
   const [showProgress, setShowProgress] = useState(false)
+  // Without a watch there is no sleep score or resting heart rate to type in.
+  const watch = data.profile?.watch !== false
 
   const setValue = (id: string, value: number | undefined) => {
     setData((prev) => ({ ...prev, habits: { ...prev.habits, [iso]: { ...prev.habits[iso], [id]: value } } }))
@@ -26,7 +28,7 @@ function RecoveryDay({ iso }: { iso: string }) {
   return (
     <div className="page room-page floor-bedroom">
 
-      <RoomHeader room="bedroom" title="Daily log" subtitle="Water, sleep and heart rate">
+      <RoomHeader room="bedroom" title="Daily log" subtitle={watch ? 'Water, sleep and heart rate' : 'Water and sleep'}>
         <div className="top-bar">
           <Link to={`/recovery/${addDays(iso, -1)}`} className="arrow-btn" aria-label="Previous day">◀</Link>
           <strong>{formatHuman(iso)}</strong>
@@ -39,8 +41,8 @@ function RecoveryDay({ iso }: { iso: string }) {
       </div>
 
       <div className="card">
-        <h2>Sleep &amp; heart</h2>
-        {HABIT_DEFS.filter((h) => h.id !== 'water').map((h) => (
+        <h2>{watch ? <>Sleep &amp; heart</> : 'Sleep'}</h2>
+        {HABIT_DEFS.filter((h) => h.id !== 'water' && (watch || h.id === 'sleepHours')).map((h) => (
           <div className="field" key={h.id}>
             <label>{h.label}{h.unit ? ` (${h.unit})` : ''}</label>
             <input
@@ -57,9 +59,9 @@ function RecoveryDay({ iso }: { iso: string }) {
         rows={[
           { label: 'Water', unit: 'L', target: 'waterL', min: 'waterMinL', step: 0.2 },
           { label: 'Sleep', unit: 'h', target: 'sleepHours', min: 'sleepHoursMin', step: 0.5 },
-          { label: 'Sleep score', unit: '', target: 'sleepScore', min: 'sleepScoreMin' },
+          ...(watch ? [{ label: 'Sleep score', unit: '', target: 'sleepScore', min: 'sleepScoreMin' } as const] : []),
         ]}
-        note="The water target also sets how many glasses you fill. On the Home calendar a day is green when all three are on target, yellow when at least one reaches its minimum, red when none do."
+        note={`The water target also sets how many glasses you fill. On the Home calendar a day is green when all ${watch ? 'three are' : 'are'} on target, yellow when at least one reaches its minimum, red when none do.`}
       />
 
       <button

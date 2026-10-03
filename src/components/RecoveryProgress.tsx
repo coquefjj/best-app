@@ -35,7 +35,7 @@ export default function RecoveryProgress() {
   return (
     <div className="report">
       <RangeToggle value={range} onChange={setRange} />
-      {HABIT_DEFS.map((m) => {
+      {HABIT_DEFS.filter((m) => data.profile?.watch !== false || m.id === 'water' || m.id === 'sleepHours').map((m) => {
         const now = recorded(data.habits, m.id, range, today)
         const before = recorded(data.habits, m.id, range, addDays(today, -range))
         const decimals = m.id === 'water' || m.id === 'sleepHours' ? 1 : 0

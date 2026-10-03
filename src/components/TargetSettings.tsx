@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useStore } from '../lib/store'
-import { DEFAULT_TARGETS, getTargets, type Targets } from '../lib/targets'
+import { defaultTargets, getTargets, type Targets } from '../lib/targets'
 
 export interface TargetRow {
   label: string
@@ -22,6 +22,7 @@ export default function TargetSettings({ rows, note }: { rows: TargetRow[]; note
   // Bumped on reset so the fields re-mount showing the defaults.
   const [resets, setResets] = useState(0)
   const t = getTargets(data)
+  const defaults = defaultTargets(data)
 
   const set = (key: keyof Targets, raw: string) => {
     if (raw === '') return
@@ -31,7 +32,7 @@ export default function TargetSettings({ rows, note }: { rows: TargetRow[]; note
   }
 
   const keys = rows.flatMap((r) => (r.min ? [r.target, r.min] : [r.target]))
-  const changed = keys.some((k) => data.targets?.[k] != null && data.targets[k] !== DEFAULT_TARGETS[k])
+  const changed = keys.some((k) => data.targets?.[k] != null && data.targets[k] !== defaults[k])
   const reset = () => {
     setResets((n) => n + 1)
     setData((prev) => {

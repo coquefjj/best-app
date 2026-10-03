@@ -74,11 +74,10 @@ function gradeRecovery(data: AppData, iso: string): Grade {
   const score = num('sleepScore')
   if (!water && hours == null && score == null) return 'none'
   const t = getTargets(data)
-  return combine([
-    atLeast(water ?? 0, t.waterL, t.waterMinL),
-    hours == null ? 'miss' : atLeast(hours, t.sleepHours, t.sleepHoursMin),
-    score == null ? 'miss' : atLeast(score, t.sleepScore, t.sleepScoreMin),
-  ])
+  const levels: Level[] = [atLeast(water ?? 0, t.waterL, t.waterMinL), hours == null ? 'miss' : atLeast(hours, t.sleepHours, t.sleepHoursMin)]
+  // Profiles without a watch have no sleep score to grade.
+  if (data.profile?.watch !== false) levels.push(score == null ? 'miss' : atLeast(score, t.sleepScore, t.sleepScoreMin))
+  return combine(levels)
 }
 
 /** Grades every date for one section; build once per render, then call per day. */

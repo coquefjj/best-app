@@ -1835,3 +1835,158 @@ details.lift[open] > .lift-summary .lift-name::after {
   flex: 1;
   min-width: 0;
 }
+
+/* Profiles: name button on the Home sign and the switcher sheet */
+.home-who {
+  margin-top: 4px;
+  background: var(--surface-2);
+  border: 2px solid var(--ink);
+  border-radius: 3px;
+  padding: 1px 10px 2px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.profile-sheet h2 {
+  margin-top: 0;
+}
+
+.profile-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.profile-row {
+  display: flex;
+  gap: 6px;
+}
+
+.profile-pick {
+  flex: 1;
+  text-align: left;
+  background: var(--status-bg);
+  border: 3px solid var(--ink);
+  border-radius: 4px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.profile-row.on .profile-pick {
+  background: var(--hp-green);
+  color: var(--surface);
+  text-shadow: 1px 1px 0 var(--ink);
+}
+
+.profile-remove {
+  width: 44px;
+  background: var(--surface-2);
+  border: 3px solid var(--ink);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.profile-backup {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0 6px;
+}
+
+.profile-backup .btn {
+  flex: 1;
+}
+
+/* Onboarding: progress dots on the wall, week preview, Back/Next pinned to the bottom */
+.onboarding {
+  padding-bottom: 96px;
+}
+
+.onb-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding: 4px 0 8px;
+}
+
+.onb-dots i {
+  width: 12px;
+  height: 12px;
+  background: var(--surface-2);
+  border: 2px solid var(--ink);
+}
+
+.onb-dots i.on {
+  background: var(--gold);
+}
+
+.onb-week {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.onb-day {
+  border: 3px solid var(--ink);
+  border-radius: 4px;
+  background: var(--status-bg);
+}
+
+.onb-day.hard {
+  background: var(--surface-2);
+}
+
+.onb-day-head {
+  display: grid;
+  grid-template-columns: 44px 1fr auto;
+  gap: 8px;
+  align-items: center;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.onb-day-head:disabled {
+  cursor: default;
+  color: var(--text-dim);
+}
+
+.onb-exercises {
+  list-style: none;
+  margin: 0;
+  padding: 0 10px 8px;
+}
+
+.onb-exercises li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 0;
+  border-top: 2px dashed var(--surface-2);
+}
+
+.onb-exercises li .subtle {
+  white-space: nowrap;
+}
+
+.onb-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  background: var(--wood-dark);
+  border-top: 4px solid var(--ink);
+}
+
+.onb-nav .btn {
+  flex: 1;
+  max-width: 220px;
+}

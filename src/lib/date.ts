@@ -1,4 +1,4 @@
-import { PLAN_START_DATE, PLAN_LENGTH_DAYS } from '../data/plan'
+import { activePlan } from '../data/templates'
 
 export function todayISO(): string {
   return toISO(new Date())
@@ -11,9 +11,9 @@ export function toISO(d: Date): string {
   return `${y}-${m}-${day}`
 }
 
-/** Day-of-plan for a given ISO date, 1-indexed. Can be < 1 (before start) or > length (after end). */
+/** Day-of-plan of the active profile's plan for a given ISO date, 1-indexed. Can be < 1 (before start) or > length (after end). */
 export function dayOfPlan(iso: string): number {
-  const start = new Date(PLAN_START_DATE + 'T00:00:00')
+  const start = new Date(activePlan().startDate + 'T00:00:00')
   const d = new Date(iso + 'T00:00:00')
   const diffMs = d.getTime() - start.getTime()
   return Math.floor(diffMs / 86400000) + 1
@@ -21,7 +21,7 @@ export function dayOfPlan(iso: string): number {
 
 export function isWithinPlan(iso: string): boolean {
   const d = dayOfPlan(iso)
-  return d >= 1 && d <= PLAN_LENGTH_DAYS
+  return d >= 1 && d <= activePlan().lengthDays
 }
 
 export function weekdayOf(iso: string): number {

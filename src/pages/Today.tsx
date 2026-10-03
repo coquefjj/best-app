@@ -3,7 +3,7 @@ import { useStore } from '../lib/store'
 import { todayISO, formatHuman, formatClock } from '../lib/date'
 import { getDayInfo } from '../lib/session'
 import { nutritionTarget } from '../lib/targets'
-import { PLAN_LENGTH_DAYS } from '../data/plan'
+import { activePlan } from '../data/templates'
 import RoomHeader from '../components/RoomHeader'
 import WaterGlasses from '../components/WaterGlasses'
 
@@ -57,7 +57,7 @@ export default function Today() {
       <RoomHeader
         room="entrance"
         title={formatHuman(iso)}
-        subtitle={info.inPlan ? `Day ${info.dayNum} of ${PLAN_LENGTH_DAYS}` : 'Outside the plan'}
+        subtitle={info.inPlan ? `Day ${info.dayNum} of ${activePlan().lengthDays}` : 'Outside the plan'}
       >
         <div className="top-bar">
           <Link to="/" className="arrow-btn" aria-label="Back to the house">◀</Link>

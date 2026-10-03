@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useStore } from '../lib/store'
 import { todayISO, startOfWeek, addDays, formatHuman } from '../lib/date'
-import { PLAN_LENGTH_DAYS, PHASES, PLAN_START_DATE } from '../data/plan'
+import { activePlan } from '../data/templates'
 import { isOnPlan } from '../lib/adherence'
 import { sectionGrader, type Grade, type Section } from '../lib/consistency'
 
@@ -17,9 +17,11 @@ const VIEWS: { id: View; label: string }[] = [
 
 const GRADE_LABEL: Record<Grade, string> = { full: 'Hit', partial: 'Partly', failed: 'Missed', none: 'No data' }
 
-/** The 100-day calendar and this week's adherence, shown under the house on Home. */
+/** The plan's calendar and this week's adherence, shown under the house on Home. */
 export default function PlanProgress() {
   const { data } = useStore()
+  const plan = activePlan()
+  const phases = plan.phases
   const [view, setView] = useState<View>('all')
   const grade = view === 'all' ? null : sectionGrader(data, view)
   const counts: Record<Grade, number> = { full: 0, partial: 0, failed: 0, none: 0 }
@@ -49,7 +51,7 @@ export default function PlanProgress() {
       </div>
 
       <div className="card">
-        <h2>100-day calendar</h2>
+        <h2>{plan.lengthDays}-day calendar</h2>
         <div className="cal-views" role="group" aria-label="Calendar view">
           {VIEWS.map((v) => (
             <button key={v.id} className={v.id === view ? 'on' : ''} aria-pressed={v.id === view} onClick={() => setView(v.id)}>
@@ -58,13 +60,13 @@ export default function PlanProgress() {
           ))}
         </div>
         <div className="world-map">
-          {Array.from({ length: PLAN_LENGTH_DAYS }, (_, i) => {
+          {Array.from({ length: plan.lengthDays }, (_, i) => {
             const dayNum = i + 1
-            const iso = addDays(PLAN_START_DATE, i)
+            const iso = addDays(plan.startDate, i)
             const week = Math.ceil(dayNum / 7)
-            const found = PHASES.findIndex((p) => week >= p.weeks[0] && week <= p.weeks[1])
+            const found = phases.findIndex((p) => week >= p.weeks[0] && week <= p.weeks[1])
             // Days past the last phase's final week are shaded as the last phase.
-            const phaseIdx = found === -1 ? PHASES.length - 1 : found
+            const phaseIdx = found === -1 ? Math.max(0, phases.length - 1) : found
             const isToday = iso === today
             const past = iso < today
             let state = ''

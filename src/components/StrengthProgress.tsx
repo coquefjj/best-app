@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { useStore } from '../lib/store'
 import { formatHuman } from '../lib/date'
 import StepChart from './StepChart'
+import { activePlan } from '../data/templates'
 import {
   MUSCLE_GROUPS,
   bestSession,
@@ -84,9 +85,11 @@ function LiftRow({ lift, color }: { lift: LiftHistory; color: string }) {
 export default function StrengthProgress() {
   const { data } = useStore()
   const histories = liftHistories(data)
+  const planLifts = activePlan().muscleLifts
   const groups = MUSCLE_GROUPS.map((g) => {
-    const lifts = [...g.lifts, ...g.travelLifts].map((name) => histories.get(name)).filter((h): h is LiftHistory => !!h)
-    return { ...g, lifts, notLogged: g.lifts.filter((name) => !histories.has(name)) }
+    const named = planLifts?.[g.id] ?? g.lifts
+    const lifts = [...named, ...(planLifts ? [] : g.travelLifts)].map((name) => histories.get(name)).filter((h): h is LiftHistory => !!h)
+    return { ...g, lifts, notLogged: named.filter((name) => !histories.has(name)) }
   })
 
   // Workout keeps yesterday and tomorrow rendered beside today, so look groups up in this copy only.

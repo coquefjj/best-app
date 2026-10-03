@@ -1,22 +1,13 @@
 // The 100-day hybrid athletic plan, encoded as data.
 // Source: 100-day-hybrid-athletic-plan.md (uploaded by Fernando).
 
-export type DayType =
-  | 'strengthA'
-  | 'aerobicEasy'
-  | 'strengthB'
-  | 'hardConditioning'
-  | 'strengthC'
-  | 'longEndurance'
-  | 'rest'
-  // Travel week (plan section 12), dumbbells only
-  | 'travelDb1'
-  | 'travelDb2'
-  | 'travelEasyRun'
-  | 'travelQualityRun'
-  | 'travelLongRun'
-  | 'travelCircuit'
+/**
+ * A session's id within a plan. Fernando's plan uses strengthA, aerobicEasy, ..., rest and
+ * the travel sessions (travelDb1 ...); other templates add their own (data/templates.ts).
+ */
+export type DayType = string
 
+/** Fernando's plan; other profiles have their own (activePlan() in data/templates.ts). */
 export const PLAN_START_DATE = '2026-09-13' // Day 1
 export const PLAN_LENGTH_DAYS = 100
 
@@ -39,6 +30,10 @@ export interface PlanExercise {
   target: ExerciseSet
   note?: string
   optional?: boolean
+  /** Weight (kg) filled into the first session's sets, before anything was logged. */
+  startKg?: number | null
+  /** Whether sets take a weight when first logged; true when missing. */
+  weighted?: boolean
 }
 
 export const WEEKLY_TEMPLATE: Record<number, { dayType: DayType; label: string }> = {
@@ -317,23 +312,10 @@ export function getWeekNumber(dayOfPlan: number): number {
   return Math.ceil(dayOfPlan / 7)
 }
 
-export function isDeloadWeek(week: number): boolean {
-  return week === 7 || week === 14
-}
-
-export function getPhase(dayOfPlan: number): Phase | undefined {
-  const week = getWeekNumber(dayOfPlan)
-  return PHASES.find((p) => week >= p.weeks[0] && week <= p.weeks[1])
-}
-
 /** Nutrition targets per day type, per plan section 2. */
 export const NUTRITION_TARGETS = {
   easy: { calories: 2100, calorieRange: [2000, 2200] as [number, number], protein: 150, fat: 65, carbs: 160 },
   hard: { calories: 2450, calorieRange: [2300, 2600] as [number, number], protein: 150, fat: 75, carbs: 280 },
-}
-
-export function isHardDay(dayType: DayType): boolean {
-  return dayType !== 'aerobicEasy' && dayType !== 'travelEasyRun' && dayType !== 'rest'
 }
 
 /** Recovery log fields in the bedroom (Recovery). */

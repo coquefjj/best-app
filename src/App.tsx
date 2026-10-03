@@ -1,4 +1,6 @@
-import { HashRouter, Routes, Route, NavLink, Navigate } from 'react-router-dom'
+import { HashRouter, Routes, Route, NavLink, Navigate, useLocation } from 'react-router-dom'
+import { useStore } from './lib/store'
+import Onboarding from './pages/Onboarding'
 import Home from './pages/Home'
 import Today from './pages/Today'
 import Workout from './pages/Workout'
@@ -29,11 +31,22 @@ function Nav() {
   )
 }
 
-function App() {
+function Shell() {
+  const { hasProfile } = useStore()
+  const { pathname } = useLocation()
+  // No profile yet (a new phone): onboarding is the whole app until it's done.
+  if (!hasProfile) {
+    return (
+      <div className="app-shell">
+        <Onboarding />
+      </div>
+    )
+  }
   return (
-    <HashRouter>
+    <>
       <div className="app-shell">
         <Routes>
+          <Route path="/welcome" element={<Onboarding />} />
           <Route path="/" element={<Home />} />
           <Route path="/today" element={<Today />} />
           <Route path="/workout" element={<Workout />} />
@@ -49,7 +62,15 @@ function App() {
           <Route path="/progress" element={<Navigate to="/workout" replace />} />
         </Routes>
       </div>
-      <Nav />
+      {pathname !== '/welcome' && <Nav />}
+    </>
+  )
+}
+
+function App() {
+  return (
+    <HashRouter>
+      <Shell />
     </HashRouter>
   )
 }

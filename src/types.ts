@@ -79,6 +79,8 @@ export interface ProgressCheckIn {
 }
 
 export interface AppData {
+  /** Missing only on data saved before profiles existed, which is Fernando's. */
+  profile?: Profile
   workouts: Record<string, WorkoutDayLog>
   food: Record<string, FoodDayLog>
   savedMeals: SavedMeal[]
@@ -94,6 +96,26 @@ export interface AppData {
   travelDays?: Record<string, import('./data/plan').DayType>
   /** A regular day swapped to a softer session, keyed by ISO date. Saved logs stay as they are. */
   swaps?: Record<string, SessionSwap>
+}
+
+/** Who the profile is and what onboarding set up. Profiles made before onboarding existed (Fernando's) have no about. */
+export interface Profile {
+  name: string
+  about?: {
+    age: number | null
+    sex: 'male' | 'female' | null
+    heightCm: number | null
+    weightKg: number | null
+    activity: 'light' | 'moderate' | 'very'
+    goal: 'lose' | 'muscle' | 'hybrid' | 'health'
+  }
+  plan: import('./data/templates').PlanRef
+  /** Targets onboarding set; changes on the Nutrition and Recovery pages go in `targets` on top. */
+  baseTargets?: Partial<import('./lib/targets').Targets>
+  /** Carbs and fat by easy and hard day, when onboarding set them. */
+  macros?: { easy: { carbs: number; fat: number }; hard: { carbs: number; fat: number } }
+  /** false hides sleep score and resting heart rate (no watch to read them from). */
+  watch?: boolean
 }
 
 export interface SessionSwap {

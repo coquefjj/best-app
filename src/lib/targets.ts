@@ -1,5 +1,6 @@
 import type { AppData } from '../types'
-import { NUTRITION_TARGETS, isHardDay } from '../data/plan'
+import { NUTRITION_TARGETS } from '../data/plan'
+import { activePlan } from '../data/templates'
 import { getDayInfo } from './session'
 
 /**
@@ -24,7 +25,7 @@ export interface Targets {
   sleepScoreMin: number
 }
 
-/** Used until changed in the app; calories and protein come from the plan. */
+/** Fernando's defaults; calories and protein come from his plan. */
 export const DEFAULT_TARGETS: Targets = {
   caloriesEasy: NUTRITION_TARGETS.easy.calories,
   caloriesHard: NUTRITION_TARGETS.hard.calories,
@@ -40,8 +41,17 @@ export const DEFAULT_TARGETS: Targets = {
   sleepScoreMin: 70,
 }
 
+/**
+ * Targets before any change on the Nutrition and Recovery pages: the plan's calories and
+ * protein, then whatever the profile's onboarding set. "Reset to defaults" goes back here.
+ */
+export function defaultTargets(data: AppData): Targets {
+  const { easy, hard } = activePlan().nutrition
+  return { ...DEFAULT_TARGETS, caloriesEasy: easy.calories, caloriesHard: hard.calories, protein: easy.protein, ...data.profile?.baseTargets }
+}
+
 export function getTargets(data: AppData): Targets {
-  return { ...DEFAULT_TARGETS, ...data.targets }
+  return { ...defaultTargets(data), ...data.targets }
 }
 
 export interface DayNutritionTarget {
@@ -54,11 +64,11 @@ export interface DayNutritionTarget {
   fat: number
 }
 
-/** The day's nutrition targets: calories and protein from your settings, carbs and fat from the plan. */
+/** The day's nutrition targets: calories and protein from your settings, carbs and fat from onboarding or the plan. */
 export function nutritionTarget(data: AppData, iso: string): DayNutritionTarget {
   const t = getTargets(data)
-  const hard = isHardDay(getDayInfo(iso, data).dayType)
-  const plan = hard ? NUTRITION_TARGETS.hard : NUTRITION_TARGETS.easy
+  const hard = getDayInfo(iso, data).hard
+  const plan = data.profile?.macros?.[hard ? 'hard' : 'easy'] ?? activePlan().nutrition[hard ? 'hard' : 'easy']
   const calories = hard ? t.caloriesHard : t.caloriesEasy
   return {
     calories,

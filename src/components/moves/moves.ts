@@ -59,6 +59,22 @@ export const MOVES: Record<string, Move> = {
   'Dead bug': { file: 'dead-bug.png' },
   'Side plank': { file: 'side-plank.png' },
   'Pallof press': { file: 'pallof-press.png' },
+  // Mateo's 3-day split (data/templates.ts) shows the closest move already drawn.
+  'Incline Dumbbell Press': { file: 'incline-db-press.png' },
+  'Incline Dumbbell Curl': { file: 'biceps-curl.png' },
+  'Cable Curl': { file: 'biceps-curl.png' },
+  'Preacher Curl': { file: 'biceps-curl.png' },
+  'Standing Hammer Curl': { file: 'biceps-curl.png' },
+  'Lat Pulldown': { file: 'lat-pulldown.png' },
+  'Seated Cable Row': { file: 'row.png' },
+  'Leg Curl': { file: 'eccentric-leg-curl.png' },
+  'Calf Raise': { file: 'single-leg-calf-raise.png' },
+  'Barbell Hip Thrust': { file: 'hip-thrust.png' },
+  'Overhead Press': { file: 'overhead-press.png' },
+  'Cable Lateral Raise': { file: 'lateral-raises.png' },
+  'Face Pull': { file: 'face-pulls.png' },
+  'Barbell Bench Press': { file: 'db-bench-press.png' },
+  'Pull-ups': { file: 'pull-up.png' },
 }
 
 export const moveSrc = (m: Move) => `${import.meta.env.BASE_URL}img/moves/${m.file}`

@@ -1,7 +1,10 @@
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useStore } from '../lib/store'
+import ProfileSheet from '../components/ProfileSheet'
 import { todayISO, formatHuman } from '../lib/date'
 import { getDayInfo } from '../lib/session'
-import { PLAN_LENGTH_DAYS } from '../data/plan'
+import { activePlan } from '../data/templates'
 import PlanProgress from '../components/PlanProgress'
 import { HOUSE_IMG, IMG_H, IMG_W, ROOMS, type RoomId } from '../components/rooms'
 
@@ -10,18 +13,24 @@ const pct = (v: number, of: number) => `${(v / of) * 100}%`
 export default function Home() {
   const navigate = useNavigate()
   const iso = todayISO()
+  const { data } = useStore()
   const info = getDayInfo(iso)
+  const [profilesOpen, setProfilesOpen] = useState(false)
 
   return (
     <>
+    {profilesOpen && <ProfileSheet onClose={() => setProfilesOpen(false)} />}
     <div className="home">
       <div className="house" style={{ aspectRatio: `${IMG_W} / ${IMG_H}` }}>
         <img className="house-img" src={HOUSE_IMG} alt="" draggable={false} />
         <div className="home-sign">
           <div className="home-title">QUEST</div>
           <div className="home-sub">
-            {formatHuman(iso)} · {info.inPlan ? `Day ${info.dayNum} of ${PLAN_LENGTH_DAYS}` : 'Outside the plan'}
+            {formatHuman(iso)} · {info.inPlan ? `Day ${info.dayNum} of ${activePlan().lengthDays}` : 'Outside the plan'}
           </div>
+          <button className="home-who" aria-haspopup="dialog" onClick={() => setProfilesOpen(true)}>
+            {data.profile?.name ?? 'Profile'} ▾
+          </button>
         </div>
         {(Object.keys(ROOMS) as RoomId[]).map((id) => {
           const r = ROOMS[id]
