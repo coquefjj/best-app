@@ -2,8 +2,20 @@ import { useParams, Link } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { getDayInfo } from '../lib/session'
 import { useState } from 'react'
-import { formatHuman, addDays, todayISO, formatClock, formatDuration, parseDuration } from '../lib/date'
-import { SESSIONS_BY_TYPE, AEROBIC_EASY_OPTIONS, HARD_CONDITIONING_OPTIONS, LONG_ENDURANCE_OPTIONS, MOBILITY_DAILY } from '../data/plan'
+import { formatHuman, addDays, todayISO, formatClock, formatDuration, parseDuration, startOfWeek, weekdayOf } from '../lib/date'
+import {
+  SESSIONS_BY_TYPE,
+  AEROBIC_EASY_OPTIONS,
+  HARD_CONDITIONING_OPTIONS,
+  LONG_ENDURANCE_OPTIONS,
+  MOBILITY_DAILY,
+  TRAVEL_SESSIONS,
+  TRAVEL_TEMPLATE,
+  TRAVEL_EASY_RUN_OPTIONS,
+  TRAVEL_QUALITY_RUN_OPTIONS,
+  TRAVEL_LONG_RUN_OPTIONS,
+  type DayType,
+} from '../data/plan'
 import RoomHeader from '../components/RoomHeader'
 import DaySwiper from '../components/DaySwiper'
 import MoveThumb from '../components/moves/MoveThumb'
@@ -16,6 +28,9 @@ const MODALITY_OPTIONS: Record<string, string[]> = {
   aerobicEasy: AEROBIC_EASY_OPTIONS,
   hardConditioning: HARD_CONDITIONING_OPTIONS,
   longEndurance: LONG_ENDURANCE_OPTIONS,
+  travelEasyRun: TRAVEL_EASY_RUN_OPTIONS,
+  travelQualityRun: TRAVEL_QUALITY_RUN_OPTIONS,
+  travelLongRun: TRAVEL_LONG_RUN_OPTIONS,
 }
 
 function emptyWorkout(): WorkoutDayLog {
@@ -63,7 +78,7 @@ export default function Workout() {
 
 function WorkoutDay({ iso }: { iso: string }) {
   const { data, setData } = useStore()
-  const info = getDayInfo(iso)
+  const info = getDayInfo(iso, data)
   const workout = data.workouts[iso] ?? emptyWorkout()
   const exerciseDefs = SESSIONS_BY_TYPE[info.dayType]
   const modalityOptions = MODALITY_OPTIONS[info.dayType]
@@ -122,6 +137,26 @@ function WorkoutDay({ iso }: { iso: string }) {
 
   const toggleMobility = () => update((w) => ({ ...w, mobilityDone: !w.mobilityDone }))
 
+  // Travel weeks only change which session a day shows; logs already saved stay as they are.
+  const week = startOfWeek(iso)
+  const toggleTravel = () => {
+    setData((prev) => {
+      const weeks = prev.travelWeeks ?? []
+      if (!weeks.includes(week)) return { ...prev, travelWeeks: [...weeks, week].sort() }
+      const travelDays = { ...prev.travelDays }
+      for (let i = 0; i < 7; i++) delete travelDays[addDays(week, i)]
+      return { ...prev, travelWeeks: weeks.filter((w) => w !== week), travelDays }
+    })
+  }
+  const swapTravelDay = (dayType: DayType) => {
+    setData((prev) => {
+      const travelDays = { ...prev.travelDays }
+      if (dayType === TRAVEL_TEMPLATE[weekdayOf(iso)]) delete travelDays[iso]
+      else travelDays[iso] = dayType
+      return { ...prev, travelDays }
+    })
+  }
+
   const [demo, setDemo] = useState<{ name: string; cue?: string } | null>(null)
   const [showProgress, setShowProgress] = useState(false)
 
@@ -131,7 +166,13 @@ function WorkoutDay({ iso }: { iso: string }) {
       <RoomHeader
         room="gym"
         title={info.label}
-        subtitle={info.deload ? <span className="badge deload">Deload week: hold back on load</span> : undefined}
+        subtitle={
+          info.travel ? (
+            <span className="badge travel">Travel week: maintain, don't progress</span>
+          ) : info.deload ? (
+            <span className="badge deload">Deload week: hold back on load</span>
+          ) : undefined
+        }
       >
         <div className="top-bar">
           <Link to={`/workout/${addDays(iso, -1)}`} className="arrow-btn" aria-label="Previous day">◀</Link>
@@ -142,6 +183,28 @@ function WorkoutDay({ iso }: { iso: string }) {
           <Link to={`/workout/${addDays(iso, 1)}`} className="arrow-btn" aria-label="Next day">▶</Link>
         </div>
       </RoomHeader>
+
+      <div className="card travel-card">
+        <div className="travel-row">
+          <button className={`toggle-chip${info.travel ? ' selected' : ''}`} aria-pressed={info.travel} onClick={toggleTravel}>
+            {info.travel ? '✓ ' : ''}Travel week
+          </button>
+          {!info.travel && <span className="subtle">Away? Switch this week to dumbbells only</span>}
+        </div>
+        {info.travel && (
+          <>
+            <div className="subtle travel-hint">Dumbbells only this week. Swap this day to fit the trip. Aim for each DB session 1-2x plus 2-3 runs; packed trip minimum is 2 DB sessions + 2 runs.</div>
+            <div className="pill-select">
+              {TRAVEL_SESSIONS.map((t) => (
+                <button key={t.dayType} className={info.dayType === t.dayType ? 'selected' : ''} onClick={() => swapTravelDay(t.dayType)}>
+                  {t.short}
+                </button>
+              ))}
+            </div>
+            <div className="subtle travel-hint">Protein slips on the road: pack whey and order protein-forward.</div>
+          </>
+        )}
+      </div>
 
       {info.dayType === 'rest' && (
         <div className="card">

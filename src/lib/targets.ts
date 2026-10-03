@@ -57,7 +57,7 @@ export interface DayNutritionTarget {
 /** The day's nutrition targets: calories and protein from your settings, carbs and fat from the plan. */
 export function nutritionTarget(data: AppData, iso: string): DayNutritionTarget {
   const t = getTargets(data)
-  const hard = isHardDay(getDayInfo(iso).dayType)
+  const hard = isHardDay(getDayInfo(iso, data).dayType)
   const plan = hard ? NUTRITION_TARGETS.hard : NUTRITION_TARGETS.easy
   const calories = hard ? t.caloriesHard : t.caloriesEasy
   return {

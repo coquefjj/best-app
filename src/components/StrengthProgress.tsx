@@ -85,7 +85,7 @@ export default function StrengthProgress() {
   const { data } = useStore()
   const histories = liftHistories(data)
   const groups = MUSCLE_GROUPS.map((g) => {
-    const lifts = g.lifts.map((name) => histories.get(name)).filter((h): h is LiftHistory => !!h)
+    const lifts = [...g.lifts, ...g.travelLifts].map((name) => histories.get(name)).filter((h): h is LiftHistory => !!h)
     return { ...g, lifts, notLogged: g.lifts.filter((name) => !histories.has(name)) }
   })
 

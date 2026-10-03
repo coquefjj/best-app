@@ -10,7 +10,7 @@ import WaterGlasses from '../components/WaterGlasses'
 export default function Today() {
   const { data, setData } = useStore()
   const iso = todayISO()
-  const info = getDayInfo(iso)
+  const info = getDayInfo(iso, data)
   const nTarget = nutritionTarget(data, iso)
   const workout = data.workouts[iso]
   const habits = data.habits[iso] ?? {}
@@ -62,7 +62,9 @@ export default function Today() {
         <div className="top-bar">
           <Link to="/" className="arrow-btn" aria-label="Back to the house">◀</Link>
           {info.inPlan ? (
-            <span className={`badge${info.deload ? ' deload' : ''}`}>{info.deload ? 'Deload' : `Week ${info.weekNumber}`}</span>
+            <span className={`badge${info.travel ? ' travel' : info.deload ? ' deload' : ''}`}>
+              {info.travel ? 'Travel' : info.deload ? 'Deload' : `Week ${info.weekNumber}`}
+            </span>
           ) : (
             <span />
           )}

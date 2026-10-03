@@ -27,7 +27,7 @@ const within = (v: number, [lo, hi]: [number, number], [minLo, minHi]: [number, 
  */
 function gradeWorkout(data: AppData, iso: string, firstWorkout: string | undefined): Grade {
   const w = data.workouts[iso]
-  const di = getDayInfo(iso)
+  const di = getDayInfo(iso, data)
   if (w?.completedAt) return 'full'
   if (di.dayType === 'rest' && w?.mobilityDone) return 'full'
   if (!di.hasStrengthExercises && di.dayType !== 'rest' && w?.aerobic?.chosenOption && (w.aerobic.durationMin ?? 0) > 0) return 'full'

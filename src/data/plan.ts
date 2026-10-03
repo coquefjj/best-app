@@ -1,7 +1,21 @@
 // The 100-day hybrid athletic plan, encoded as data.
 // Source: 100-day-hybrid-athletic-plan.md (uploaded by Fernando).
 
-export type DayType = 'strengthA' | 'aerobicEasy' | 'strengthB' | 'hardConditioning' | 'strengthC' | 'longEndurance' | 'rest'
+export type DayType =
+  | 'strengthA'
+  | 'aerobicEasy'
+  | 'strengthB'
+  | 'hardConditioning'
+  | 'strengthC'
+  | 'longEndurance'
+  | 'rest'
+  // Travel week (plan section 12), dumbbells only
+  | 'travelDb1'
+  | 'travelDb2'
+  | 'travelEasyRun'
+  | 'travelQualityRun'
+  | 'travelLongRun'
+  | 'travelCircuit'
 
 export const PLAN_START_DATE = '2026-09-13' // Day 1
 export const PLAN_LENGTH_DAYS = 100
@@ -37,6 +51,35 @@ export const WEEKLY_TEMPLATE: Record<number, { dayType: DayType; label: string }
   6: { dayType: 'longEndurance', label: 'Long endurance' },
   0: { dayType: 'rest', label: 'Rest + long flexibility session' },
 }
+
+/**
+ * Travel week (plan section 12): maintain, don't progress. Each DB session 1-2x plus 2-3 runs;
+ * any day can be swapped to another travel session to fit the trip.
+ */
+export const TRAVEL_TEMPLATE: Record<number, DayType> = {
+  1: 'travelDb1',
+  2: 'travelEasyRun',
+  3: 'travelDb2',
+  4: 'travelQualityRun',
+  5: 'travelDb1',
+  6: 'travelLongRun',
+  0: 'rest',
+}
+
+/** Sessions a travel day can be swapped to, in the order the picker shows them. */
+export const TRAVEL_SESSIONS: { dayType: DayType; short: string; label: string }[] = [
+  { dayType: 'travelDb1', short: 'DB 1', label: 'Travel DB Session 1 — Push/pull + posterior chain' },
+  { dayType: 'travelDb2', short: 'DB 2', label: 'Travel DB Session 2 — Press/row + stability' },
+  { dayType: 'travelEasyRun', short: 'Easy run', label: 'Travel easy run' },
+  { dayType: 'travelQualityRun', short: 'Hills run', label: 'Travel quality run (hills / tempo)' },
+  { dayType: 'travelLongRun', short: 'Long run', label: 'Travel longer run' },
+  { dayType: 'travelCircuit', short: 'DB circuit', label: "Travel DB conditioning circuit (can't run)" },
+  { dayType: 'rest', short: 'Rest', label: 'Rest + long flexibility session' },
+]
+
+export const TRAVEL_EASY_RUN_OPTIONS = ['Easy run']
+export const TRAVEL_QUALITY_RUN_OPTIONS = ['Hill repeats', 'Tempo run', 'Run intervals']
+export const TRAVEL_LONG_RUN_OPTIONS = ['Longer run']
 
 export const AEROBIC_EASY_OPTIONS = [
   'Easy swim',
@@ -187,10 +230,46 @@ export const STRENGTH_C: PlanExercise[] = [
   },
 ]
 
+export const TRAVEL_DB_1: PlanExercise[] = [
+  { id: 't1-press', options: [{ name: 'DB floor press', cue: 'Elbows ~45°, pause on the floor' }, { name: 'Push-up progression', cue: 'Body straight, chest to floor' }], target: { sets: '4', reps: '8-10' } },
+  { id: 't1-row', options: [{ name: 'DB single-arm row', cue: 'Hand on bed/chair, pull to hip' }], target: { sets: '4', reps: '10/side' } },
+  { id: 't1-rdl', options: [{ name: 'DB Romanian deadlift', cue: 'Slow tempo, hinge, DBs close to legs' }], target: { sets: '3', reps: '10-12' }, note: 'Slow tempo' },
+  { id: 't1-lateral', options: [{ name: 'DB lateral raise', cue: 'Light weight, lead with elbows' }], target: { sets: '3', reps: '12-15' } },
+  { id: 't1-lunge', options: [{ name: 'DB reverse lunge', cue: 'Step back, knee to floor' }], target: { sets: '2', reps: '8/leg' } },
+  { id: 't1-curl', options: [{ name: 'DB curl', cue: 'Elbows pinned, no swing' }], target: { sets: '2', reps: '12' } },
+  { id: 't1-triceps', options: [{ name: 'DB overhead triceps extension', cue: 'Elbows in, lower behind head' }], target: { sets: '2', reps: '12' } },
+  { id: 't1-core', options: [{ name: 'Plank', cue: 'Straight line, brace core' }, { name: 'Dead bug', cue: 'Opposite arm/leg, low back flat' }], target: { sets: '2', reps: 'to form' }, note: 'Plank + dead bug' },
+]
+
+export const TRAVEL_DB_2: PlanExercise[] = [
+  { id: 't2-press', options: [{ name: 'DB shoulder press', cue: 'Brace core, press straight up' }], target: { sets: '4', reps: '8-10' } },
+  { id: 't2-row', options: [{ name: 'DB bent-over row', cue: 'Flat back, squeeze shoulder blades' }], target: { sets: '4', reps: '10-12' } },
+  { id: 't2-split', options: [{ name: 'DB Bulgarian split squat', cue: 'Rear foot on bed/chair, pause at the bottom' }], target: { sets: '3', reps: '8/leg' }, note: 'Paused' },
+  { id: 't2-thrust', options: [{ name: 'DB hip thrust', cue: 'Shoulders on bed, DB on hips' }], target: { sets: '3', reps: '12' } },
+  { id: 't2-fly', options: [{ name: 'DB reverse fly', cue: 'Bent over, lead with elbows' }], target: { sets: '3', reps: '12-15' } },
+  { id: 't2-ham', options: [{ name: 'Single-leg RDL', cue: 'Hinge on one leg, hips square' }, { name: 'Towel sliding leg curl', cue: 'Heels on towel, hips up, curl in' }], target: { sets: '2', reps: '8' }, note: 'Hamstring finisher' },
+  { id: 't2-copenhagen', options: [{ name: 'Copenhagen plank', cue: 'Top foot on a chair' }], target: { sets: '2', reps: '20-30s/side' }, note: 'Stability circuit' },
+  { id: 't2-abduction', options: [{ name: 'Side-lying abduction', cue: 'Lift top leg, hips stacked' }], target: { sets: '2', reps: '12-15/side' }, note: 'Stability circuit' },
+  { id: 't2-tib', options: [{ name: 'Tibialis raise', cue: 'Lean on wall, lift toes' }], target: { sets: '2', reps: '15-20' }, note: 'Stability circuit' },
+  { id: 't2-calf', options: [{ name: 'Single-leg calf raise', cue: 'Full range, controlled' }], target: { sets: '2', reps: '15' }, optional: true },
+]
+
+/** "Can't run?" swap: 5 rounds of the circuit. */
+export const TRAVEL_CIRCUIT: PlanExercise[] = [
+  { id: 'tc-thruster', options: [{ name: 'DB thruster', cue: 'Squat, then drive the DBs overhead' }], target: { sets: '5', reps: '8' } },
+  { id: 'tc-swing', options: [{ name: 'DB swing', cue: 'Hinge and snap hips, arms just guide' }], target: { sets: '5', reps: '12' } },
+  { id: 'tc-renegade', options: [{ name: 'Renegade row', cue: 'Plank on DBs, row without twisting' }], target: { sets: '5', reps: '8/side' } },
+  { id: 'tc-lunge', options: [{ name: 'DB reverse lunge', cue: 'Step back, knee to floor' }], target: { sets: '5', reps: '8/side' } },
+  { id: 'tc-burpee', options: [{ name: 'Burpees', cue: 'Chest to floor, jump at the top' }], target: { sets: '5', reps: '8' } },
+]
+
 export const SESSIONS_BY_TYPE: Partial<Record<DayType, PlanExercise[]>> = {
   strengthA: STRENGTH_A,
   strengthB: STRENGTH_B,
   strengthC: STRENGTH_C,
+  travelDb1: TRAVEL_DB_1,
+  travelDb2: TRAVEL_DB_2,
+  travelCircuit: TRAVEL_CIRCUIT,
 }
 
 export const MOBILITY_DAILY = [
@@ -235,7 +314,7 @@ export const NUTRITION_TARGETS = {
 }
 
 export function isHardDay(dayType: DayType): boolean {
-  return dayType === 'strengthA' || dayType === 'hardConditioning' || dayType === 'strengthC' || dayType === 'longEndurance' || dayType === 'strengthB'
+  return dayType !== 'aerobicEasy' && dayType !== 'travelEasyRun' && dayType !== 'rest'
 }
 
 /** Recovery log fields in the bedroom (Recovery). */

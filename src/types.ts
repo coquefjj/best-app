@@ -88,6 +88,10 @@ export interface AppData {
   habitList: Habit[]
   /** Targets and minimums changed on the Nutrition and Recovery pages; defaults fill the rest. */
   targets?: Partial<import('./lib/targets').Targets>
+  /** Weeks switched to the travel plan (section 12), as the Monday ISO date starting each week. */
+  travelWeeks?: string[]
+  /** A travel day swapped to a different travel session, keyed by ISO date. */
+  travelDays?: Record<string, import('./data/plan').DayType>
 }
 
 export const EMPTY_DATA: AppData = {

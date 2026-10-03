@@ -3,7 +3,7 @@ import { getDayInfo } from './session'
 
 /** Whether the day's training was done, using the same rules as weekly adherence. */
 export function isOnPlan(data: AppData, iso: string): boolean {
-  const di = getDayInfo(iso)
+  const di = getDayInfo(iso, data)
   const w = data.workouts[iso]
   if (w?.completedAt) return true
   if (di.dayType === 'rest') return !!w?.mobilityDone

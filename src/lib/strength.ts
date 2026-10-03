@@ -2,13 +2,16 @@ import type { AppData } from '../types'
 
 export type MuscleGroupId = 'arms' | 'back' | 'chest' | 'legs' | 'glutes'
 
-/** Muscle groups as colored on the muscle map (public/img/muscle-map.webp). */
-export const MUSCLE_GROUPS: { id: MuscleGroupId; name: string; color: string; lifts: string[] }[] = [
-  { id: 'arms', name: 'Arms & shoulders', color: '#e21919', lifts: ['Overhead press', 'Lateral raises', 'Face pulls', 'Biceps + triceps'] },
-  { id: 'back', name: 'Back', color: '#d94e92', lifts: ['Pull-up', 'Lat pulldown', 'Chin-ups', 'Row (cable/DB)'] },
-  { id: 'chest', name: 'Chest', color: '#3ea839', lifts: ['DB bench press', 'Incline DB press', 'Push-up progression'] },
-  { id: 'legs', name: 'Legs', color: '#0981d6', lifts: ['Trap-bar deadlift', 'Bulgarian split squat', 'Reverse lunge', 'Eccentric machine leg curl', 'Nordic hamstring curl'] },
-  { id: 'glutes', name: 'Glutes', color: '#8164b7', lifts: ['Hip thrust', 'Romanian deadlift', 'Single-leg RDL'] },
+/**
+ * Muscle groups as colored on the muscle map (public/img/muscle-map.webp). Travel-week
+ * dumbbell lifts show once logged but never in the "not logged yet" list.
+ */
+export const MUSCLE_GROUPS: { id: MuscleGroupId; name: string; color: string; lifts: string[]; travelLifts: string[] }[] = [
+  { id: 'arms', name: 'Arms & shoulders', color: '#e21919', lifts: ['Overhead press', 'Lateral raises', 'Face pulls', 'Biceps + triceps'], travelLifts: ['DB shoulder press', 'DB lateral raise', 'DB reverse fly', 'DB curl', 'DB overhead triceps extension'] },
+  { id: 'back', name: 'Back', color: '#d94e92', lifts: ['Pull-up', 'Lat pulldown', 'Chin-ups', 'Row (cable/DB)'], travelLifts: ['DB single-arm row', 'DB bent-over row', 'Renegade row'] },
+  { id: 'chest', name: 'Chest', color: '#3ea839', lifts: ['DB bench press', 'Incline DB press', 'Push-up progression'], travelLifts: ['DB floor press'] },
+  { id: 'legs', name: 'Legs', color: '#0981d6', lifts: ['Trap-bar deadlift', 'Bulgarian split squat', 'Reverse lunge', 'Eccentric machine leg curl', 'Nordic hamstring curl'], travelLifts: ['DB reverse lunge', 'DB Bulgarian split squat', 'Towel sliding leg curl'] },
+  { id: 'glutes', name: 'Glutes', color: '#8164b7', lifts: ['Hip thrust', 'Romanian deadlift', 'Single-leg RDL'], travelLifts: ['DB Romanian deadlift', 'DB hip thrust'] },
 ]
 
 export interface LiftSession {
