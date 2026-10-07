@@ -2,7 +2,7 @@ import { useParams, Link } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { getDayInfo } from '../lib/session'
 import { useState } from 'react'
-import { formatHuman, addDays, todayISO, formatClock, formatDuration, parseDuration, startOfWeek, weekdayOf } from '../lib/date'
+import { formatHuman, addDays, todayISO, formatClock, formatDuration, parseDuration, weekdayOf } from '../lib/date'
 import { MOBILITY_DAILY, TRAVEL_SESSIONS, TRAVEL_TEMPLATE, SWAP_SESSIONS, SWAP_REASONS, type DayType, type SwapReason } from '../data/plan'
 import { activePlan } from '../data/templates'
 import RoomHeader from '../components/RoomHeader'
@@ -121,25 +121,16 @@ function WorkoutDay({ iso }: { iso: string }) {
 
   const toggleMobility = () => update((w) => ({ ...w, mobilityDone: !w.mobilityDone }))
 
-  // Travel weeks only change which session a day shows; logs already saved stay as they are.
-  const week = startOfWeek(iso)
-  const toggleTravel = () => {
-    setData((prev) => {
-      const weeks = prev.travelWeeks ?? []
-      if (!weeks.includes(week)) return { ...prev, travelWeeks: [...weeks, week].sort() }
-      const travelDays = { ...prev.travelDays }
-      for (let i = 0; i < 7; i++) delete travelDays[addDays(week, i)]
-      return { ...prev, travelWeeks: weeks.filter((w) => w !== week), travelDays }
-    })
-  }
-  const swapTravelDay = (dayType: DayType) => {
+  // Travel only changes which session the day shows; logs already saved stay as they are.
+  const setTravelDay = (dayType: DayType | null) => {
     setData((prev) => {
       const travelDays = { ...prev.travelDays }
-      if (dayType === TRAVEL_TEMPLATE[weekdayOf(iso)]) delete travelDays[iso]
-      else travelDays[iso] = dayType
+      if (dayType) travelDays[iso] = dayType
+      else delete travelDays[iso]
       return { ...prev, travelDays }
     })
   }
+  const toggleTravel = () => setTravelDay(info.travel ? null : TRAVEL_TEMPLATE[weekdayOf(iso)])
 
   // A swap only changes which session the day shows; logs for the planned session are kept.
   const swap = info.travel ? undefined : data.swaps?.[iso]
@@ -155,7 +146,7 @@ function WorkoutDay({ iso }: { iso: string }) {
     })
   }
 
-  /** Card heading with the Swap and week Travel buttons on the right; the pickers sit under it. */
+  /** Card heading with the Swap and day Travel buttons on the right; the pickers sit under it. */
   const cardHead = (title: string) => (
     <>
       <h2 className="card-head">
@@ -207,7 +198,7 @@ function WorkoutDay({ iso }: { iso: string }) {
       {info.travel && (
         <div className="pill-select travel-swap" aria-label="Swap this travel day">
           {TRAVEL_SESSIONS.map((t) => (
-            <button key={t.dayType} className={info.dayType === t.dayType ? 'selected' : ''} onClick={() => swapTravelDay(t.dayType)}>
+            <button key={t.dayType} className={info.dayType === t.dayType ? 'selected' : ''} onClick={() => setTravelDay(t.dayType)}>
               {t.short}
             </button>
           ))}
@@ -227,7 +218,7 @@ function WorkoutDay({ iso }: { iso: string }) {
         title={info.label}
         subtitle={
           info.travel ? (
-            <span className="badge travel">Travel week: maintain, don't progress</span>
+            <span className="badge travel">Travel day: maintain, don't progress</span>
           ) : info.swap ? (
             <span className="badge travel">
               Swapped from {info.swap.fromLabel.split(' —')[0]}

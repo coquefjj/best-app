@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
-import { DEFAULT_HABITS } from '../data/plan'
+import { DEFAULT_HABITS, TRAVEL_TEMPLATE } from '../data/plan'
 import { FERNANDO_PLAN, resolvePlan, setActivePlan } from '../data/templates'
-import { todayISO } from './date'
+import { todayISO, addDays, weekdayOf } from './date'
 import { EMPTY_DATA, type AppData, type HabitDayLog, type WorkoutDayLog } from '../types'
 
 /** Everything before profiles existed (Sep 27 to Oct 3 2026) was saved here; it is kept as a backup. */
@@ -70,7 +70,16 @@ function migrate(data: AppData): AppData {
   const habitList = data.habitList ?? DEFAULT_HABITS
   // Data from before profiles is Fernando's, on his 100-day plan.
   const profile = data.profile ?? { name: 'Fernando', plan: FERNANDO_PLAN }
-  return { ...data, workouts, habits, habitList, profile }
+  // Travel was set per week until Oct 7 2026; every day of those weeks becomes a travel day.
+  const travelDays = { ...data.travelDays }
+  for (const monday of data.travelWeeks ?? []) {
+    for (let i = 0; i < 7; i++) {
+      const iso = addDays(monday, i)
+      travelDays[iso] ??= TRAVEL_TEMPLATE[weekdayOf(iso)]
+    }
+  }
+  const { travelWeeks: _, ...rest } = data
+  return { ...rest, workouts, habits, habitList, profile, travelDays }
 }
 
 /**

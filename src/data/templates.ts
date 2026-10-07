@@ -45,7 +45,7 @@ export interface PlanConfig {
   sessions: Record<DayType, PlanSession>
   phases: Phase[]
   deloadWeeks: number[]
-  /** Whether the Travel week button (Fernando's section 12 sessions) is offered. */
+  /** Whether the Travel day button (Fernando's section 12 sessions) is offered. */
   travel: boolean
   /** Softer sessions the Swap button offers. */
   swapTo: DayType[]

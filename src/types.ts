@@ -90,9 +90,12 @@ export interface AppData {
   habitList: Habit[]
   /** Targets and minimums changed on the Nutrition and Recovery pages; defaults fill the rest. */
   targets?: Partial<import('./lib/targets').Targets>
-  /** Weeks switched to the travel plan (section 12), as the Monday ISO date starting each week. */
+  /**
+   * Until Oct 7 2026: weeks switched to the travel plan, as each week's Monday ISO date.
+   * Loading turns them into `travelDays`.
+   */
   travelWeeks?: string[]
-  /** A travel day swapped to a different travel session, keyed by ISO date. */
+  /** Days switched to the travel plan (section 12) and the travel session each one shows, keyed by ISO date. */
   travelDays?: Record<string, import('./data/plan').DayType>
   /** A regular day swapped to a softer session, keyed by ISO date. Saved logs stay as they are. */
   swaps?: Record<string, SessionSwap>

@@ -1,7 +1,7 @@
 import { TRAVEL_TEMPLATE, SWAP_REASONS, getWeekNumber, type DayType, type SwapReason } from '../data/plan'
 import { activePlan, type DayMacros } from '../data/templates'
 import type { AppData } from '../types'
-import { dayOfPlan, weekdayOf, startOfWeek } from './date'
+import { dayOfPlan, weekdayOf } from './date'
 
 export interface DayInfo {
   iso: string
@@ -11,7 +11,7 @@ export interface DayInfo {
   label: string
   weekNumber: number
   deload: boolean
-  /** The day falls in a week switched to the travel plan. */
+  /** The day is switched to the travel plan. */
   travel: boolean
   /** Set when the day was swapped to a softer session: what was planned and why. */
   swap?: { fromLabel: string; reason: SwapReason | null; reasonLabel: string | undefined }
@@ -22,14 +22,14 @@ export interface DayInfo {
   nutrition: DayMacros
 }
 
-type TravelData = Pick<AppData, 'travelWeeks' | 'travelDays' | 'swaps'>
+type TravelData = Pick<AppData, 'travelDays' | 'swaps'>
 
-export function isTravelWeek(data: TravelData | undefined, iso: string): boolean {
-  return !!data?.travelWeeks?.includes(startOfWeek(iso))
+export function isTravelDay(data: TravelData | undefined, iso: string): boolean {
+  return data?.travelDays?.[iso] != null
 }
 
 /**
- * The day's session in the active profile's plan; pass the app data so travel weeks and
+ * The day's session in the active profile's plan; pass the app data so travel days and
  * swapped days show what was done.
  */
 export function getDayInfo(iso: string, data?: TravelData): DayInfo {
@@ -37,10 +37,10 @@ export function getDayInfo(iso: string, data?: TravelData): DayInfo {
   const dayNum = dayOfPlan(iso)
   const inPlan = dayNum >= 1 && dayNum <= plan.lengthDays
   const weekday = weekdayOf(iso)
-  const travel = plan.travel && isTravelWeek(data, iso)
+  const travel = plan.travel && isTravelDay(data, iso)
   let dayType = plan.week[weekday]
   if (travel) dayType = data?.travelDays?.[iso] ?? TRAVEL_TEMPLATE[weekday]
-  // Travel days have their own session picker, so a swap only applies to regular weeks.
+  // Travel days have their own session picker, so a swap only applies to regular days.
   const swapped = travel ? undefined : data?.swaps?.[iso]
   let swap: DayInfo['swap']
   if (swapped && swapped.to !== dayType && plan.sessions[swapped.to]) {
