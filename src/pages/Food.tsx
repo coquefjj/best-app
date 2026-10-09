@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import { useStore } from '../lib/store'
 import { todayISO, formatHuman, addDays, nowHHMM, hhmmToMinutes, formatMinutes } from '../lib/date'
-import { nutritionTarget } from '../lib/targets'
+import { calorieReason, nutritionTarget } from '../lib/targets'
 import type { FoodEntry } from '../types'
 import RoomHeader from '../components/RoomHeader'
 import DaySwiper from '../components/DaySwiper'
@@ -122,6 +122,7 @@ export default function Food() {
 function FoodDay({ iso }: { iso: string }) {
   const { data, setData } = useStore()
   const target = nutritionTarget(data, iso)
+  const kcal = calorieReason(data, iso)
   const entries = data.food[iso]?.entries ?? []
   // Earliest first; food logged before times were saved keeps its order at the top.
   const shown = [...entries].sort((a, b) => (hhmmToMinutes(a.time) ?? -1) - (hhmmToMinutes(b.time) ?? -1))
@@ -256,6 +257,12 @@ function FoodDay({ iso }: { iso: string }) {
             <div className="stat-label">carbs / fat</div>
           </div>
         </div>
+        {kcal.why && (
+          <div className="subtle kcal-line">
+            {kcal.why}
+            {kcal.calories !== kcal.plannedCalories ? ` · target ${kcal.calories} kcal (was ${kcal.plannedCalories})` : ` · target stays ${kcal.calories} kcal`}
+          </div>
+        )}
         {burned > 0 && (
           <div className="subtle burned-line">
             Burned in workout: {Math.round(burned)} kcal · Net: {Math.round(totals.calories - burned)} kcal

@@ -80,3 +80,30 @@ export function nutritionTarget(data: AppData, iso: string): DayNutritionTarget 
     fat: plan.fat,
   }
 }
+
+export interface CalorieReason {
+  /** The day's calorie target and the one the planned session would have had. */
+  calories: number
+  plannedCalories: number
+  hard: boolean
+  /** Why the day's target is what it is, when a swap or travel day set it. */
+  why?: string
+}
+
+/**
+ * The calorie target follows the session the day turns into on the Workout page: a lifting
+ * or hard cardio day gets hard-day calories, easy cardio or rest gets easy-day calories.
+ */
+export function calorieReason(data: AppData, iso: string): CalorieReason {
+  const t = getTargets(data)
+  const info = getDayInfo(iso, data)
+  const planned = getDayInfo(iso)
+  const calories = info.hard ? t.caloriesHard : t.caloriesEasy
+  const plannedCalories = planned.hard ? t.caloriesHard : t.caloriesEasy
+  const kind = info.hard ? 'Hard day' : 'Easy day'
+  const session = info.label.split(' —')[0]
+  let why: string | undefined
+  if (info.swap) why = `${kind}: swapped ${info.swap.fromLabel.split(' —')[0]} for ${session}`
+  else if (info.travel) why = `${kind}: travel day, ${session.replace(/^Travel /, '').toLowerCase()}`
+  return { calories, plannedCalories, hard: info.hard, why }
+}

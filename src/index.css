@@ -1990,3 +1990,8 @@ details.lift[open] > .lift-summary .lift-name::after {
   flex: 1;
   max-width: 220px;
 }
+
+.kcal-line {
+  margin-top: 8px;
+  text-align: center;
+}

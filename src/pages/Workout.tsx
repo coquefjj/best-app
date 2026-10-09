@@ -1,6 +1,7 @@
 import { useParams, Link } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { getDayInfo } from '../lib/session'
+import { calorieReason } from '../lib/targets'
 import { useState } from 'react'
 import { formatHuman, addDays, todayISO, formatClock, formatDuration, parseDuration, weekdayOf } from '../lib/date'
 import { MOBILITY_DAILY, TRAVEL_SESSIONS, TRAVEL_TEMPLATE, SWAP_SESSIONS, SWAP_REASONS, type DayType, type SwapReason } from '../data/plan'
@@ -59,6 +60,7 @@ export default function Workout() {
 function WorkoutDay({ iso }: { iso: string }) {
   const { data, setData } = useStore()
   const info = getDayInfo(iso, data)
+  const kcal = calorieReason(data, iso)
   const workout = data.workouts[iso] ?? emptyWorkout()
   const plan = activePlan()
   const exerciseDefs = plan.sessions[info.dayType].exercises
@@ -202,6 +204,12 @@ function WorkoutDay({ iso }: { iso: string }) {
               {t.short}
             </button>
           ))}
+        </div>
+      )}
+      {(info.swap || info.travel) && (
+        <div className="subtle kcal-line">
+          Food target: <strong>{kcal.calories} kcal</strong> ({kcal.hard ? 'hard' : 'easy'} day
+          {kcal.calories !== kcal.plannedCalories ? `, was ${kcal.plannedCalories}` : ''})
         </div>
       )}
     </>
