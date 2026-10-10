@@ -33,6 +33,8 @@ export const HABIT_CHOICES: Habit[] = [
 export interface Suggested {
   caloriesHard: number
   caloriesEasy: number
+  /** Set by hand; otherwise halfway between easy and hard. */
+  caloriesModerate?: number
   protein: number
   fat: number
   waterL: number

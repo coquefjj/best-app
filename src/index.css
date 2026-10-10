@@ -1995,3 +1995,15 @@ details.lift[open] > .lift-summary .lift-name::after {
   margin-top: 8px;
   text-align: center;
 }
+
+.kcal-pick {
+  margin: 10px 0 12px;
+  padding: 8px 0 12px;
+  border-bottom: 2px dashed var(--line, rgba(0, 0, 0, 0.15));
+  text-align: center;
+}
+
+.kcal-pick .pill-select {
+  justify-content: center;
+  margin-top: 6px;
+}

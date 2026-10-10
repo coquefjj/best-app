@@ -99,6 +99,8 @@ export interface AppData {
   travelDays?: Record<string, import('./data/plan').DayType>
   /** A regular day swapped to a softer session, or a rest day to a workout, keyed by ISO date. Saved logs stay as they are. */
   swaps?: Record<string, SessionSwap>
+  /** Calorie day picked on the Workout page (easy, moderate or hard), keyed by ISO date; without one the session decides. */
+  dayLevels?: Record<string, import('./lib/targets').DayLevel>
 }
 
 /** Who the profile is and what onboarding set up. Profiles made before onboarding existed (Fernando's) have no about. */

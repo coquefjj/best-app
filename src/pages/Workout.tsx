@@ -1,7 +1,7 @@
 import { useParams, Link } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { getDayInfo } from '../lib/session'
-import { calorieReason } from '../lib/targets'
+import { calorieReason, dayLevel, DAY_LEVELS, type DayLevel } from '../lib/targets'
 import { useState } from 'react'
 import { formatHuman, addDays, todayISO, formatClock, formatDuration, parseDuration, weekdayOf } from '../lib/date'
 import { MOBILITY_DAILY, TRAVEL_SESSIONS, TRAVEL_TEMPLATE, SWAP_SESSIONS, SWAP_REASONS, SWAP_REASONS_SOFTER, SWAP_REASONS_FROM_REST, type DayType, type SwapReason } from '../data/plan'
@@ -155,6 +155,17 @@ function WorkoutDay({ iso }: { iso: string }) {
     })
   }
 
+  /** Picking the level the session already gives clears the pick, so the day follows the session again. */
+  const pickLevel = (level: DayLevel) => {
+    const auto = dayLevel({ ...data, dayLevels: {} }, iso).auto
+    setData((prev) => {
+      const dayLevels = { ...prev.dayLevels }
+      if (level === auto) delete dayLevels[iso]
+      else dayLevels[iso] = level
+      return { ...prev, dayLevels }
+    })
+  }
+
   /** Card heading with the Swap and day Travel buttons on the right; the pickers sit under it. */
   const cardHead = (title: string) => (
     <>
@@ -213,12 +224,19 @@ function WorkoutDay({ iso }: { iso: string }) {
           ))}
         </div>
       )}
-      {(info.swap || info.travel) && (
-        <div className="subtle kcal-line">
-          Food target: <strong>{kcal.calories} kcal</strong> ({kcal.hard ? 'hard' : 'easy'} day
-          {kcal.calories !== kcal.plannedCalories ? `, was ${kcal.plannedCalories}` : ''})
+      <div className="kcal-pick">
+        <div className="subtle">
+          Calories for this day: <strong>{kcal.calories} kcal</strong>
+          {kcal.calories !== kcal.plannedCalories ? ` (was ${kcal.plannedCalories})` : ''}
         </div>
-      )}
+        <div className="pill-select" aria-label="Calorie day">
+          {DAY_LEVELS.map((l) => (
+            <button key={l.id} className={kcal.level === l.id ? 'selected' : ''} aria-pressed={kcal.level === l.id} onClick={() => pickLevel(l.id)}>
+              {l.label}
+            </button>
+          ))}
+        </div>
+      </div>
     </>
   )
 

@@ -355,11 +355,12 @@ function FoodDay({ iso }: { iso: string }) {
       <TargetSettings
         rows={[
           { label: 'Calories, easy day', unit: 'kcal', target: 'caloriesEasy' },
+          { label: 'Calories, moderate day', unit: 'kcal', target: 'caloriesModerate' },
           { label: 'Calories, hard day', unit: 'kcal', target: 'caloriesHard' },
           { label: 'Calories within ±', unit: 'kcal', target: 'calorieTolerance', min: 'calorieMinTolerance', step: 10 },
           { label: 'Protein', unit: 'g', target: 'protein', min: 'proteinMin' },
         ]}
-        note="Easy days are Tuesday and Sunday. On the Home calendar a day is green when calories and protein are both on target, yellow when at least one reaches its minimum, red when neither does."
+        note="Easy days are Tuesday and Sunday; dumbbell-only travel days are moderate. Pick Easy, Moderate or Hard on Workout to change a day. Moderate starts halfway between easy and hard. On the Home calendar a day is green when calories and protein are both on target, yellow when at least one reaches its minimum, red when neither does."
       />
 
       <button

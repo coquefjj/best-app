@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../lib/store'
+import { midpoint } from '../lib/targets'
 import { addDays, formatHuman, startOfWeek, todayISO } from '../lib/date'
 import { TEMPLATES, resolvePlan, type PlanRef } from '../data/templates'
 import { BLANK_DRAFT, HABIT_CHOICES, PRESETS, carbsFor, suggest, type About, type Draft } from '../data/onboarding'
@@ -44,6 +45,7 @@ export default function Onboarding() {
   const set = (patch: Partial<Draft>) => setDraft((d) => ({ ...d, ...patch }))
   const setAbout = (patch: Partial<About>) => setDraft((d) => ({ ...d, about: { ...d.about, ...patch } }))
   const food = { ...suggest(draft.about), ...draft.food }
+  const moderate = food.caloriesModerate ?? midpoint(food.caloriesEasy, food.caloriesHard)
   const setFood = (key: keyof typeof food, v: number | null) =>
     setDraft((d) => {
       const next = { ...d.food }
@@ -71,6 +73,7 @@ export default function Onboarding() {
         baseTargets: {
           caloriesHard: food.caloriesHard,
           caloriesEasy: food.caloriesEasy,
+          ...(food.caloriesModerate != null ? { caloriesModerate: food.caloriesModerate } : {}),
           protein: food.protein,
           proteinMin,
           waterL: food.waterL,
@@ -286,6 +289,7 @@ export default function Onboarding() {
         <div className="card">
           <p className="subtle">Suggested from your body numbers, activity and goal. These are estimates to start from; change them any time on Nutrition.</p>
           {field('Calories on training days (kcal)', food.caloriesHard, (v) => setFood('caloriesHard', v), 50)}
+          {field('Calories on moderate days (kcal)', moderate, (v) => setFood('caloriesModerate', v), 25)}
           {field('Calories on rest days (kcal)', food.caloriesEasy, (v) => setFood('caloriesEasy', v), 50)}
           {field('Protein (g)', food.protein, (v) => setFood('protein', v), 5)}
           {field('Fat (g)', food.fat, (v) => setFood('fat', v), 5)}
@@ -329,7 +333,7 @@ export default function Onboarding() {
           <div className="card">
             <div className="card-kicker">Nutrition</div>
             <div className="subtle">
-              {food.caloriesHard} kcal training days · {food.caloriesEasy} kcal rest days · {food.protein} g protein
+              {food.caloriesHard} kcal training days · {moderate} kcal moderate days · {food.caloriesEasy} kcal rest days · {food.protein} g protein
             </div>
           </div>
           <div className="card">

@@ -24,6 +24,8 @@ export interface PlanSession {
   label: string
   /** Hard days get the hard-day calorie target. */
   hard: boolean
+  /** Moderate days get the in-between calorie target (wins over hard). */
+  moderate?: boolean
   exercises?: PlanExercise[]
   /** Cardio sessions: the menu to pick today's session from. */
   modalityOptions?: string[]
@@ -83,6 +85,8 @@ function hybrid100(ref: PlanRef): PlanConfig {
   for (const t of TRAVEL_SESSIONS) {
     if (t.dayType === 'rest') continue
     sessions[t.dayType] = { label: t.label, hard: t.dayType !== 'travelEasyRun', exercises: SESSIONS_BY_TYPE[t.dayType] }
+    // Dumbbell-only sessions are lighter than the gym days they stand in for.
+    if (t.dayType === 'travelDb1' || t.dayType === 'travelDb2' || t.dayType === 'travelCircuit') sessions[t.dayType].moderate = true
   }
   sessions.travelEasyRun.modalityOptions = TRAVEL_EASY_RUN_OPTIONS
   sessions.travelQualityRun.modalityOptions = TRAVEL_QUALITY_RUN_OPTIONS
