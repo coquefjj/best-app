@@ -103,7 +103,7 @@ export function calorieReason(data: AppData, iso: string): CalorieReason {
   const kind = info.hard ? 'Hard day' : 'Easy day'
   const session = info.label.split(' —')[0]
   let why: string | undefined
-  if (info.swap) why = `${kind}: swapped ${info.swap.fromLabel.split(' —')[0]} for ${session}`
+  if (info.swap) why = `${kind}: swapped ${info.swap.fromShort} for ${session}`
   else if (info.travel) why = `${kind}: travel day, ${session.replace(/^Travel /, '').toLowerCase()}`
   return { calories, plannedCalories, hard: info.hard, why }
 }

@@ -4,7 +4,7 @@ import { getDayInfo } from '../lib/session'
 import { calorieReason } from '../lib/targets'
 import { useState } from 'react'
 import { formatHuman, addDays, todayISO, formatClock, formatDuration, parseDuration, weekdayOf } from '../lib/date'
-import { MOBILITY_DAILY, TRAVEL_SESSIONS, TRAVEL_TEMPLATE, SWAP_SESSIONS, SWAP_REASONS, type DayType, type SwapReason } from '../data/plan'
+import { MOBILITY_DAILY, TRAVEL_SESSIONS, TRAVEL_TEMPLATE, SWAP_SESSIONS, SWAP_REASONS, SWAP_REASONS_SOFTER, SWAP_REASONS_FROM_REST, type DayType, type SwapReason } from '../data/plan'
 import { activePlan } from '../data/templates'
 import RoomHeader from '../components/RoomHeader'
 import DaySwiper from '../components/DaySwiper'
@@ -138,7 +138,14 @@ function WorkoutDay({ iso }: { iso: string }) {
   const swap = info.travel ? undefined : data.swaps?.[iso]
   const [swapOpen, setSwapOpen] = useState(false)
   const plannedType = getDayInfo(iso, { ...data, swaps: undefined }).dayType
-  const swapTargets = SWAP_SESSIONS.filter((t) => plan.swapTo.includes(t.dayType) && t.dayType !== plannedType)
+  // A rest day can take any workout on the plan's week; a workout day goes to a softer session.
+  const swapTargets: { dayType: DayType; short: string }[] =
+    plannedType === 'rest'
+      ? [...new Set(Object.keys(plan.week).sort((a, b) => ((+a + 6) % 7) - ((+b + 6) % 7)).map((wd) => plan.week[+wd]))]
+          .filter((t) => t !== 'rest')
+          .map((t) => ({ dayType: t, short: plan.sessions[t].label.split(' —')[0].replace(/ \(.*\)$/, '') }))
+      : SWAP_SESSIONS.filter((t) => plan.swapTo.includes(t.dayType) && t.dayType !== plannedType)
+  const swapReasons = (plannedType === 'rest' ? SWAP_REASONS_FROM_REST : SWAP_REASONS_SOFTER).map((id) => SWAP_REASONS.find((r) => r.id === id)!)
   const setSwap = (to: DayType | null, reason: SwapReason | null = swap?.reason ?? null) => {
     setData((prev) => {
       const swaps = { ...prev.swaps }
@@ -172,7 +179,7 @@ function WorkoutDay({ iso }: { iso: string }) {
       </h2>
       {!info.travel && swapOpen && (
         <div className="travel-swap swap-panel">
-          <div className="subtle">Swap {swap ? info.swap?.fromLabel.split(' —')[0] : info.label.split(' —')[0]} for</div>
+          <div className="subtle">Swap {plannedType === 'rest' ? 'rest day' : swap ? info.swap?.fromShort : info.label.split(' —')[0]} for</div>
           <div className="pill-select" aria-label="Swap to">
             {swapTargets.map((t) => (
               <button key={t.dayType} className={swap?.to === t.dayType ? 'selected' : ''} onClick={() => setSwap(t.dayType)}>
@@ -184,7 +191,7 @@ function WorkoutDay({ iso }: { iso: string }) {
             <>
               <div className="subtle">Why?</div>
               <div className="pill-select" aria-label="Why swap">
-                {SWAP_REASONS.map((r) => (
+                {swapReasons.map((r) => (
                   <button key={r.id} className={swap.reason === r.id ? 'selected' : ''} onClick={() => setSwap(swap.to, swap.reason === r.id ? null : r.id)}>
                     {r.label}
                   </button>
@@ -229,7 +236,7 @@ function WorkoutDay({ iso }: { iso: string }) {
             <span className="badge travel">Travel day: maintain, don't progress</span>
           ) : info.swap ? (
             <span className="badge travel">
-              Swapped from {info.swap.fromLabel.split(' —')[0]}
+              Swapped from {info.swap.fromShort}
               {info.swap.reasonLabel ? ` · ${info.swap.reasonLabel}` : ''}
             </span>
           ) : info.deload ? (

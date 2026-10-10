@@ -97,7 +97,7 @@ export interface AppData {
   travelWeeks?: string[]
   /** Days switched to the travel plan (section 12) and the travel session each one shows, keyed by ISO date. */
   travelDays?: Record<string, import('./data/plan').DayType>
-  /** A regular day swapped to a softer session, keyed by ISO date. Saved logs stay as they are. */
+  /** A regular day swapped to a softer session, or a rest day to a workout, keyed by ISO date. Saved logs stay as they are. */
   swaps?: Record<string, SessionSwap>
 }
 

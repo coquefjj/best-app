@@ -13,8 +13,8 @@ export interface DayInfo {
   deload: boolean
   /** The day is switched to the travel plan. */
   travel: boolean
-  /** Set when the day was swapped to a softer session: what was planned and why. */
-  swap?: { fromLabel: string; reason: SwapReason | null; reasonLabel: string | undefined }
+  /** Set when the day was swapped to another session: what was planned and why. */
+  swap?: { fromLabel: string; /** Short name, e.g. "Strength C" or "Rest". */ fromShort: string; fromRest: boolean; reason: SwapReason | null; reasonLabel: string | undefined }
   phaseName: string | undefined
   /** Hard days get the hard-day calorie target. */
   hard: boolean
@@ -44,7 +44,7 @@ export function getDayInfo(iso: string, data?: TravelData): DayInfo {
   const swapped = travel ? undefined : data?.swaps?.[iso]
   let swap: DayInfo['swap']
   if (swapped && swapped.to !== dayType && plan.sessions[swapped.to]) {
-    swap = { fromLabel: plan.sessions[dayType].label, reason: swapped.reason, reasonLabel: SWAP_REASONS.find((r) => r.id === swapped.reason)?.label }
+    swap = { fromLabel: plan.sessions[dayType].label, fromShort: dayType === 'rest' ? 'Rest' : plan.sessions[dayType].label.split(' —')[0], fromRest: dayType === 'rest', reason: swapped.reason, reasonLabel: SWAP_REASONS.find((r) => r.id === swapped.reason)?.label }
     dayType = swapped.to
   }
   const session = plan.sessions[dayType]

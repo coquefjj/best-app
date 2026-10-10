@@ -25,10 +25,12 @@ const within = (v: number, [lo, hi]: [number, number], [minLo, minHi]: [number, 
  * Workout: finished (or rest-day mobility, or an aerobic session with its time) is green,
  * anything logged is yellow, nothing is red. Days before the first logged workout have no data.
  * A day swapped to a softer session tops out at yellow: you trained, but not what was planned.
+ * A rest day swapped for a workout goes green once that workout is done.
  */
 function gradeWorkout(data: AppData, iso: string, firstWorkout: string | undefined): Grade {
   const grade = gradeWorkoutDone(data, iso, firstWorkout)
-  return grade === 'full' && getDayInfo(iso, data).swap ? 'partial' : grade
+  const swap = getDayInfo(iso, data).swap
+  return grade === 'full' && swap && !swap.fromRest ? 'partial' : grade
 }
 
 function gradeWorkoutDone(data: AppData, iso: string, firstWorkout: string | undefined): Grade {

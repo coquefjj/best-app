@@ -87,7 +87,15 @@ export const SWAP_REASONS = [
   { id: 'sick', label: 'Sick' },
   { id: 'time', label: 'No time' },
   { id: 'other', label: 'Other' },
+  // Offered when a rest day is swapped for a workout.
+  { id: 'feltGood', label: 'Felt good' },
+  { id: 'makeUp', label: 'Make up a missed day' },
+  { id: 'moved', label: 'Moved a session' },
 ] as const
+
+/** Reasons the Why? picker offers, by whether the planned day was a rest day. */
+export const SWAP_REASONS_SOFTER: SwapReason[] = ['tired', 'sore', 'sick', 'time', 'other']
+export const SWAP_REASONS_FROM_REST: SwapReason[] = ['feltGood', 'makeUp', 'moved', 'other']
 
 export type SwapReason = (typeof SWAP_REASONS)[number]['id']
 
