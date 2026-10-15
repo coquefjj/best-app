@@ -42,9 +42,12 @@ export default function TargetSettings({ rows, note }: { rows: TargetRow[]; note
     })
   }
 
+  const follows = (key: keyof Targets) => key.endsWith('Moderate') && data.targets?.[key] == null && data.profile?.baseTargets?.[key] == null
+
   const input = (key: keyof Targets, step = 1, label: string) => (
     <input
-      key={`${key}-${resets}`}
+      // An unset moderate field follows easy and hard, so it re-mounts to show the new value.
+      key={`${key}-${resets}-${follows(key) ? t[key] : ''}`}
       type="number"
       inputMode="decimal"
       step={step}

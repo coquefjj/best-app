@@ -46,6 +46,8 @@ export default function Onboarding() {
   const setAbout = (patch: Partial<About>) => setDraft((d) => ({ ...d, about: { ...d.about, ...patch } }))
   const food = { ...suggest(draft.about), ...draft.food }
   const moderate = food.caloriesModerate ?? midpoint(food.caloriesEasy, food.caloriesHard)
+  const carbsHard = food.carbsHard ?? carbsFor(food.caloriesHard, food.protein, food.fat)
+  const carbsEasy = food.carbsEasy ?? carbsFor(food.caloriesEasy, food.protein, food.fat)
   const setFood = (key: keyof typeof food, v: number | null) =>
     setDraft((d) => {
       const next = { ...d.food }
@@ -82,8 +84,8 @@ export default function Onboarding() {
           sleepHoursMin: Math.max(0, food.sleepHours - 1),
         },
         macros: {
-          easy: { fat: food.fat, carbs: carbsFor(food.caloriesEasy, food.protein, food.fat) },
-          hard: { fat: food.fat, carbs: carbsFor(food.caloriesHard, food.protein, food.fat) },
+          easy: { fat: food.fat, carbs: carbsEasy },
+          hard: { fat: food.fat, carbs: carbsHard },
         },
       },
     }
@@ -293,9 +295,10 @@ export default function Onboarding() {
           {field('Calories on rest days (kcal)', food.caloriesEasy, (v) => setFood('caloriesEasy', v), 50)}
           {field('Protein (g)', food.protein, (v) => setFood('protein', v), 5)}
           {field('Fat (g)', food.fat, (v) => setFood('fat', v), 5)}
+          {field('Carbs on training days (g)', carbsHard, (v) => setFood('carbsHard', v), 5)}
+          {field('Carbs on rest days (g)', carbsEasy, (v) => setFood('carbsEasy', v), 5)}
           <p className="subtle">
-            Carbs fill the rest: {carbsFor(food.caloriesHard, food.protein, food.fat)} g on training days,{' '}
-            {carbsFor(food.caloriesEasy, food.protein, food.fat)} g on rest days.
+            Carbs start as the calories left after protein and fat; moderate days sit halfway. Change fat and carbs by day any time in Targets on Nutrition.
           </p>
         </div>
       )}

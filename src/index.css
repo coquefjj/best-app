@@ -646,6 +646,10 @@ input[type='checkbox']:checked {
   text-align: center;
 }
 
+.stat-grid.two-by-two {
+  grid-template-columns: repeat(2, 1fr);
+}
+
 .stat-grid > div {
   background: var(--status-bg);
   border: 3px solid var(--ink);

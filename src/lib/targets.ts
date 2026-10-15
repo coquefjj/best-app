@@ -18,6 +18,13 @@ export interface Targets {
   calorieMinTolerance: number
   protein: number
   proteinMin: number
+  /** Carbs and fat (g) by calorie day; moderate starts halfway between easy and hard. */
+  carbsEasy: number
+  carbsModerate: number
+  carbsHard: number
+  fatEasy: number
+  fatModerate: number
+  fatHard: number
   waterL: number
   waterMinL: number
   sleepHours: number
@@ -31,6 +38,18 @@ export function midpoint(easy: number, hard: number): number {
   return Math.round((easy + hard) / 2 / 25) * 25
 }
 
+/** Halfway between the easy and hard day's grams. */
+function half(easy: number, hard: number): number {
+  return Math.round((easy + hard) / 2)
+}
+
+/** Moderate fields that follow the easy and hard day until set, and how they are worked out. */
+const MODERATE: [keyof Targets, keyof Targets, keyof Targets, (e: number, h: number) => number][] = [
+  ['caloriesModerate', 'caloriesEasy', 'caloriesHard', midpoint],
+  ['carbsModerate', 'carbsEasy', 'carbsHard', half],
+  ['fatModerate', 'fatEasy', 'fatHard', half],
+]
+
 /** Fernando's defaults; calories and protein come from his plan. */
 export const DEFAULT_TARGETS: Targets = {
   caloriesEasy: NUTRITION_TARGETS.easy.calories,
@@ -40,6 +59,12 @@ export const DEFAULT_TARGETS: Targets = {
   calorieMinTolerance: 350,
   protein: NUTRITION_TARGETS.easy.protein,
   proteinMin: 120,
+  carbsEasy: NUTRITION_TARGETS.easy.carbs,
+  carbsModerate: half(NUTRITION_TARGETS.easy.carbs, NUTRITION_TARGETS.hard.carbs),
+  carbsHard: NUTRITION_TARGETS.hard.carbs,
+  fatEasy: NUTRITION_TARGETS.easy.fat,
+  fatModerate: half(NUTRITION_TARGETS.easy.fat, NUTRITION_TARGETS.hard.fat),
+  fatHard: NUTRITION_TARGETS.hard.fat,
   waterL: 2,
   waterMinL: 1.4,
   sleepHours: 8,
@@ -54,16 +79,30 @@ export const DEFAULT_TARGETS: Targets = {
  */
 export function defaultTargets(data: AppData): Targets {
   const { easy, hard } = activePlan().nutrition
-  const t = { ...DEFAULT_TARGETS, caloriesEasy: easy.calories, caloriesHard: hard.calories, protein: easy.protein, ...data.profile?.baseTargets }
-  if (data.profile?.baseTargets?.caloriesModerate == null) t.caloriesModerate = midpoint(t.caloriesEasy, t.caloriesHard)
+  // Carbs and fat: what onboarding set for the profile, otherwise the plan's.
+  const macros = data.profile?.macros ?? { easy, hard }
+  const t: Targets = {
+    ...DEFAULT_TARGETS,
+    caloriesEasy: easy.calories,
+    caloriesHard: hard.calories,
+    protein: easy.protein,
+    carbsEasy: macros.easy.carbs,
+    carbsHard: macros.hard.carbs,
+    fatEasy: macros.easy.fat,
+    fatHard: macros.hard.fat,
+    ...data.profile?.baseTargets,
+  }
+  for (const [mod, e, h, fn] of MODERATE) {
+    if (data.profile?.baseTargets?.[mod] == null) t[mod] = fn(t[e], t[h])
+  }
   return t
 }
 
 export function getTargets(data: AppData): Targets {
   const t = { ...defaultTargets(data), ...data.targets }
   // Until you set it, the moderate day stays halfway between the other two.
-  if (data.targets?.caloriesModerate == null && data.profile?.baseTargets?.caloriesModerate == null) {
-    t.caloriesModerate = midpoint(t.caloriesEasy, t.caloriesHard)
+  for (const [mod, e, h, fn] of MODERATE) {
+    if (data.targets?.[mod] == null && data.profile?.baseTargets?.[mod] == null) t[mod] = fn(t[e], t[h])
   }
   return t
 }
@@ -110,15 +149,19 @@ export interface DayNutritionTarget {
   fat: number
 }
 
-/** The day's nutrition targets: calories and protein from your settings, carbs and fat from onboarding or the plan. */
+export function macrosFor(t: Targets, level: DayLevel): { carbs: number; fat: number } {
+  return level === 'hard'
+    ? { carbs: t.carbsHard, fat: t.fatHard }
+    : level === 'moderate'
+      ? { carbs: t.carbsModerate, fat: t.fatModerate }
+      : { carbs: t.carbsEasy, fat: t.fatEasy }
+}
+
+/** The day's nutrition targets for its calorie day, from the Targets card on Nutrition. */
 export function nutritionTarget(data: AppData, iso: string): DayNutritionTarget {
   const t = getTargets(data)
   const { level } = dayLevel(data, iso)
-  const macros = (k: 'easy' | 'hard') => data.profile?.macros?.[k] ?? activePlan().nutrition[k]
-  // Moderate days sit halfway between easy and hard for carbs and fat too.
-  const plan = level === 'moderate'
-    ? { carbs: Math.round((macros('easy').carbs + macros('hard').carbs) / 2), fat: Math.round((macros('easy').fat + macros('hard').fat) / 2) }
-    : macros(level)
+  const plan = macrosFor(t, level)
   const calories = caloriesFor(t, level)
   return {
     calories,

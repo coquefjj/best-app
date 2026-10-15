@@ -37,6 +37,9 @@ export interface Suggested {
   caloriesModerate?: number
   protein: number
   fat: number
+  /** Set by hand; otherwise the calories left after protein and fat. */
+  carbsHard?: number
+  carbsEasy?: number
   waterL: number
   sleepHours: number
 }
