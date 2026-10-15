@@ -33,6 +33,8 @@ export interface WorkoutDayLog {
   notes?: string
   /** Set by "Finish workout"; ISO timestamp of when it was finished. */
   completedAt?: string
+  /** Exercises added from the library for this day only, in order; their sets live in `exercises` under the same id. */
+  added?: { id: string; name: string }[]
 }
 
 export interface FoodEntry {

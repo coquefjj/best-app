@@ -11,6 +11,8 @@ import DaySwiper from '../components/DaySwiper'
 import MoveThumb from '../components/moves/MoveThumb'
 import MoveSheet from '../components/moves/MoveSheet'
 import StrengthProgress from '../components/StrengthProgress'
+import ExercisePicker from '../components/ExercisePicker'
+import { findLibraryExercise, type LibraryExercise } from '../data/library'
 import type { AerobicLog, ExerciseLog, SetLog, WorkoutDayLog } from '../types'
 import type { PlanExercise } from '../data/plan'
 
@@ -24,6 +26,16 @@ function findLastLog(workouts: Record<string, WorkoutDayLog>, exerciseId: string
     .sort()
     .reverse()
   return dates.length ? workouts[dates[0]].exercises[exerciseId] : undefined
+}
+
+/** The last time an exercise with this name was logged before the day, from any session or slot. */
+function findLastByName(workouts: Record<string, WorkoutDayLog>, name: string, beforeIso: string): ExerciseLog | undefined {
+  const dates = Object.keys(workouts).filter((d) => d < beforeIso).sort().reverse()
+  for (const d of dates) {
+    const found = Object.values(workouts[d].exercises).find((ex) => ex.chosenOption === name && ex.sets.length)
+    if (found) return found
+  }
+  return undefined
 }
 
 const emptySet = (): SetLog => ({ weight: null, reps: null, seconds: null, done: false })
@@ -106,6 +118,31 @@ function WorkoutDay({ iso }: { iso: string }) {
 
   const addSet = (exerciseId: string) => updateExercise(exerciseId, (ex) => ({ ...ex, sets: [...ex.sets, emptySet()] }))
   const removeSet = (exerciseId: string) => updateExercise(exerciseId, (ex) => ({ ...ex, sets: ex.sets.slice(0, -1) }))
+
+  // Exercises from the library apply to this day only; they log sets like the planned ones.
+  const addFromLibrary = (lib: LibraryExercise) => {
+    const lastLog = findLastByName(data.workouts, lib.name, iso)
+    const id = `add-${Date.now().toString(36)}`
+    update((w) => ({
+      ...w,
+      added: [...(w.added ?? []), { id, name: lib.name }],
+      exercises: {
+        ...w.exercises,
+        [id]: {
+          chosenOption: lib.name,
+          mode: lastLog?.mode ?? lib.mode,
+          weighted: lastLog?.weighted ?? lib.weighted,
+          sets: Array.from({ length: lastLog?.sets.length || parseInt(lib.target.sets) || 3 }, emptySet),
+        },
+      },
+    }))
+  }
+  const removeAdded = (id: string) =>
+    update((w) => {
+      const exercises = { ...w.exercises }
+      delete exercises[id]
+      return { ...w, added: (w.added ?? []).filter((a) => a.id !== id), exercises }
+    })
 
   const finish = () => update((w) => ({ ...w, completedAt: new Date().toISOString() }))
   const reopen = () => update((w) => ({ ...w, completedAt: undefined }))
@@ -240,12 +277,121 @@ function WorkoutDay({ iso }: { iso: string }) {
     </>
   )
 
+  /** Reps/time and weight toggles, the set rows and add/remove set, for one logged exercise. */
+  const renderSets = (exId: string, log: ExerciseLog, lastLog: ExerciseLog | undefined) => {
+    const mode = log.mode ?? 'reps'
+    const weighted = log.weighted ?? true
+    return (
+      <>
+        <div className="set-toggles">
+          <div className="segmented" role="group" aria-label="Count sets by">
+            <button className={mode === 'reps' ? 'selected' : ''} onClick={() => updateExercise(exId, (e) => ({ ...e, mode: 'reps' }))}>Reps</button>
+            <button className={mode === 'time' ? 'selected' : ''} onClick={() => updateExercise(exId, (e) => ({ ...e, mode: 'time' }))}>Time</button>
+          </div>
+          <button
+            className={`toggle-chip${weighted ? ' selected' : ''}`}
+            aria-pressed={weighted}
+            onClick={() => updateExercise(exId, (e) => ({ ...e, weighted: !weighted }))}
+          >
+            {weighted ? '✓ ' : ''}Weight
+          </button>
+        </div>
+
+        {log.sets.map((s, idx) => {
+          const lastSet = lastLog?.sets[idx]
+          return (
+            <div className={`set-row${weighted ? '' : ' no-weight'}`} key={idx}>
+              <span className="set-num">#{idx + 1}</span>
+              {weighted && (
+                <input
+                  type="number"
+                  inputMode="decimal"
+                  placeholder={lastSet?.weight != null ? `${lastSet.weight} kg last` : 'kg'}
+                  value={s.weight ?? ''}
+                  onChange={(e) => updateSet(exId, idx, { weight: e.target.value === '' ? null : Number(e.target.value) })}
+                />
+              )}
+              {mode === 'time' ? (
+                <TimeInput
+                  seconds={s.seconds ?? null}
+                  placeholder={lastSet?.seconds != null ? `${formatDuration(lastSet.seconds)} last` : 'm:ss'}
+                  onChange={(sec) => updateSet(exId, idx, { seconds: sec })}
+                />
+              ) : (
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  placeholder={lastSet?.reps != null ? `${lastSet.reps} reps last` : 'reps'}
+                  value={s.reps ?? ''}
+                  onChange={(e) => updateSet(exId, idx, { reps: e.target.value === '' ? null : Number(e.target.value) })}
+                />
+              )}
+              <input
+                type="checkbox"
+                aria-label={`Set ${idx + 1} done`}
+                checked={s.done}
+                onChange={(e) => updateSet(exId, idx, { done: e.target.checked })}
+              />
+            </div>
+          )
+        })}
+
+        <div className="set-actions">
+          <button className="btn secondary small" onClick={() => addSet(exId)}>+ Add set</button>
+          {log.sets.length > 1 && (
+            <button className="btn secondary small" onClick={() => removeSet(exId)}>− Remove set</button>
+          )}
+        </div>
+      </>
+    )
+  }
+
   const [demo, setDemo] = useState<{ name: string; cue?: string } | null>(null)
+  const [pickerOpen, setPickerOpen] = useState(false)
+  const added = workout.added ?? []
+
+  /** Exercises added from the library, then the button that opens it. */
+  const addedSection = (
+    <>
+      {added.map((a) => {
+        const log = workout.exercises[a.id]
+        if (!log) return null
+        const lib = findLibraryExercise(a.name)
+        return (
+          <div className="exercise-block added" key={a.id}>
+            <div className="exercise-head">
+              <MoveThumb name={a.name} onOpen={() => setDemo({ name: a.name, cue: lib?.cue })} />
+              <div className="added-title">
+                <h3>{a.name}</h3>
+                <div className="subtle">
+                  <span className="badge added-badge">Added</span>
+                  {lib ? ` Guide: ${lib.target.sets} x ${lib.target.reps}` : ''}
+                </div>
+                {lib?.cue && <div className="subtle">Cue: {lib.cue}</div>}
+              </div>
+              <button className="remove-added" aria-label={`Remove ${a.name} from this day`} onClick={() => removeAdded(a.id)}>✕</button>
+            </div>
+            {renderSets(a.id, log, findLastByName(data.workouts, a.name, iso))}
+          </div>
+        )
+      })}
+      <button className="btn secondary full add-exercise" onClick={() => setPickerOpen(true)}>
+        + Add exercise
+      </button>
+    </>
+  )
   const [showProgress, setShowProgress] = useState(false)
 
   return (
     <div className="page room-page floor-gym">
       {demo && <MoveSheet name={demo.name} cue={demo.cue} onClose={() => setDemo(null)} />}
+      {pickerOpen && (
+        <ExercisePicker
+          added={added.map((a) => a.name)}
+          onPick={(ex) => { addFromLibrary(ex); setPickerOpen(false) }}
+          onClose={() => setPickerOpen(false)}
+        />
+      )}
       <RoomHeader
         room="gym"
         title={info.label}
@@ -383,76 +529,19 @@ function WorkoutDay({ iso }: { iso: string }) {
                   </button>
                 )}
 
-                {log && (() => {
-                  const mode = log.mode ?? 'reps'
-                  const weighted = log.weighted ?? true
-                  return (
-                    <>
-                      <div className="set-toggles">
-                        <div className="segmented" role="group" aria-label="Count sets by">
-                          <button className={mode === 'reps' ? 'selected' : ''} onClick={() => updateExercise(ex.id, (e) => ({ ...e, mode: 'reps' }))}>Reps</button>
-                          <button className={mode === 'time' ? 'selected' : ''} onClick={() => updateExercise(ex.id, (e) => ({ ...e, mode: 'time' }))}>Time</button>
-                        </div>
-                        <button
-                          className={`toggle-chip${weighted ? ' selected' : ''}`}
-                          aria-pressed={weighted}
-                          onClick={() => updateExercise(ex.id, (e) => ({ ...e, weighted: !weighted }))}
-                        >
-                          {weighted ? '✓ ' : ''}Weight
-                        </button>
-                      </div>
-
-                      {log.sets.map((s, idx) => {
-                        const lastSet = lastLog?.sets[idx]
-                        return (
-                          <div className={`set-row${weighted ? '' : ' no-weight'}`} key={idx}>
-                            <span className="set-num">#{idx + 1}</span>
-                            {weighted && (
-                              <input
-                                type="number"
-                                inputMode="decimal"
-                                placeholder={lastSet?.weight != null ? `${lastSet.weight} kg last` : 'kg'}
-                                value={s.weight ?? ''}
-                                onChange={(e) => updateSet(ex.id, idx, { weight: e.target.value === '' ? null : Number(e.target.value) })}
-                              />
-                            )}
-                            {mode === 'time' ? (
-                              <TimeInput
-                                seconds={s.seconds ?? null}
-                                placeholder={lastSet?.seconds != null ? `${formatDuration(lastSet.seconds)} last` : 'm:ss'}
-                                onChange={(sec) => updateSet(ex.id, idx, { seconds: sec })}
-                              />
-                            ) : (
-                              <input
-                                type="number"
-                                inputMode="numeric"
-                                placeholder={lastSet?.reps != null ? `${lastSet.reps} reps last` : 'reps'}
-                                value={s.reps ?? ''}
-                                onChange={(e) => updateSet(ex.id, idx, { reps: e.target.value === '' ? null : Number(e.target.value) })}
-                              />
-                            )}
-                            <input
-                              type="checkbox"
-                              aria-label={`Set ${idx + 1} done`}
-                              checked={s.done}
-                              onChange={(e) => updateSet(ex.id, idx, { done: e.target.checked })}
-                            />
-                          </div>
-                        )
-                      })}
-
-                      <div className="set-actions">
-                        <button className="btn secondary small" onClick={() => addSet(ex.id)}>+ Add set</button>
-                        {log.sets.length > 1 && (
-                          <button className="btn secondary small" onClick={() => removeSet(ex.id)}>− Remove set</button>
-                        )}
-                      </div>
-                    </>
-                  )
-                })()}
+                {log && renderSets(ex.id, log, lastLog)}
               </div>
             )
           })}
+          {addedSection}
+        </div>
+      )}
+
+      {!exerciseDefs && (
+        <div className="card">
+          <h2>Extra exercises</h2>
+          {!added.length && <p className="subtle">Add anything from the exercise library to this day.</p>}
+          {addedSection}
         </div>
       )}
 
