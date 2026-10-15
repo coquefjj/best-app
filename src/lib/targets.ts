@@ -16,7 +16,11 @@ export interface Targets {
   calorieTolerance: number
   /** Within this many kcal still counts as the minimum. */
   calorieMinTolerance: number
+  /** Old single protein target; the day fields below start from it. */
   protein: number
+  proteinEasy: number
+  proteinModerate: number
+  proteinHard: number
   proteinMin: number
   /** Carbs and fat (g) by calorie day; moderate starts halfway between easy and hard. */
   carbsEasy: number
@@ -46,6 +50,7 @@ function half(easy: number, hard: number): number {
 /** Moderate fields that follow the easy and hard day until set, and how they are worked out. */
 const MODERATE: [keyof Targets, keyof Targets, keyof Targets, (e: number, h: number) => number][] = [
   ['caloriesModerate', 'caloriesEasy', 'caloriesHard', midpoint],
+  ['proteinModerate', 'proteinEasy', 'proteinHard', half],
   ['carbsModerate', 'carbsEasy', 'carbsHard', half],
   ['fatModerate', 'fatEasy', 'fatHard', half],
 ]
@@ -58,6 +63,9 @@ export const DEFAULT_TARGETS: Targets = {
   calorieTolerance: 150,
   calorieMinTolerance: 350,
   protein: NUTRITION_TARGETS.easy.protein,
+  proteinEasy: NUTRITION_TARGETS.easy.protein,
+  proteinModerate: half(NUTRITION_TARGETS.easy.protein, NUTRITION_TARGETS.hard.protein),
+  proteinHard: NUTRITION_TARGETS.hard.protein,
   proteinMin: 120,
   carbsEasy: NUTRITION_TARGETS.easy.carbs,
   carbsModerate: half(NUTRITION_TARGETS.easy.carbs, NUTRITION_TARGETS.hard.carbs),
@@ -77,6 +85,13 @@ export const DEFAULT_TARGETS: Targets = {
  * Targets before any change on the Nutrition and Recovery pages: the plan's calories and
  * protein, then whatever the profile's onboarding set. "Reset to defaults" goes back here.
  */
+/** Protein was one number until Oct 15 2026; easy and hard days start from it until set. */
+function followProtein(t: Targets, ...sources: (Partial<Targets> | undefined)[]) {
+  for (const k of ['proteinEasy', 'proteinHard'] as const) {
+    if (sources.every((s) => s?.[k] == null)) t[k] = t.protein
+  }
+}
+
 export function defaultTargets(data: AppData): Targets {
   const { easy, hard } = activePlan().nutrition
   // Carbs and fat: what onboarding set for the profile, otherwise the plan's.
@@ -92,6 +107,7 @@ export function defaultTargets(data: AppData): Targets {
     fatHard: macros.hard.fat,
     ...data.profile?.baseTargets,
   }
+  followProtein(t, data.profile?.baseTargets)
   for (const [mod, e, h, fn] of MODERATE) {
     if (data.profile?.baseTargets?.[mod] == null) t[mod] = fn(t[e], t[h])
   }
@@ -100,6 +116,7 @@ export function defaultTargets(data: AppData): Targets {
 
 export function getTargets(data: AppData): Targets {
   const t = { ...defaultTargets(data), ...data.targets }
+  followProtein(t, data.targets, data.profile?.baseTargets)
   // Until you set it, the moderate day stays halfway between the other two.
   for (const [mod, e, h, fn] of MODERATE) {
     if (data.targets?.[mod] == null && data.profile?.baseTargets?.[mod] == null) t[mod] = fn(t[e], t[h])
@@ -149,6 +166,10 @@ export interface DayNutritionTarget {
   fat: number
 }
 
+export function proteinFor(t: Targets, level: DayLevel): number {
+  return level === 'hard' ? t.proteinHard : level === 'moderate' ? t.proteinModerate : t.proteinEasy
+}
+
 export function macrosFor(t: Targets, level: DayLevel): { carbs: number; fat: number } {
   return level === 'hard'
     ? { carbs: t.carbsHard, fat: t.fatHard }
@@ -167,7 +188,7 @@ export function nutritionTarget(data: AppData, iso: string): DayNutritionTarget 
     calories,
     calorieRange: [calories - t.calorieTolerance, calories + t.calorieTolerance],
     calorieMinRange: [calories - t.calorieMinTolerance, calories + t.calorieMinTolerance],
-    protein: t.protein,
+    protein: proteinFor(t, level),
     proteinMin: t.proteinMin,
     carbs: plan.carbs,
     fat: plan.fat,

@@ -70,19 +70,24 @@ function MealTimeline({ days }: { days: NutritionDay[] }) {
   )
 }
 
-function MacroMeter({ label, eaten, target, unit }: { label: string; eaten: number; target: number; unit: string }) {
+function MacroMeter({ label, eaten, target, unit, overIsBad }: { label: string; eaten: number; target: number; unit: string; overIsBad?: boolean }) {
   const pct = target ? eaten / target : 0
+  // The bar leaves room past the target; when you go further over, the scale grows so the
+  // fill always ends where you are and the target tick moves left.
+  const scale = Math.max(1.25, pct * 1.05)
+  const over = target > 0 && Math.round(eaten) > Math.round(target)
   return (
     <div className="macro-meter">
       <div className="macro-meter-top">
         <span>{label}</span>
         <span>
           {fmt(eaten)} / {fmt(target)} {unit}
+          {over && overIsBad ? <span className="meter-over-text"> · {fmt(eaten - target)} {unit} over</span> : null}
         </span>
       </div>
       <div className="meter">
-        <div className="meter-fill" style={{ width: `${Math.min(100, pct * 100) / 1.25}%` }} />
-        <div className="meter-target" style={{ left: `${100 / 1.25}%` }} />
+        <div className={`meter-fill${over && overIsBad ? ' over' : ''}`} style={{ width: `${(pct * 100) / scale}%` }} />
+        <div className="meter-target" style={{ left: `${100 / scale}%` }} />
       </div>
     </div>
   )
@@ -185,8 +190,8 @@ export default function NutritionProgress() {
             <ChartDates from={firstISO} to={today} indent={44} />
             <div className="subtle report-note">Dark ticks are each day's target.</div>
             <MacroMeter label="Protein" eaten={avg('protein')} target={avgTarget('protein')} unit="g" />
-            <MacroMeter label="Carbs" eaten={avg('carbs')} target={avgTarget('carbs')} unit="g" />
-            <MacroMeter label="Fat" eaten={avg('fat')} target={avgTarget('fat')} unit="g" />
+            <MacroMeter label="Carbs" eaten={avg('carbs')} target={avgTarget('carbs')} unit="g" overIsBad />
+            <MacroMeter label="Fat" eaten={avg('fat')} target={avgTarget('fat')} unit="g" overIsBad />
             <ul className="report-rows">
               <li>
                 <span className="report-row-name">Calories in range</span>

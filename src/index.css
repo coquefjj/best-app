@@ -1716,6 +1716,14 @@ details.lift[open] > .lift-summary .lift-name::after {
   background: var(--accent);
 }
 
+.meter-fill.over {
+  background: var(--hp-red);
+}
+
+.meter-over-text {
+  color: var(--hp-red);
+}
+
 .meter-target {
   position: absolute;
   top: -5px;
@@ -1791,6 +1799,16 @@ details.lift[open] > .lift-summary .lift-name::after {
   align-items: center;
 }
 
+.targets-grid.by-day {
+  grid-template-columns: minmax(0, 1fr) repeat(3, 72px);
+  gap: 8px 6px;
+  margin-bottom: 16px;
+}
+
+.targets-grid.by-day .targets-head {
+  justify-content: center;
+}
+
 .targets-row {
   display: contents;
 }
@@ -1824,6 +1842,16 @@ details.lift[open] > .lift-summary .lift-name::after {
   .targets-grid {
     grid-template-columns: minmax(0, 1fr) 68px 68px;
     gap: 6px;
+  }
+
+  .targets-grid.by-day {
+    grid-template-columns: minmax(0, 1fr) repeat(3, 60px);
+    gap: 6px 4px;
+  }
+
+  .targets-grid.by-day .targets-cell input {
+    padding: 6px 3px;
+    font-size: 1rem;
   }
 }
 

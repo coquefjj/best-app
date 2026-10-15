@@ -357,20 +357,17 @@ function FoodDay({ iso }: { iso: string }) {
       </div>
 
       <TargetSettings
-        rows={[
-          { label: 'Calories, easy day', unit: 'kcal', target: 'caloriesEasy' },
-          { label: 'Calories, moderate day', unit: 'kcal', target: 'caloriesModerate' },
-          { label: 'Calories, hard day', unit: 'kcal', target: 'caloriesHard' },
-          { label: 'Calories within ±', unit: 'kcal', target: 'calorieTolerance', min: 'calorieMinTolerance', step: 10 },
-          { label: 'Protein', unit: 'g', target: 'protein', min: 'proteinMin' },
-          { label: 'Carbs, easy day', unit: 'g', target: 'carbsEasy', step: 5 },
-          { label: 'Carbs, moderate day', unit: 'g', target: 'carbsModerate', step: 5 },
-          { label: 'Carbs, hard day', unit: 'g', target: 'carbsHard', step: 5 },
-          { label: 'Fat, easy day', unit: 'g', target: 'fatEasy', step: 5 },
-          { label: 'Fat, moderate day', unit: 'g', target: 'fatModerate', step: 5 },
-          { label: 'Fat, hard day', unit: 'g', target: 'fatHard', step: 5 },
+        byDay={[
+          { label: 'Calories', unit: 'kcal', keys: ['caloriesEasy', 'caloriesModerate', 'caloriesHard'], step: 25 },
+          { label: 'Protein', unit: 'g', keys: ['proteinEasy', 'proteinModerate', 'proteinHard'], step: 5 },
+          { label: 'Carbs', unit: 'g', keys: ['carbsEasy', 'carbsModerate', 'carbsHard'], step: 5 },
+          { label: 'Fat', unit: 'g', keys: ['fatEasy', 'fatModerate', 'fatHard'], step: 5 },
         ]}
-        note="Easy days are Tuesday and Sunday; dumbbell-only travel days are moderate. Pick Easy, Moderate or Hard on Workout to change a day. Moderate starts halfway between easy and hard. Carbs and fat show on Totals and Progress but don't color the calendar. On the Home calendar a day is green when calories and protein are both on target, yellow when at least one reaches its minimum, red when neither does."
+        rows={[
+          { label: 'Calories within ±', unit: 'kcal', target: 'calorieTolerance', min: 'calorieMinTolerance', step: 10 },
+          { label: 'Protein', unit: 'g', min: 'proteinMin' },
+        ]}
+        note="Easy days are Tuesday and Sunday; dumbbell-only travel days are moderate. Pick Easy, Moderate or Hard on Workout to change a day. Moderate starts halfway between easy and hard until you change it. Carbs and fat show on Totals and Progress but don't color the calendar. On the Home calendar a day is green when calories and protein are both on target, yellow when at least one reaches its minimum, red when neither does."
       />
 
       <button

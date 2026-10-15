@@ -6,9 +6,17 @@ export interface TargetRow {
   label: string
   unit: string
   /** Field for the target; shown in the "Target" column. */
-  target: keyof Targets
+  target?: keyof Targets
   /** Field for the minimum; shown in the "Minimum" column. */
   min?: keyof Targets
+  step?: number
+}
+
+/** A target set per calorie day, shown as Easy, Moderate and Hard columns. */
+export interface DayTargetRow {
+  label: string
+  unit: string
+  keys: [keyof Targets, keyof Targets, keyof Targets]
   step?: number
 }
 
@@ -16,7 +24,7 @@ export interface TargetRow {
  * Collapsible "Targets" card on Nutrition and Recovery. Hitting a target colors the day
  * green on the Home calendar; hitting only the minimum colors it yellow.
  */
-export default function TargetSettings({ rows, note }: { rows: TargetRow[]; note: string }) {
+export default function TargetSettings({ byDay = [], rows, note }: { byDay?: DayTargetRow[]; rows: TargetRow[]; note: string }) {
   const { data, setData } = useStore()
   const [open, setOpen] = useState(false)
   // Bumped on reset so the fields re-mount showing the defaults.
@@ -31,7 +39,7 @@ export default function TargetSettings({ rows, note }: { rows: TargetRow[]; note
     setData((prev) => ({ ...prev, targets: { ...prev.targets, [key]: v } }))
   }
 
-  const keys = rows.flatMap((r) => (r.min ? [r.target, r.min] : [r.target]))
+  const keys = [...byDay.flatMap((r) => r.keys), ...rows.flatMap((r) => [r.target, r.min])].filter((k): k is keyof Targets => k != null)
   const changed = keys.some((k) => data.targets?.[k] != null && data.targets[k] !== defaults[k])
   const reset = () => {
     setResets((n) => n + 1)
@@ -70,14 +78,30 @@ export default function TargetSettings({ rows, note }: { rows: TargetRow[]; note
       </button>
       {open && (
         <div className="card targets">
+          {byDay.length > 0 && (
+            <div className="targets-grid by-day">
+              <span />
+              <span className="targets-head">Easy</span>
+              <span className="targets-head">Moderate</span>
+              <span className="targets-head">Hard</span>
+              {byDay.map((r) => (
+                <div className="targets-row" key={r.label}>
+                  <label>{r.label}{r.unit ? <span className="subtle"> ({r.unit})</span> : null}</label>
+                  {r.keys.map((k, i) => (
+                    <span className="targets-cell" key={k}>{input(k, r.step, `${r.label}, ${['easy', 'moderate', 'hard'][i]} day`)}</span>
+                  ))}
+                </div>
+              ))}
+            </div>
+          )}
           <div className="targets-grid">
             <span />
             <span className="targets-head"><i className="swatch" style={{ background: 'var(--hp-green)' }} /> Target</span>
             <span className="targets-head"><i className="swatch" style={{ background: 'var(--hp-yellow)' }} /> Minimum</span>
             {rows.map((r) => (
-              <div className="targets-row" key={r.target}>
+              <div className="targets-row" key={r.label}>
                 <label>{r.label}{r.unit ? <span className="subtle"> ({r.unit})</span> : null}</label>
-                <span className="targets-cell">{input(r.target, r.step, `${r.label} target`)}</span>
+                <span className="targets-cell">{r.target ? input(r.target, r.step, `${r.label} target`) : null}</span>
                 <span className="targets-cell">{r.min ? input(r.min, r.step, `${r.label} minimum`) : null}</span>
               </div>
             ))}
