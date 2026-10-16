@@ -22,6 +22,12 @@ const CORE = ['Hanging knee raise', 'Plank', 'Dead bug', 'Side plank', 'Pallof p
 const EXTRA_LEGS = ['Single-leg calf raise', 'Light hinge']
 const CONDITIONING = ['DB thruster', 'DB swing', 'Burpees']
 
+/** Exercises no plan uses yet, so they can still be added from the library. */
+const EXTRAS: (LibraryExercise & { group: string })[] = [
+  { name: 'Triceps pushdown (machine)', cue: 'Elbows pinned to your sides, press down to straight arms', target: { sets: '3', reps: '10-12' }, weighted: true, mode: 'reps', group: 'Arms & shoulders' },
+  { name: 'Dips', cue: 'Shoulders down, lower until elbows reach 90°, press up', target: { sets: '3', reps: '6-10' }, weighted: false, mode: 'reps', group: 'Chest' },
+]
+
 /** Plan targets like "20-30s/side" are held for time, everything else is counted in reps. */
 export const isTimeTarget = (reps: string) => /\d\s*(s|sec|min)\b/i.test(reps)
 
@@ -50,7 +56,11 @@ function build(active: PlanConfig): LibraryGroup[] {
     }
   }
 
+  for (const { group: _group, ...ex } of EXTRAS) if (!byName.has(sameKey(ex.name))) byName.set(sameKey(ex.name), ex)
+
   const groupOf = (name: string): string => {
+    const extra = EXTRAS.find((e) => e.name === name)
+    if (extra) return extra.group
     for (const g of MUSCLE_GROUPS) {
       if (g.lifts.includes(name) || g.travelLifts.includes(name) || split.muscleLifts?.[g.id].includes(name)) return g.name
     }

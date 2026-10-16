@@ -24,6 +24,11 @@ export const MOVES: Record<string, Move> = {
   'DB bent-over row': { file: 'row.png' },
   'DB lateral raise': { file: 'lateral-raises.png' },
   'DB curl': { file: 'biceps-curl.png' },
+  'DB floor press': { file: 'db-floor-press.png' },
+  'Towel sliding leg curl': { file: 'towel-sliding-leg-curl.png' },
+  'DB thruster': { file: 'db-thruster.png' },
+  'DB swing': { file: 'db-swing.png' },
+  Burpees: { file: 'burpee.png' },
   'DB overhead triceps extension': { file: 'db-overhead-triceps-extension.png' },
   'DB reverse fly': { file: 'db-reverse-fly.png' },
   'Renegade row': { file: 'renegade-row.png' },
@@ -83,6 +88,13 @@ export const MOVES: Record<string, Move> = {
   'Dumbbell Pullover': { file: 'db-pullover.png' },
   'Cable Crossover': { file: 'cable-crossover.png' },
   'Low-to-High Cable Fly': { file: 'low-to-high-cable-fly.png' },
+  'Rope Pushdown': { file: 'rope-pushdown.png' },
+  'Leg Extension': { file: 'leg-extension.png' },
+  'Sumo Squat': { file: 'sumo-squat.png' },
+  'Kneeling Cable Crunch': { file: 'kneeling-cable-crunch.png' },
+  // Library-only extras (data/library.ts).
+  'Triceps pushdown (machine)': { file: 'triceps-pushdown-machine.png' },
+  Dips: { file: 'dips.png' },
 }
 
 export const moveSrc = (m: Move) => `${import.meta.env.BASE_URL}img/moves/${m.file}`
