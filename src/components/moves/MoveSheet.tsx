@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import MoveAnim, { useMoveFrames } from './MoveAnim'
 import { MOVES } from './moves'
 
@@ -13,7 +14,9 @@ export default function MoveSheet({ name, cue, onClose }: { name: string; cue?: 
   }, [onClose])
 
   if (!move || !frames) return null
-  return (
+  // Portal to <body>: the day swiper's transform would otherwise make position:fixed
+  // relative to the whole (scrolled) page instead of the screen
+  return createPortal(
     <div className="move-backdrop" onClick={onClose}>
       <div className="card move-sheet" role="dialog" aria-modal="true" aria-label={`How to do ${name}`} onClick={(e) => e.stopPropagation()}>
         <div className="move-stage">
@@ -30,6 +33,7 @@ export default function MoveSheet({ name, cue, onClose }: { name: string; cue?: 
         )}
         <button className="btn full" onClick={onClose}>Got it</button>
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
