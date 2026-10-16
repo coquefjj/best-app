@@ -49,6 +49,12 @@ function loadProfile(id: string | null): AppData | null {
   }
 }
 
+/**
+ * Exercises renamed on Oct 16 2026: "Push-up progression" became "Push-up", and the overhead
+ * press split into barbell and dumbbell options (earlier logs were the barbell default).
+ */
+const RENAMED: Record<string, string> = { 'Push-up progression': 'Push-up', 'Overhead press': 'Barbell overhead press' }
+
 /** Brings logs saved by older versions up to the current shape; safe to run on current data. */
 function migrate(data: AppData): AppData {
   const workouts: Record<string, WorkoutDayLog> = {}
@@ -57,12 +63,14 @@ function migrate(data: AppData): AppData {
     for (const [id, ex] of Object.entries(w.exercises ?? {})) {
       exercises[id] = {
         ...ex,
+        chosenOption: RENAMED[ex.chosenOption] ?? ex.chosenOption,
         mode: ex.mode ?? 'reps',
         weighted: ex.weighted ?? true,
         sets: (ex.sets ?? []).map((s) => ({ ...s, seconds: s.seconds ?? null })),
       }
     }
-    workouts[date] = { ...w, exercises }
+    const added = w.added?.map((a) => ({ ...a, name: RENAMED[a.name] ?? a.name }))
+    workouts[date] = { ...w, exercises, ...(added && { added }) }
   }
   const habits: Record<string, HabitDayLog> = {}
   for (const [date, h] of Object.entries(data.habits ?? {})) habits[date] = migrateHabits(h)

@@ -50,13 +50,14 @@ export const MOVES: Record<string, Move> = {
   },
   'Single-leg calf raise': { file: 'single-leg-calf-raise.png' },
   'DB bench press': { file: 'db-bench-press.png' },
-  'Push-up progression': {
+  'Push-up': {
     file: 'push-up.png',
     points: ['Hands just outside shoulders', 'Body in one straight line', 'Elbows about 45° from your sides', 'Chest to the floor, then press away'],
   },
   'Pull-up': { file: 'pull-up.png' },
   'Lat pulldown': { file: 'lat-pulldown.png' },
-  'Overhead press': { file: 'overhead-press.png' },
+  'Barbell overhead press': { file: 'barbell-overhead-press.png' },
+  'DB overhead press': { file: 'overhead-press.png' },
   'Row (cable/DB)': { file: 'row.png' },
   'Lateral raises': { file: 'lateral-raises.png' },
   'Biceps + triceps': { file: 'biceps-curl.png' },

@@ -185,7 +185,7 @@ export const STRENGTH_A: PlanExercise[] = [
 export const STRENGTH_B: PlanExercise[] = [
   {
     id: 'b1',
-    options: [{ name: 'DB bench press', cue: 'Elbows ~45°, full range' }, { name: 'Push-up progression', cue: 'Body straight, chest to floor' }],
+    options: [{ name: 'DB bench press', cue: 'Elbows ~45°, full range' }, { name: 'Push-up', cue: 'Body straight, chest to floor' }],
     target: { sets: '4', reps: '8-10' },
   },
   {
@@ -195,7 +195,7 @@ export const STRENGTH_B: PlanExercise[] = [
   },
   {
     id: 'b3',
-    options: [{ name: 'Overhead press', cue: 'Brace core, press straight up' }],
+    options: [{ name: 'Barbell overhead press', cue: 'Bar on front rack, press straight up, head through' }, { name: 'DB overhead press', cue: 'Brace core, press straight up' }],
     target: { sets: '3', reps: '8-10' },
   },
   {
@@ -253,7 +253,7 @@ export const STRENGTH_C: PlanExercise[] = [
 ]
 
 export const TRAVEL_DB_1: PlanExercise[] = [
-  { id: 't1-press', options: [{ name: 'DB floor press', cue: 'Elbows ~45°, pause on the floor' }, { name: 'Push-up progression', cue: 'Body straight, chest to floor' }], target: { sets: '4', reps: '8-10' } },
+  { id: 't1-press', options: [{ name: 'DB floor press', cue: 'Elbows ~45°, pause on the floor' }, { name: 'Push-up', cue: 'Body straight, chest to floor' }], target: { sets: '4', reps: '8-10' } },
   { id: 't1-row', options: [{ name: 'DB single-arm row', cue: 'Hand on bed/chair, pull to hip' }], target: { sets: '4', reps: '10/side' } },
   { id: 't1-rdl', options: [{ name: 'DB Romanian deadlift', cue: 'Slow tempo, hinge, DBs close to legs' }], target: { sets: '3', reps: '10-12' }, note: 'Slow tempo' },
   { id: 't1-lateral', options: [{ name: 'DB lateral raise', cue: 'Light weight, lead with elbows' }], target: { sets: '3', reps: '12-15' } },
