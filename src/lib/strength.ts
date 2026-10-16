@@ -7,9 +7,9 @@ export type MuscleGroupId = 'arms' | 'back' | 'chest' | 'legs' | 'glutes'
  * dumbbell lifts show once logged but never in the "not logged yet" list.
  */
 export const MUSCLE_GROUPS: { id: MuscleGroupId; name: string; color: string; lifts: string[]; travelLifts: string[] }[] = [
-  { id: 'arms', name: 'Arms & shoulders', color: '#e21919', lifts: ['Overhead press', 'Lateral raises', 'Face pulls', 'Biceps + triceps'], travelLifts: ['DB shoulder press', 'DB lateral raise', 'DB reverse fly', 'DB curl', 'DB overhead triceps extension'] },
+  { id: 'arms', name: 'Arms & shoulders', color: '#e21919', lifts: ['Barbell overhead press', 'DB overhead press', 'Lateral raises', 'Face pulls', 'Biceps + triceps'], travelLifts: ['DB shoulder press', 'DB lateral raise', 'DB reverse fly', 'DB curl', 'DB overhead triceps extension'] },
   { id: 'back', name: 'Back', color: '#d94e92', lifts: ['Pull-up', 'Lat pulldown', 'Chin-ups', 'Row (cable/DB)'], travelLifts: ['DB single-arm row', 'DB bent-over row', 'Renegade row'] },
-  { id: 'chest', name: 'Chest', color: '#3ea839', lifts: ['DB bench press', 'Incline DB press', 'Push-up progression'], travelLifts: ['DB floor press'] },
+  { id: 'chest', name: 'Chest', color: '#3ea839', lifts: ['DB bench press', 'Incline DB press', 'Push-up'], travelLifts: ['DB floor press'] },
   { id: 'legs', name: 'Legs', color: '#0981d6', lifts: ['Trap-bar deadlift', 'Bulgarian split squat', 'Reverse lunge', 'Eccentric machine leg curl', 'Nordic hamstring curl'], travelLifts: ['DB reverse lunge', 'DB Bulgarian split squat', 'Towel sliding leg curl'] },
   { id: 'glutes', name: 'Glutes', color: '#8164b7', lifts: ['Hip thrust', 'Romanian deadlift', 'Single-leg RDL'], travelLifts: ['DB Romanian deadlift', 'DB hip thrust'] },
 ]
