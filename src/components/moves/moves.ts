@@ -24,6 +24,8 @@ export const MOVES: Record<string, Move> = {
   'DB bent-over row': { file: 'row.png' },
   'DB lateral raise': { file: 'lateral-raises.png' },
   'DB curl': { file: 'biceps-curl.png' },
+  'DB overhead triceps extension': { file: 'db-overhead-triceps-extension.png' },
+  'DB reverse fly': { file: 'db-reverse-fly.png' },
   'Single-leg RDL': { file: 'single-leg-rdl.png' },
   'Nordic hamstring curl': { file: 'nordic-hamstring-curl.png' },
   'Eccentric machine leg curl': { file: 'eccentric-leg-curl.png' },
@@ -75,6 +77,9 @@ export const MOVES: Record<string, Move> = {
   'Face Pull': { file: 'face-pulls.png' },
   'Barbell Bench Press': { file: 'db-bench-press.png' },
   'Pull-ups': { file: 'pull-up.png' },
+  'Overhead Cable Triceps Extension': { file: 'overhead-cable-triceps-extension.png' },
+  'Overhead Rope Extension': { file: 'overhead-rope-extension.png' },
+  'Dumbbell Pullover': { file: 'db-pullover.png' },
 }
 
 export const moveSrc = (m: Move) => `${import.meta.env.BASE_URL}img/moves/${m.file}`
