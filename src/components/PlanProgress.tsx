@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { todayISO, startOfWeek, addDays, formatHuman } from '../lib/date'
 import { activePlan } from '../data/templates'
@@ -15,6 +16,27 @@ const VIEWS: { id: View; label: string }[] = [
   { id: 'recovery', label: 'Rest' },
 ]
 
+// Tapping a day opens that day's log on the page that matches the view; "All" opens Workout.
+const VIEW_PAGE: Record<View, string> = {
+  all: 'workout',
+  workout: 'workout',
+  habits: 'habits',
+  nutrition: 'food',
+  recovery: 'recovery',
+}
+
+// Kept while the app is open, so coming back from a day's log shows the same view.
+const VIEW_KEY = 'quest:calendar-view'
+
+function savedView(): View {
+  try {
+    const v = sessionStorage.getItem(VIEW_KEY) as View | null
+    return v && VIEW_PAGE[v] ? v : 'all'
+  } catch {
+    return 'all'
+  }
+}
+
 const GRADE_LABEL: Record<Grade, string> = { full: 'Hit', partial: 'Partly', failed: 'Missed', none: 'No data' }
 
 /** The plan's calendar and this week's adherence, shown under the house on Home. */
@@ -22,7 +44,16 @@ export default function PlanProgress() {
   const { data } = useStore()
   const plan = activePlan()
   const phases = plan.phases
-  const [view, setView] = useState<View>('all')
+  const [view, setViewState] = useState<View>(savedView)
+  const setView = (v: View) => {
+    try {
+      sessionStorage.setItem(VIEW_KEY, v)
+    } catch {
+      // storage unavailable; the view just resets next time
+    }
+    setViewState(v)
+  }
+  const navigate = useNavigate()
   const grade = view === 'all' ? null : sectionGrader(data, view)
   const counts: Record<Grade, number> = { full: 0, partial: 0, failed: 0, none: 0 }
   const today = todayISO()
@@ -85,7 +116,17 @@ export default function PlanProgress() {
             }
             const cls = ['tile', `w${phaseIdx + 1}`, state, isToday ? 'today' : ''].filter(Boolean).join(' ')
             return (
-              <div key={dayNum} className={cls} title={`Day ${dayNum} · ${formatHuman(iso)}${g ? ` · ${GRADE_LABEL[g]}` : ''}`} />
+              <button
+                key={dayNum}
+                type="button"
+                className={cls}
+                title={`Day ${dayNum} · ${formatHuman(iso)}${g ? ` · ${GRADE_LABEL[g]}` : ''}`}
+                aria-label={`Day ${dayNum}, ${formatHuman(iso)}`}
+                onClick={() => {
+                  navigate(`/${VIEW_PAGE[view]}/${iso}`)
+                  window.scrollTo({ top: 0 })
+                }}
+              />
             )
           })}
         </div>

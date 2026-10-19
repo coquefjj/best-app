@@ -711,7 +711,13 @@ input[type='checkbox']:checked {
   place-items: center;
   position: relative;
   border-radius: 3px;
+  border: 0;
+  padding: 0;
+  min-width: 0;
+  cursor: pointer;
 }
+
+.tile:active { filter: brightness(0.85); }
 
 .tile.w1 { background: #e8d4ac; }
 .tile.w2 { background: #dcc096; }
