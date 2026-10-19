@@ -275,8 +275,6 @@ function FoodDay({ iso }: { iso: string }) {
         )}
       </div>
 
-      <WeightCard key={iso} iso={iso} />
-
       <div className="card">
         <h2>Eaten today</h2>
         {entries.length === 0 && <div className="subtle">Nothing logged yet.</div>}
@@ -382,6 +380,8 @@ function FoodDay({ iso }: { iso: string }) {
         <span aria-hidden="true">{showProgress ? '▲' : '▼'}</span>
       </button>
       {showProgress && <NutritionProgress />}
+
+      <WeightCard key={iso} iso={iso} />
     </div>
   )
 }
