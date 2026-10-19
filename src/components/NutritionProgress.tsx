@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useStore } from '../lib/store'
-import { addDays, formatMinutes, todayISO } from '../lib/date'
+import { addDays, formatHuman, formatMinutes, todayISO } from '../lib/date'
 import {
   MEAL_GAP_MIN,
   average,
@@ -11,6 +11,9 @@ import {
 } from '../lib/nutritionReport'
 import { MEAL_SLOTS, slotInfo } from '../data/meals'
 import { ChartDates, DayBars, RangeToggle, type RangeDays } from './ReportBits'
+import StepChart from './StepChart'
+import { showKg, weighIns } from '../lib/weight'
+import type { AppData } from '../types'
 
 
 /** "Mon 28" for a row label. */
@@ -93,7 +96,53 @@ function MacroMeter({ label, eaten, target, unit, overIsBad }: { label: string; 
   )
 }
 
-/** Meals, eating times, calories and macros; opened from the Progress button at the bottom of Nutrition. */
+/** Weigh-ins over the range as a step line, with the change from the first to the latest. */
+function WeightTrend({ data, range, today }: { data: AppData; range: RangeDays; today: string }) {
+  const all = weighIns(data)
+  const from = addDays(today, -(range - 1))
+  const now = all.filter((w) => w.date >= from && w.date <= today)
+  const last = now[now.length - 1]
+  const before = all.filter((w) => w.date < from).pop()
+  // Change from the weigh-in just before the range when there is one, else from the first inside it.
+  const start = before ?? (now.length > 1 ? now[0] : undefined)
+  const change = last && start ? last.kg - start.kg : null
+  return (
+    <div className="card">
+      <h2>Weight</h2>
+      {!last ? (
+        <div className="subtle">
+          {all.length
+            ? `No weigh-ins in the last ${range} days. Last one: ${showKg(all[all.length - 1].kg)} on ${formatHuman(all[all.length - 1].date)}.`
+            : 'Log your weight on Nutrition and the trend shows here.'}
+        </div>
+      ) : (
+        <>
+          <div className="report-headline">
+            {showKg(last.kg)} <span className="subtle">on {formatHuman(last.date)}</span>
+          </div>
+          {change != null && start && (
+            <div className="subtle">
+              {Math.abs(change) < 0.05
+                ? `Same as ${formatHuman(start.date)}`
+                : `${change > 0 ? '+' : '−'}${showKg(Math.abs(change))} since ${formatHuman(start.date)}`}
+            </div>
+          )}
+          {now.length > 1 && (
+            <div className="report-chart">
+              <StepChart values={now.map((w) => w.kg)} color="var(--accent-2)" width={300} height={90} showScale unit="kg" />
+              <ChartDates from={now[0].date} to={last.date} indent={44} />
+            </div>
+          )}
+          <div className="subtle report-note">
+            Weighed on {now.length} of {range} days.
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
+/** Weight, meals, eating times, calories and macros; opened from the Progress button at the bottom of Nutrition. */
 export default function NutritionProgress() {
   const { data } = useStore()
   const [range, setRange] = useState<RangeDays>(7)
@@ -118,6 +167,8 @@ export default function NutritionProgress() {
   return (
     <div className="report">
       <RangeToggle value={range} onChange={setRange} />
+
+      <WeightTrend data={data} range={range} today={today} />
 
       {logged.length === 0 ? (
         <div className="card">

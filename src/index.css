@@ -2161,3 +2161,49 @@ details.lift[open] > .lift-summary .lift-name::after {
     height: 32px;
   }
 }
+
+/* Body weight on Nutrition */
+.weight-saved {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.weight-saved .entry-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.weight-value {
+  font-family: var(--font-pixel);
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+.weight-entry {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.weight-entry input {
+  background: var(--surface);
+  border: 3px solid var(--ink);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 1.3rem;
+  width: 7em;
+  min-width: 0;
+}
+
+.weight-entry input:focus {
+  outline: none;
+  border-color: var(--accent-2);
+  box-shadow: 0 0 0 2px var(--frame-inner);
+}
+
+.weight-card form .row .btn {
+  flex: 1;
+}

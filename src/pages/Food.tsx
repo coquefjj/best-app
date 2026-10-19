@@ -7,6 +7,7 @@ import RoomHeader from '../components/RoomHeader'
 import DaySwiper from '../components/DaySwiper'
 import NutritionProgress from '../components/NutritionProgress'
 import TargetSettings from '../components/TargetSettings'
+import WeightCard from '../components/WeightCard'
 import { MEAL_SLOTS, PICKABLE_SLOTS, nearestSlot, slotInfo } from '../data/meals'
 import { Link, useParams } from 'react-router-dom'
 
@@ -273,6 +274,8 @@ function FoodDay({ iso }: { iso: string }) {
           </div>
         )}
       </div>
+
+      <WeightCard key={iso} iso={iso} />
 
       <div className="card">
         <h2>Eaten today</h2>
