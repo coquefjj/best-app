@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import { useStore } from '../lib/store'
 import { todayISO, formatHuman, addDays, nowHHMM, hhmmToMinutes, formatMinutes } from '../lib/date'
-import { calorieReason, nutritionTarget } from '../lib/targets'
+import { MACROS, calorieReason, gradedMacros, nutritionTarget, type Macro } from '../lib/targets'
 import type { FoodEntry } from '../types'
 import RoomHeader from '../components/RoomHeader'
 import DaySwiper from '../components/DaySwiper'
@@ -225,6 +225,10 @@ function FoodDay({ iso }: { iso: string }) {
     setShowForm(false)
   }
 
+  const graded = gradedMacros(data)
+  const toggleGraded = (m: Macro) =>
+    setData((prev) => ({ ...prev, gradedMacros: { ...prev.gradedMacros, [m]: !gradedMacros(prev)[m] } }))
+
   const removeSavedMeal = (id: string) => {
     setData((prev) => ({ ...prev, savedMeals: prev.savedMeals.filter((m) => m.id !== id) }))
     setEditingMeal(null)
@@ -368,8 +372,19 @@ function FoodDay({ iso }: { iso: string }) {
           { label: 'Calories within ±', unit: 'kcal', target: 'calorieTolerance', min: 'calorieMinTolerance', step: 10 },
           { label: 'Protein', unit: 'g', min: 'proteinMin' },
         ]}
-        note="Easy days are Tuesday and Sunday; dumbbell-only travel days are moderate. Pick Easy, Moderate or Hard on Workout to change a day. Moderate starts halfway between easy and hard until you change it. Carbs and fat show on Totals and Progress but don't color the calendar. On the Home calendar a day is green when calories and protein are both on target, yellow when at least one reaches its minimum, red when neither does."
-      />
+        note="Easy days are Tuesday and Sunday; dumbbell-only travel days are moderate. Pick Easy, Moderate or Hard on Workout to change a day. Moderate starts halfway between easy and hard until you change it. On the Home calendar a day is green when every macro that counts is on target (carbs and fat within 10%), yellow when at least one reaches its minimum (within 25%), red when none does. Macros switched off are only tracked."
+      >
+        <div className="targets-count">
+          <div className="targets-head">Counts toward on target</div>
+          <div className="pill-select">
+            {MACROS.map((m) => (
+              <button key={m.id} className={graded[m.id] ? 'selected' : ''} aria-pressed={graded[m.id]} onClick={() => toggleGraded(m.id)}>
+                {graded[m.id] ? '✓ ' : ''}{m.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </TargetSettings>
 
       <button
         className={`btn secondary full progress-toggle${showProgress ? ' open' : ''}`}

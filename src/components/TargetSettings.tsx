@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { useStore } from '../lib/store'
 import { defaultTargets, getTargets, type Targets } from '../lib/targets'
 
@@ -24,7 +24,7 @@ export interface DayTargetRow {
  * Collapsible "Targets" card on Nutrition and Recovery. Hitting a target colors the day
  * green on the Home calendar; hitting only the minimum colors it yellow.
  */
-export default function TargetSettings({ byDay = [], rows, note }: { byDay?: DayTargetRow[]; rows: TargetRow[]; note: string }) {
+export default function TargetSettings({ byDay = [], rows, note, children }: { byDay?: DayTargetRow[]; rows: TargetRow[]; note: string; children?: ReactNode }) {
   const { data, setData } = useStore()
   const [open, setOpen] = useState(false)
   // Bumped on reset so the fields re-mount showing the defaults.
@@ -106,6 +106,7 @@ export default function TargetSettings({ byDay = [], rows, note }: { byDay?: Day
               </div>
             ))}
           </div>
+          {children}
           <p className="subtle targets-note">{note}</p>
           {changed && (
             <button className="btn secondary full" onClick={reset}>Reset to defaults</button>

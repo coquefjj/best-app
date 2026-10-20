@@ -1815,6 +1815,10 @@ details.lift[open] > .lift-summary .lift-name::after {
   justify-content: center;
 }
 
+.targets-count {
+  margin-top: 16px;
+}
+
 .targets-row {
   display: contents;
 }

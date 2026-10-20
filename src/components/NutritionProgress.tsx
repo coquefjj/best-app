@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useStore } from '../lib/store'
+import { gradedMacros } from '../lib/targets'
 import { addDays, formatHuman, formatMinutes, todayISO } from '../lib/date'
 import {
   MEAL_GAP_MIN,
@@ -159,6 +160,8 @@ export default function NutritionProgress() {
   const windowHours = average(timedComplete.filter((d) => d.mealTimes.length > 1).map((d) => d.mealTimes[d.mealTimes.length - 1].minutes - d.mealTimes[0].minutes)) / 60
   const firstISO = addDays(today, -(range - 1))
 
+  // Over target only shows red for macros that count toward on target.
+  const graded = gradedMacros(data)
   const inRange = avgBase.filter((d) => d.calories >= d.target.calorieRange[0] && d.calories <= d.target.calorieRange[1]).length
   const proteinHit = avgBase.filter((d) => d.protein >= d.target.proteinMin).length
   const avg = (k: 'calories' | 'protein' | 'carbs' | 'fat') => average(avgBase.map((d) => d[k]))
@@ -241,8 +244,8 @@ export default function NutritionProgress() {
             <ChartDates from={firstISO} to={today} indent={44} />
             <div className="subtle report-note">Dark ticks are each day's target.</div>
             <MacroMeter label="Protein" eaten={avg('protein')} target={avgTarget('protein')} unit="g" />
-            <MacroMeter label="Carbs" eaten={avg('carbs')} target={avgTarget('carbs')} unit="g" overIsBad />
-            <MacroMeter label="Fat" eaten={avg('fat')} target={avgTarget('fat')} unit="g" overIsBad />
+            <MacroMeter label="Carbs" eaten={avg('carbs')} target={avgTarget('carbs')} unit="g" overIsBad={graded.carbs} />
+            <MacroMeter label="Fat" eaten={avg('fat')} target={avgTarget('fat')} unit="g" overIsBad={graded.fat} />
             <ul className="report-rows">
               <li>
                 <span className="report-row-name">Calories in range</span>

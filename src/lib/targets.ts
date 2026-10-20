@@ -124,6 +124,20 @@ export function getTargets(data: AppData): Targets {
   return t
 }
 
+export type Macro = 'calories' | 'protein' | 'carbs' | 'fat'
+export const MACROS: { id: Macro; label: string }[] = [
+  { id: 'calories', label: 'Calories' },
+  { id: 'protein', label: 'Protein' },
+  { id: 'carbs', label: 'Carbs' },
+  { id: 'fat', label: 'Fat' },
+]
+/** Calories and protein count by default; carbs and fat are only tracked until switched on. */
+const DEFAULT_GRADED: Record<Macro, boolean> = { calories: true, protein: true, carbs: false, fat: false }
+
+export function gradedMacros(data: AppData): Record<Macro, boolean> {
+  return { ...DEFAULT_GRADED, ...data.gradedMacros }
+}
+
 export type DayLevel = 'easy' | 'moderate' | 'hard'
 export const DAY_LEVELS: { id: DayLevel; label: string }[] = [
   { id: 'easy', label: 'Easy' },

@@ -1,6 +1,6 @@
 import type { AppData } from '../types'
 import { getDayInfo } from './session'
-import { getTargets, nutritionTarget } from './targets'
+import { getTargets, gradedMacros, nutritionTarget } from './targets'
 import { habitDone } from './streaks'
 
 export type Section = 'workout' | 'habits' | 'nutrition' | 'recovery'
@@ -57,14 +57,25 @@ function gradeHabits(data: AppData, iso: string): Grade {
   return done === list.length ? 'full' : done > 0 ? 'partial' : 'failed'
 }
 
-/** Nutrition: calories inside the target band and protein at target; minimums count as partial. */
+/** Carbs and fat, when they count: within 10% of the target is on target, within 25% the minimum. */
+const near = (v: number, target: number): Level => within(v, [target * 0.9, target * 1.1], [target * 0.75, target * 1.25])
+
+/**
+ * Nutrition: each macro switched on in Targets (calories and protein by default) must be on
+ * target for green; minimums count as partial. Macros switched off are only tracked.
+ */
 function gradeNutrition(data: AppData, iso: string): Grade {
   const entries = data.food[iso]?.entries ?? []
   if (!entries.length) return 'none'
   const t = nutritionTarget(data, iso)
-  const calories = entries.reduce((a, e) => a + (e.calories || 0), 0)
-  const protein = entries.reduce((a, e) => a + (e.protein || 0), 0)
-  return combine([within(calories, t.calorieRange, t.calorieMinRange), atLeast(protein, t.protein, t.proteinMin)])
+  const on = gradedMacros(data)
+  const sum = (k: 'calories' | 'protein' | 'carbs' | 'fat') => entries.reduce((a, e) => a + (e[k] || 0), 0)
+  const levels: Level[] = []
+  if (on.calories) levels.push(within(sum('calories'), t.calorieRange, t.calorieMinRange))
+  if (on.protein) levels.push(atLeast(sum('protein'), t.protein, t.proteinMin))
+  if (on.carbs) levels.push(near(sum('carbs'), t.carbs))
+  if (on.fat) levels.push(near(sum('fat'), t.fat))
+  return levels.length ? combine(levels) : 'none'
 }
 
 /** Recovery: water, sleep hours and sleep score; a missing value counts as missed once anything is logged. */

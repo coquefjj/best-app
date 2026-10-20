@@ -103,6 +103,8 @@ export interface AppData {
   swaps?: Record<string, SessionSwap>
   /** Calorie day picked on the Workout page (easy, moderate or hard), keyed by ISO date; without one the session decides. */
   dayLevels?: Record<string, import('./lib/targets').DayLevel>
+  /** Which macros count toward on target on the Home calendar; the rest are only tracked. */
+  gradedMacros?: Partial<Record<import('./lib/targets').Macro, boolean>>
 }
 
 /** Who the profile is and what onboarding set up. Profiles made before onboarding existed (Fernando's) have no about. */
