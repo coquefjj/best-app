@@ -4,7 +4,7 @@ import { getDayInfo } from '../lib/session'
 import { calorieReason, dayLevel, DAY_LEVELS, type DayLevel } from '../lib/targets'
 import { useState } from 'react'
 import { formatHuman, addDays, todayISO, formatClock, formatDuration, parseDuration, weekdayOf } from '../lib/date'
-import { MOBILITY_DAILY, TRAVEL_SESSIONS, TRAVEL_TEMPLATE, SWAP_SESSIONS, SWAP_REASONS, SWAP_REASONS_SOFTER, SWAP_REASONS_FROM_REST, type DayType, type SwapReason } from '../data/plan'
+import { MOBILITY_DAILY, TRAVEL_SESSIONS, TRAVEL_TEMPLATES, TRAVEL_GEARS, travelGearOf, SWAP_SESSIONS, SWAP_REASONS, SWAP_REASONS_SOFTER, SWAP_REASONS_FROM_REST, type DayType, type SwapReason, type TravelGear } from '../data/plan'
 import { activePlan } from '../data/templates'
 import RoomHeader from '../components/RoomHeader'
 import DaySwiper from '../components/DaySwiper'
@@ -62,6 +62,17 @@ function TimeInput({ seconds, placeholder, onChange }: { seconds: number | null;
       onBlur={() => setText(null)}
     />
   )
+}
+
+/** A gear session's closest match in the other gear, for days whose weekday plan is a run or rest. */
+const TRAVEL_GEAR_SWAP: Record<DayType, DayType> = {
+  travelDb1: 'travelCalB',
+  travelDb2: 'travelCalC',
+  travelCircuit: 'travelCalCircuit',
+  travelCalA: 'travelDb2',
+  travelCalB: 'travelDb1',
+  travelCalC: 'travelDb1',
+  travelCalCircuit: 'travelCircuit',
 }
 
 export default function Workout() {
@@ -161,15 +172,33 @@ function WorkoutDay({ iso }: { iso: string }) {
   const toggleMobility = () => update((w) => ({ ...w, mobilityDone: !w.mobilityDone }))
 
   // Travel only changes which session the day shows; logs already saved stay as they are.
-  const setTravelDay = (dayType: DayType | null) => {
+  // The gear (dumbbells or a calisthenics park) is kept per day; dumbbells when unset.
+  const travelGear: TravelGear = data.travelGear?.[iso] ?? travelGearOf(info.dayType) ?? 'dumbbells'
+  const setTravelDay = (dayType: DayType | null, gear: TravelGear = travelGear) => {
     setData((prev) => {
       const travelDays = { ...prev.travelDays }
+      const gears = { ...prev.travelGear }
       if (dayType) travelDays[iso] = dayType
       else delete travelDays[iso]
-      return { ...prev, travelDays }
+      if (dayType && gear !== 'dumbbells') gears[iso] = gear
+      else delete gears[iso]
+      return { ...prev, travelDays, travelGear: gears }
     })
   }
-  const toggleTravel = () => setTravelDay(info.travel ? null : TRAVEL_TEMPLATE[weekdayOf(iso)])
+  // A trip usually runs several days, so a new travel day takes the day before's gear.
+  const toggleTravel = () => {
+    if (info.travel) return setTravelDay(null)
+    const prevIso = addDays(iso, -1)
+    const gear = data.travelDays?.[prevIso] ? data.travelGear?.[prevIso] ?? travelGearOf(data.travelDays[prevIso]) ?? 'dumbbells' : 'dumbbells'
+    setTravelDay(TRAVEL_TEMPLATES[gear][weekdayOf(iso)], gear)
+  }
+  /** Runs and rest stay as they are; a dumbbell or calisthenics session turns into the other gear's. */
+  const pickGear = (gear: TravelGear) => {
+    const current = travelGearOf(info.dayType)
+    if (!current || current === gear) return setTravelDay(info.dayType, gear)
+    const planned = TRAVEL_TEMPLATES[gear][weekdayOf(iso)]
+    setTravelDay(travelGearOf(planned) === gear ? planned : TRAVEL_GEAR_SWAP[info.dayType], gear)
+  }
 
   // A swap only changes which session the day shows; logs for the planned session are kept.
   const swap = info.travel ? undefined : data.swaps?.[iso]
@@ -253,12 +282,21 @@ function WorkoutDay({ iso }: { iso: string }) {
         </div>
       )}
       {info.travel && (
-        <div className="pill-select travel-swap" aria-label="Swap this travel day">
-          {TRAVEL_SESSIONS.map((t) => (
-            <button key={t.dayType} className={info.dayType === t.dayType ? 'selected' : ''} onClick={() => setTravelDay(t.dayType)}>
-              {t.short}
-            </button>
-          ))}
+        <div className="travel-swap swap-panel">
+          <div className="pill-select" aria-label="Travel gear">
+            {TRAVEL_GEARS.map((g) => (
+              <button key={g.id} className={travelGear === g.id ? 'selected' : ''} aria-pressed={travelGear === g.id} onClick={() => pickGear(g.id)}>
+                {g.label}
+              </button>
+            ))}
+          </div>
+          <div className="pill-select" aria-label="Swap this travel day">
+            {TRAVEL_SESSIONS.filter((t) => !t.gear || t.gear === travelGear).map((t) => (
+              <button key={t.dayType} className={info.dayType === t.dayType ? 'selected' : ''} onClick={() => setTravelDay(t.dayType)}>
+                {t.short}
+              </button>
+            ))}
+          </div>
         </div>
       )}
       <div className="kcal-pick">

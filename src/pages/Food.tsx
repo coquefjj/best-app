@@ -372,7 +372,7 @@ function FoodDay({ iso }: { iso: string }) {
           { label: 'Calories within ±', unit: 'kcal', target: 'calorieTolerance', min: 'calorieMinTolerance', step: 10 },
           { label: 'Protein', unit: 'g', min: 'proteinMin' },
         ]}
-        note="Easy days are Tuesday and Sunday; dumbbell-only travel days are moderate. Pick Easy, Moderate or Hard on Workout to change a day. Moderate starts halfway between easy and hard until you change it. On the Home calendar a day is green when every macro that counts is on target (carbs and fat within 10%), yellow when at least one reaches its minimum (within 25%), red when none does. Macros switched off are only tracked."
+        note="Easy days are Tuesday and Sunday; dumbbell and calisthenics travel days are moderate. Pick Easy, Moderate or Hard on Workout to change a day. Moderate starts halfway between easy and hard until you change it. On the Home calendar a day is green when every macro that counts is on target (carbs and fat within 10%), yellow when at least one reaches its minimum (within 25%), red when none does. Macros switched off are only tracked."
       >
         <div className="targets-count">
           <div className="targets-head">Counts toward on target</div>

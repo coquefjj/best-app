@@ -47,7 +47,7 @@ export interface PlanConfig {
   sessions: Record<DayType, PlanSession>
   phases: Phase[]
   deloadWeeks: number[]
-  /** Whether the Travel day button (Fernando's section 12 sessions) is offered. */
+  /** Whether the Travel day button (Fernando's section 12 and 13 sessions) is offered. */
   travel: boolean
   /** Softer sessions the Swap button offers. */
   swapTo: DayType[]
@@ -85,8 +85,8 @@ function hybrid100(ref: PlanRef): PlanConfig {
   for (const t of TRAVEL_SESSIONS) {
     if (t.dayType === 'rest') continue
     sessions[t.dayType] = { label: t.label, hard: t.dayType !== 'travelEasyRun', exercises: SESSIONS_BY_TYPE[t.dayType] }
-    // Dumbbell-only sessions are lighter than the gym days they stand in for.
-    if (t.dayType === 'travelDb1' || t.dayType === 'travelDb2' || t.dayType === 'travelCircuit') sessions[t.dayType].moderate = true
+    // Dumbbell and calisthenics sessions are lighter than the gym days they stand in for.
+    if (t.gear) sessions[t.dayType].moderate = true
   }
   sessions.travelEasyRun.modalityOptions = TRAVEL_EASY_RUN_OPTIONS
   sessions.travelQualityRun.modalityOptions = TRAVEL_QUALITY_RUN_OPTIONS

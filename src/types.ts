@@ -97,8 +97,10 @@ export interface AppData {
    * Loading turns them into `travelDays`.
    */
   travelWeeks?: string[]
-  /** Days switched to the travel plan (section 12) and the travel session each one shows, keyed by ISO date. */
+  /** Days switched to the travel plan (sections 12 and 13) and the travel session each one shows, keyed by ISO date. */
   travelDays?: Record<string, import('./data/plan').DayType>
+  /** Travel days at a calisthenics park instead of with dumbbells (section 13), keyed by ISO date; dumbbells when unset. */
+  travelGear?: Record<string, import('./data/plan').TravelGear>
   /** A regular day swapped to a softer session, or a rest day to a workout, keyed by ISO date. Saved logs stay as they are. */
   swaps?: Record<string, SessionSwap>
   /** Calorie day picked on the Workout page (easy, moderate or hard), keyed by ISO date; without one the session decides. */

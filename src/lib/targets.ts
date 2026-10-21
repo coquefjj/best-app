@@ -221,7 +221,7 @@ export interface CalorieReason {
 
 /**
  * The calorie target follows the session the day turns into on the Workout page: a lifting
- * or hard cardio day gets hard-day calories, dumbbell-only travel days moderate, easy cardio
+ * or hard cardio day gets hard-day calories, dumbbell and calisthenics travel days moderate, easy cardio
  * or rest easy. A day picked by hand on the Workout page wins.
  */
 export function calorieReason(data: AppData, iso: string): CalorieReason {

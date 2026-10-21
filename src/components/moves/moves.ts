@@ -32,6 +32,9 @@ export const MOVES: Record<string, Move> = {
   'DB overhead triceps extension': { file: 'db-overhead-triceps-extension.png' },
   'DB reverse fly': { file: 'db-reverse-fly.png' },
   'Renegade row': { file: 'renegade-row.png' },
+  // Calisthenics travel versions (plan section 13) that match a move already drawn.
+  'Feet-elevated push-up': { file: 'push-up.png' },
+  'Decline push-up': { file: 'push-up.png' },
   'Single-leg RDL': { file: 'single-leg-rdl.png' },
   'Nordic hamstring curl': { file: 'nordic-hamstring-curl.png' },
   'Eccentric machine leg curl': { file: 'eccentric-leg-curl.png' },
@@ -93,7 +96,7 @@ export const MOVES: Record<string, Move> = {
   'Leg Extension': { file: 'leg-extension.png' },
   'Sumo Squat': { file: 'sumo-squat.png' },
   'Kneeling Cable Crunch': { file: 'kneeling-cable-crunch.png' },
-  // Library-only extras (data/library.ts).
+  // Library-only extras (data/library.ts); Dips is in the calisthenics travel sessions now.
   'Triceps pushdown (machine)': { file: 'triceps-pushdown-machine.png' },
   Dips: { file: 'dips.png' },
 }

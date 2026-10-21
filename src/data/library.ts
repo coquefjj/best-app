@@ -18,14 +18,13 @@ export interface LibraryGroup {
   exercises: LibraryExercise[]
 }
 
-const CORE = ['Hanging knee raise', 'Plank', 'Dead bug', 'Side plank', 'Pallof press', 'Kneeling Cable Crunch', 'Copenhagen plank', 'Adductor squeeze', 'Banded lateral walk', 'Side-lying abduction', 'Tibialis raise']
+const CORE = ['Hanging knee raise', 'Plank', 'Dead bug', 'Side plank', 'Pallof press', 'Kneeling Cable Crunch', 'Copenhagen plank', 'Adductor squeeze', 'Banded lateral walk', 'Side-lying abduction', 'Tibialis raise', 'Hanging leg raise', 'L-sit']
 const EXTRA_LEGS = ['Single-leg calf raise', 'Light hinge']
-const CONDITIONING = ['DB thruster', 'DB swing', 'Burpees']
+const CONDITIONING = ['DB thruster', 'DB swing', 'Burpees', 'Box jump', 'Jump squat', 'Mountain climbers']
 
 /** Exercises no plan uses yet, so they can still be added from the library. */
 const EXTRAS: (LibraryExercise & { group: string })[] = [
   { name: 'Triceps pushdown (machine)', cue: 'Elbows pinned to your sides, press down to straight arms', target: { sets: '3', reps: '10-12' }, weighted: true, mode: 'reps', group: 'Arms & shoulders' },
-  { name: 'Dips', cue: 'Shoulders down, lower until elbows reach 90°, press up', target: { sets: '3', reps: '6-10' }, weighted: false, mode: 'reps', group: 'Chest' },
 ]
 
 /** Plan targets like "20-30s/side" are held for time, everything else is counted in reps. */

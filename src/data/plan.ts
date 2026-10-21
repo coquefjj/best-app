@@ -48,9 +48,18 @@ export const WEEKLY_TEMPLATE: Record<number, { dayType: DayType; label: string }
 }
 
 /**
- * Travel week (plan section 12): maintain, don't progress. Each DB session 1-2x plus 2-3 runs;
- * any day can be swapped to another travel session to fit the trip.
+ * Travel days (plan sections 12 and 13): maintain, don't progress. A trip has dumbbells
+ * (section 12) or a calisthenics park with bars (section 13); runs and rest are shared.
+ * Any day can be swapped to another travel session of the same gear to fit the trip.
  */
+export type TravelGear = 'dumbbells' | 'calisthenics'
+
+export const TRAVEL_GEARS: { id: TravelGear; label: string }[] = [
+  { id: 'dumbbells', label: 'Dumbbells' },
+  { id: 'calisthenics', label: 'Calisthenics' },
+]
+
+/** Section 12: each DB session 1-2x plus 2-3 runs. */
 export const TRAVEL_TEMPLATE: Record<number, DayType> = {
   1: 'travelDb1',
   2: 'travelEasyRun',
@@ -61,16 +70,42 @@ export const TRAVEL_TEMPLATE: Record<number, DayType> = {
   0: 'rest',
 }
 
-/** Sessions a travel day can be swapped to, in the order the picker shows them. */
-export const TRAVEL_SESSIONS: { dayType: DayType; short: string; label: string }[] = [
-  { dayType: 'travelDb1', short: 'DB 1', label: 'Travel DB Session 1 — Push/pull + posterior chain' },
-  { dayType: 'travelDb2', short: 'DB 2', label: 'Travel DB Session 2 — Press/row + stability' },
+/** Section 13 weekly shape: Cal A, easy run, Cal B, quality run, Cal C, long run, rest. */
+export const TRAVEL_CAL_TEMPLATE: Record<number, DayType> = {
+  1: 'travelCalA',
+  2: 'travelEasyRun',
+  3: 'travelCalB',
+  4: 'travelQualityRun',
+  5: 'travelCalC',
+  6: 'travelLongRun',
+  0: 'rest',
+}
+
+export const TRAVEL_TEMPLATES: Record<TravelGear, Record<number, DayType>> = {
+  dumbbells: TRAVEL_TEMPLATE,
+  calisthenics: TRAVEL_CAL_TEMPLATE,
+}
+
+/**
+ * Sessions a travel day can be swapped to, in the order the picker shows them. Sessions
+ * with a gear only show for that gear; the rest show for both.
+ */
+export const TRAVEL_SESSIONS: { dayType: DayType; short: string; label: string; gear?: TravelGear }[] = [
+  { dayType: 'travelDb1', short: 'DB 1', label: 'Travel DB Session 1 — Push/pull + posterior chain', gear: 'dumbbells' },
+  { dayType: 'travelDb2', short: 'DB 2', label: 'Travel DB Session 2 — Press/row + stability', gear: 'dumbbells' },
+  { dayType: 'travelCalA', short: 'Cal A', label: 'Calisthenics A — Lower / posterior & stability', gear: 'calisthenics' },
+  { dayType: 'travelCalB', short: 'Cal B', label: 'Calisthenics B — Upper push/pull', gear: 'calisthenics' },
+  { dayType: 'travelCalC', short: 'Cal C', label: 'Calisthenics C — Full body (upper bias + stability)', gear: 'calisthenics' },
   { dayType: 'travelEasyRun', short: 'Easy run', label: 'Travel easy run' },
   { dayType: 'travelQualityRun', short: 'Hills run', label: 'Travel quality run (hills / tempo)' },
   { dayType: 'travelLongRun', short: 'Long run', label: 'Travel longer run' },
-  { dayType: 'travelCircuit', short: 'DB circuit', label: "Travel DB conditioning circuit (can't run)" },
+  { dayType: 'travelCircuit', short: 'DB circuit', label: "Travel DB conditioning circuit (can't run)", gear: 'dumbbells' },
+  { dayType: 'travelCalCircuit', short: 'BW circuit', label: "Bodyweight conditioning circuit (can't run)", gear: 'calisthenics' },
   { dayType: 'rest', short: 'Rest', label: 'Rest + long flexibility session' },
 ]
+
+/** The gear a travel session needs, if it needs one. */
+export const travelGearOf = (dayType: DayType): TravelGear | undefined => TRAVEL_SESSIONS.find((t) => t.dayType === dayType)?.gear
 
 /**
  * Softer sessions a regular day can be swapped to when the planned one is too much
@@ -285,6 +320,56 @@ export const TRAVEL_CIRCUIT: PlanExercise[] = [
   { id: 'tc-burpee', options: [{ name: 'Burpees', cue: 'Chest to floor, jump at the top' }], target: { sets: '5', reps: '8' } },
 ]
 
+// Section 13, calisthenics park (bars + elevated surfaces). Progress by harder leverage,
+// then more reps, then tempo/pauses, then a loaded backpack.
+const bw = { weighted: false }
+
+/** Based on Jacob Juul Hansen's bodyweight leg routine; run it 1-2x per travel week. */
+export const TRAVEL_CAL_A: PlanExercise[] = [
+  { id: 'ca-box', options: [{ name: 'Box jump', cue: 'Do these first, before legs are tired; land soft' }], target: { sets: '3', reps: '5' }, note: 'For power', optional: true, ...bw },
+  { id: 'ca-pistol', options: [{ name: 'Assisted elevated pistol squat', cue: 'Stand on a box, free leg drops below it; hold a rail and help with the arms' }], target: { sets: '3', reps: '5+/leg' }, note: 'Stop just short of failure', ...bw },
+  { id: 'ca-stepup', options: [{ name: 'Deep step-up', cue: 'Same box: drop into a deep lunge, lean forward, drive up' }], target: { sets: '2', reps: 'near failure/leg' }, ...bw },
+  { id: 'ca-nordic', options: [{ name: 'Nordic hamstring curl', cue: 'Heels under a bar, knees padded, lower slowly, push back up with hands' }], target: { sets: '2-3', reps: '6-8' }, note: 'Not to failure; hips fully extended is harder', ...bw },
+  { id: 'ca-calf', options: [{ name: 'Single-leg calf raise', cue: 'Heel off a step edge, full stretch' }], target: { sets: '2', reps: 'to failure' }, ...bw },
+  { id: 'ca-copenhagen', options: [{ name: 'Copenhagen plank', cue: 'Side plank, top leg on a bench' }], target: { sets: '3', reps: '20-30s/side' }, note: 'Stability (physio focus)', ...bw },
+  { id: 'ca-abduction', options: [{ name: 'Side-lying abduction', cue: 'Lift top leg, hips stacked' }], target: { sets: '3', reps: '15/side' }, note: 'Stability (physio focus)', ...bw },
+  { id: 'ca-tib', options: [{ name: 'Tibialis raise', cue: 'Lean on a wall, lift toes' }], target: { sets: '3', reps: '15-20' }, note: 'Stability (physio focus)', ...bw },
+  { id: 'ca-core', options: [{ name: 'Hanging leg raise', cue: 'High bar, legs up without swinging' }, { name: 'Hanging knee raise', cue: 'Curl knees to chest, no swing' }], target: { sets: '3', reps: '10' }, ...bw },
+]
+
+/** Upper push/pull, hypertrophy bias: the "look". */
+export const TRAVEL_CAL_B: PlanExercise[] = [
+  { id: 'cb-pull', options: [{ name: 'Pull-up', cue: 'Full hang to chin over bar' }], target: { sets: '4', reps: '6-10' }, note: 'Progress: tempo, then backpack load', ...bw },
+  { id: 'cb-dips', options: [{ name: 'Dips', cue: 'Parallel bars, shoulders down, lower to 90°, press up' }], target: { sets: '4', reps: '8-12' }, ...bw },
+  { id: 'cb-push', options: [{ name: 'Feet-elevated push-up', cue: 'Feet on a bench, body straight, chest to floor' }], target: { sets: '3', reps: '12-20' }, note: 'Progress: archer / decline', ...bw },
+  { id: 'cb-row', options: [{ name: 'Inverted row', cue: 'Under the parallel bars, body straight, chest to bar' }], target: { sets: '3', reps: '10-15' }, ...bw },
+  { id: 'cb-pike', options: [{ name: 'Pike push-up', cue: 'Feet elevated, hips high, head toward the floor' }], target: { sets: '3', reps: '8-12' }, note: 'Progress toward handstand push-up', ...bw },
+  { id: 'cb-chin', options: [{ name: 'Chin-ups', cue: 'Underhand grip, full range' }], target: { sets: '2', reps: 'AMRAP' }, ...bw },
+]
+
+/** Full body, upper bias plus stability. */
+export const TRAVEL_CAL_C: PlanExercise[] = [
+  { id: 'cc-pull', options: [{ name: 'Pull-up', cue: 'Full hang to chin over bar' }, { name: 'Chin-ups', cue: 'Underhand grip, full range' }], target: { sets: '3', reps: '8' }, ...bw },
+  { id: 'cc-dips', options: [{ name: 'Dips', cue: 'Parallel bars, shoulders down, lower to 90°, press up' }], target: { sets: '3', reps: '10' }, ...bw },
+  { id: 'cc-push', options: [{ name: 'Archer push-up', cue: 'Wide hands, lower toward one hand, other arm straight' }, { name: 'Decline push-up', cue: 'Feet up on a bench, body straight' }], target: { sets: '3', reps: '10' }, ...bw },
+  { id: 'cc-rdl', options: [{ name: 'Single-leg RDL', cue: 'Slow, hinge on one leg, hips square' }], target: { sets: '3', reps: '10/leg' }, note: 'Slow', ...bw },
+  { id: 'cc-squat', options: [{ name: 'Bulgarian split squat', cue: 'Rear foot on a bench, upright torso' }, { name: 'Assisted elevated pistol squat', cue: 'Stand on a box, hold a rail, help with the arms' }], target: { sets: '3', reps: '8/leg' }, ...bw },
+  { id: 'cc-row', options: [{ name: 'Inverted row', cue: 'Under the parallel bars, body straight, chest to bar' }], target: { sets: '3', reps: '12' }, ...bw },
+  { id: 'cc-core', options: [{ name: 'L-sit', cue: 'On the parallel bars, legs straight out, shoulders down' }, { name: 'Hanging leg raise', cue: 'High bar, legs up without swinging' }], target: { sets: '3', reps: 'to form' }, note: 'Core', ...bw },
+  { id: 'cc-copenhagen', options: [{ name: 'Copenhagen plank', cue: 'Side plank, top leg on a bench' }], target: { sets: '3', reps: '20-30s/side' }, note: 'Stability', ...bw },
+  { id: 'cc-tib', options: [{ name: 'Tibialis raise', cue: 'Lean on a wall, lift toes' }], target: { sets: '2', reps: '20' }, ...bw },
+]
+
+/** Thursday when running isn't possible: 4-5 rounds, keep rest short. */
+export const TRAVEL_CAL_CIRCUIT: PlanExercise[] = [
+  { id: 'cx-burpee', options: [{ name: 'Burpees', cue: 'Chest to floor, jump at the top' }], target: { sets: '4-5', reps: '10' }, ...bw },
+  { id: 'cx-jump', options: [{ name: 'Jump squat', cue: 'Squat to parallel, jump, land soft' }], target: { sets: '4-5', reps: '15' }, ...bw },
+  { id: 'cx-pull', options: [{ name: 'Pull-up', cue: 'Full hang to chin over bar' }], target: { sets: '4-5', reps: '8' }, ...bw },
+  { id: 'cx-dips', options: [{ name: 'Dips', cue: 'Parallel bars, shoulders down, lower to 90°, press up' }], target: { sets: '4-5', reps: '10' }, ...bw },
+  { id: 'cx-climber', options: [{ name: 'Mountain climbers', cue: 'Plank, drive knees to chest fast' }], target: { sets: '4-5', reps: '30' }, ...bw },
+  { id: 'cx-lunge', options: [{ name: 'Walking lunge', cue: 'Long steps, back knee near the floor' }], target: { sets: '4-5', reps: '20' }, ...bw },
+]
+
 export const SESSIONS_BY_TYPE: Partial<Record<DayType, PlanExercise[]>> = {
   strengthA: STRENGTH_A,
   strengthB: STRENGTH_B,
@@ -292,6 +377,10 @@ export const SESSIONS_BY_TYPE: Partial<Record<DayType, PlanExercise[]>> = {
   travelDb1: TRAVEL_DB_1,
   travelDb2: TRAVEL_DB_2,
   travelCircuit: TRAVEL_CIRCUIT,
+  travelCalA: TRAVEL_CAL_A,
+  travelCalB: TRAVEL_CAL_B,
+  travelCalC: TRAVEL_CAL_C,
+  travelCalCircuit: TRAVEL_CAL_CIRCUIT,
 }
 
 export const MOBILITY_DAILY = [
