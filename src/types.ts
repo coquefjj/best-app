@@ -119,6 +119,8 @@ export interface AppData {
   dayLevels?: Record<string, import('./lib/targets').DayLevel>
   /** Which macros count toward on target on the Home calendar; the rest are only tracked. */
   gradedMacros?: Partial<Record<import('./lib/targets').Macro, boolean>>
+  /** Which of carbs, fiber and fat this profile logs at all; untracked ones are hidden everywhere. */
+  trackedMacros?: Partial<Record<import('./lib/targets').Macro, boolean>>
 }
 
 /** Who the profile is and what onboarding set up. Profiles made before onboarding existed (Fernando's) have no about. */

@@ -1,12 +1,12 @@
 import { useState, type ReactNode } from 'react'
 import { useStore } from '../lib/store'
 import { todayISO, formatHuman, addDays, nowHHMM, hhmmToMinutes, formatMinutes } from '../lib/date'
-import { MACROS, calorieReason, gradedMacros, nutritionTarget, type Macro } from '../lib/targets'
+import { MACROS, OPTIONAL_MACROS, calorieReason, gradedMacros, nutritionTarget, trackedMacros, type Macro } from '../lib/targets'
 import type { FoodEntry } from '../types'
 import RoomHeader from '../components/RoomHeader'
 import DaySwiper from '../components/DaySwiper'
 import NutritionProgress from '../components/NutritionProgress'
-import TargetSettings from '../components/TargetSettings'
+import TargetSettings, { type DayTargetRow } from '../components/TargetSettings'
 import WeightCard from '../components/WeightCard'
 import { MEAL_SLOTS, PICKABLE_SLOTS, nearestSlot, slotInfo } from '../data/meals'
 import { Link, useParams } from 'react-router-dom'
@@ -37,8 +37,13 @@ function fromForm(f: MealForm): MealValues {
   }
 }
 
+const MACRO_LABEL = Object.fromEntries(MACROS.map((m) => [m.id, m.label])) as Record<Macro, string>
+
 // Meal first, then the time eaten (when given), then the food itself
 function MealFields({ form, setForm, timeField }: { form: MealForm; setForm: (f: MealForm) => void; timeField?: ReactNode }) {
+  // Untracked macros are hidden; what an entry already has stays in the form and is saved as it was.
+  const tracked = trackedMacros(useStore().data)
+  const optional = OPTIONAL_MACROS.filter((m) => tracked[m])
   return (
     <>
       <div className="field">
@@ -65,20 +70,16 @@ function MealFields({ form, setForm, timeField }: { form: MealForm; setForm: (f:
           <input type="number" inputMode="decimal" value={form.protein} onChange={(e) => setForm({ ...form, protein: e.target.value })} />
         </div>
       </div>
-      <div className="row">
-        <div className="field" style={{ flex: 1 }}>
-          <label>Carbs (g)</label>
-          <input type="number" inputMode="decimal" value={form.carbs} onChange={(e) => setForm({ ...form, carbs: e.target.value })} />
+      {optional.length > 0 && (
+        <div className="row">
+          {optional.map((m) => (
+            <div className="field" style={{ flex: 1 }} key={m}>
+              <label>{MACRO_LABEL[m]} (g)</label>
+              <input type="number" inputMode="decimal" value={form[m]} onChange={(e) => setForm({ ...form, [m]: e.target.value })} />
+            </div>
+          ))}
         </div>
-        <div className="field" style={{ flex: 1 }}>
-          <label>Fiber (g)</label>
-          <input type="number" inputMode="decimal" value={form.fiber} onChange={(e) => setForm({ ...form, fiber: e.target.value })} />
-        </div>
-        <div className="field" style={{ flex: 1 }}>
-          <label>Fat (g)</label>
-          <input type="number" inputMode="decimal" value={form.fat} onChange={(e) => setForm({ ...form, fat: e.target.value })} />
-        </div>
-      </div>
+      )}
     </>
   )
 }
@@ -236,6 +237,18 @@ function FoodDay({ iso }: { iso: string }) {
     setShowForm(false)
   }
 
+  const tracked = trackedMacros(data)
+  const optional = OPTIONAL_MACROS.filter((m) => tracked[m])
+  const entryMacros = (e: FoodEntry) =>
+    [
+      `${e.calories} kcal, ${e.protein}g P`,
+      tracked.carbs && `${e.carbs}g C`,
+      tracked.fiber && e.fiber && `${e.fiber}g fiber`,
+      tracked.fat && `${e.fat}g F`,
+    ].filter(Boolean).join(' · ')
+  const toggleTracked = (m: Macro) =>
+    setData((prev) => ({ ...prev, trackedMacros: { ...prev.trackedMacros, [m]: !trackedMacros(prev)[m] } }))
+
   const graded = gradedMacros(data)
   const toggleGraded = (m: Macro) =>
     setData((prev) => ({ ...prev, gradedMacros: { ...prev.gradedMacros, [m]: !gradedMacros(prev)[m] } }))
@@ -268,18 +281,13 @@ function FoodDay({ iso }: { iso: string }) {
             <div className="stat-value">{Math.round(totals.protein)}g</div>
             <div className="stat-label">protein / {target.protein}g</div>
           </div>
-          <div>
-            <div className="stat-value">{Math.round(totals.carbs)}g</div>
-            <div className="stat-label">carbs / {target.carbs}g</div>
-          </div>
-          <div>
-            <div className="stat-value">{Math.round(totals.fiber)}g</div>
-            <div className="stat-label">fiber / {target.fiber}g</div>
-          </div>
-          <div>
-            <div className="stat-value">{Math.round(totals.fat)}g</div>
-            <div className="stat-label">fat / {target.fat}g</div>
-          </div>
+          {optional.map((m) => (
+            // Carbs, fiber and fat share the second row, however many are tracked.
+            <div key={m} style={{ gridColumn: `span ${6 / optional.length}` }}>
+              <div className="stat-value">{Math.round(totals[m])}g</div>
+              <div className="stat-label">{m} / {target[m]}g</div>
+            </div>
+          ))}
         </div>
         {kcal.why && (
           <div className="subtle kcal-line">
@@ -311,7 +319,7 @@ function FoodDay({ iso }: { iso: string }) {
             <div className="food-entry" key={e.id}>
               <button className="entry-text" onClick={() => setEditingEntry(e.id)}>
                 {e.time && <span className="entry-time">{formatMinutes(hhmmToMinutes(e.time)!)}</span>}
-                {e.name} <span className="subtle">({slotInfo(e.mealSlot).label.toLowerCase()}) · {e.calories} kcal, {e.protein}g P · {e.carbs}g C{e.fiber ? ` · ${e.fiber}g fiber` : ''} · {e.fat}g F</span>
+                {e.name} <span className="subtle">({slotInfo(e.mealSlot).label.toLowerCase()}) · {entryMacros(e)}</span>
               </button>
               <button className="icon-btn edit" aria-label={`Edit ${e.name}`} onClick={() => setEditingEntry(e.id)}>✎</button>
               <button className="icon-btn" aria-label={`Delete ${e.name}`} onClick={() => removeEntry(e.id)}>✕</button>
@@ -377,23 +385,33 @@ function FoodDay({ iso }: { iso: string }) {
       </div>
 
       <TargetSettings
-        byDay={[
+        byDay={([
           { label: 'Calories', unit: 'kcal', keys: ['caloriesEasy', 'caloriesModerate', 'caloriesHard'], step: 25 },
           { label: 'Protein', unit: 'g', keys: ['proteinEasy', 'proteinModerate', 'proteinHard'], step: 5 },
-          { label: 'Carbs', unit: 'g', keys: ['carbsEasy', 'carbsModerate', 'carbsHard'], step: 5 },
-          { label: 'Fiber', unit: 'g', keys: ['fiberEasy', 'fiberModerate', 'fiberHard'], step: 1 },
-          { label: 'Fat', unit: 'g', keys: ['fatEasy', 'fatModerate', 'fatHard'], step: 5 },
-        ]}
+          { label: 'Carbs', unit: 'g', keys: ['carbsEasy', 'carbsModerate', 'carbsHard'], step: 5, macro: 'carbs' },
+          { label: 'Fiber', unit: 'g', keys: ['fiberEasy', 'fiberModerate', 'fiberHard'], step: 1, macro: 'fiber' },
+          { label: 'Fat', unit: 'g', keys: ['fatEasy', 'fatModerate', 'fatHard'], step: 5, macro: 'fat' },
+        ] as (DayTargetRow & { macro?: Macro })[]).filter((r) => !r.macro || tracked[r.macro])}
         rows={[
           { label: 'Calories within ±', unit: 'kcal', target: 'calorieTolerance', min: 'calorieMinTolerance', step: 10 },
           { label: 'Protein', unit: 'g', min: 'proteinMin' },
         ]}
-        note="Easy days are Tuesday and Sunday; dumbbell and calisthenics travel days are moderate. Pick Easy, Moderate or Hard on Workout to change a day. Moderate starts halfway between easy and hard until you change it. On the Home calendar a day is green when every macro that counts is on target (carbs and fat within 10%, fiber at least its target), yellow when at least one reaches its minimum (within 25%, or 75% of fiber), red when none does. Macros switched off are only tracked."
+        note="Easy days are Tuesday and Sunday; dumbbell and calisthenics travel days are moderate. Pick Easy, Moderate or Hard on Workout to change a day. Moderate starts halfway between easy and hard until you change it. On the Home calendar a day is green when every macro that counts is on target (carbs and fat within 10%, fiber at least its target), yellow when at least one reaches its minimum (within 25%, or 75% of fiber), red when none does. Macros that don't count are only tracked; untracked ones are hidden from logging, totals and Progress."
       >
+        <div className="targets-count">
+          <div className="targets-head">Track</div>
+          <div className="pill-select">
+            {MACROS.filter((m) => OPTIONAL_MACROS.includes(m.id)).map((m) => (
+              <button key={m.id} className={tracked[m.id] ? 'selected' : ''} aria-pressed={tracked[m.id]} onClick={() => toggleTracked(m.id)}>
+                {tracked[m.id] ? '✓ ' : ''}{m.label}
+              </button>
+            ))}
+          </div>
+        </div>
         <div className="targets-count">
           <div className="targets-head">Counts toward on target</div>
           <div className="pill-select">
-            {MACROS.map((m) => (
+            {MACROS.filter((m) => tracked[m.id]).map((m) => (
               <button key={m.id} className={graded[m.id] ? 'selected' : ''} aria-pressed={graded[m.id]} onClick={() => toggleGraded(m.id)}>
                 {graded[m.id] ? '✓ ' : ''}{m.label}
               </button>

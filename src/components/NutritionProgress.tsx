@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useStore } from '../lib/store'
-import { gradedMacros } from '../lib/targets'
+import { gradedMacros, trackedMacros } from '../lib/targets'
 import { addDays, formatHuman, formatMinutes, todayISO } from '../lib/date'
 import {
   MEAL_GAP_MIN,
@@ -162,10 +162,11 @@ export default function NutritionProgress() {
 
   // Over target only shows red for macros that count toward on target.
   const graded = gradedMacros(data)
+  const tracked = trackedMacros(data)
   const inRange = avgBase.filter((d) => d.calories >= d.target.calorieRange[0] && d.calories <= d.target.calorieRange[1]).length
   const proteinHit = avgBase.filter((d) => d.protein >= d.target.proteinMin).length
   const fiberHit = avgBase.filter((d) => d.fiber >= d.target.fiber).length
-  const fiberLogged = avgBase.some((d) => d.fiber > 0)
+  const fiberLogged = tracked.fiber && avgBase.some((d) => d.fiber > 0)
   const avg = (k: 'calories' | 'protein' | 'carbs' | 'fiber' | 'fat') => average(avgBase.map((d) => d[k]))
   const avgTarget = (k: 'calories' | 'protein' | 'carbs' | 'fiber' | 'fat') => average(avgBase.map((d) => d.target[k]))
 
@@ -246,9 +247,9 @@ export default function NutritionProgress() {
             <ChartDates from={firstISO} to={today} indent={44} />
             <div className="subtle report-note">Dark ticks are each day's target.</div>
             <MacroMeter label="Protein" eaten={avg('protein')} target={avgTarget('protein')} unit="g" />
-            <MacroMeter label="Carbs" eaten={avg('carbs')} target={avgTarget('carbs')} unit="g" overIsBad={graded.carbs} />
-            <MacroMeter label="Fiber" eaten={avg('fiber')} target={avgTarget('fiber')} unit="g" />
-            <MacroMeter label="Fat" eaten={avg('fat')} target={avgTarget('fat')} unit="g" overIsBad={graded.fat} />
+            {tracked.carbs && <MacroMeter label="Carbs" eaten={avg('carbs')} target={avgTarget('carbs')} unit="g" overIsBad={graded.carbs} />}
+            {tracked.fiber && <MacroMeter label="Fiber" eaten={avg('fiber')} target={avgTarget('fiber')} unit="g" />}
+            {tracked.fat && <MacroMeter label="Fat" eaten={avg('fat')} target={avgTarget('fat')} unit="g" overIsBad={graded.fat} />}
             <ul className="report-rows">
               <li>
                 <span className="report-row-name">Calories in range</span>

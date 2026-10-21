@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../lib/store'
-import { fiberFor, midpoint } from '../lib/targets'
+import { MACROS, OPTIONAL_MACROS, fiberFor, midpoint, type Macro } from '../lib/targets'
 import { addDays, formatHuman, startOfWeek, todayISO } from '../lib/date'
 import { TEMPLATES, resolvePlan, type PlanRef } from '../data/templates'
 import { BLANK_DRAFT, HABIT_CHOICES, PRESETS, carbsFor, suggest, type About, type Draft } from '../data/onboarding'
@@ -42,6 +42,8 @@ export default function Onboarding() {
   const [step, setStep] = useState(0)
   const [draft, setDraft] = useState<Draft>(() => BLANK_DRAFT(nextMonday()))
   const [preset, setPreset] = useState<string | null>(null)
+  // Carbs, fiber and fat to log; fiber starts off.
+  const [track, setTrack] = useState<Record<Macro, boolean>>({ calories: true, protein: true, carbs: true, fiber: false, fat: true })
 
   const set = (patch: Partial<Draft>) => setDraft((d) => ({ ...d, ...patch }))
   const setAbout = (patch: Partial<About>) => setDraft((d) => ({ ...d, about: { ...d.about, ...patch } }))
@@ -69,6 +71,7 @@ export default function Onboarding() {
     const data: AppData = {
       ...EMPTY_DATA,
       habitList: draft.habits,
+      trackedMacros: { carbs: track.carbs, fiber: track.fiber, fat: track.fat },
       profile: {
         name: draft.name.trim(),
         about: draft.about,
@@ -317,12 +320,20 @@ export default function Onboarding() {
           {field('Calories on moderate days (kcal)', moderate, (v) => setFood('caloriesModerate', v), 25)}
           {field('Calories on rest days (kcal)', food.caloriesEasy, (v) => setFood('caloriesEasy', v), 50)}
           {field('Protein (g)', food.protein, (v) => setFood('protein', v), 5)}
-          {field('Fat (g)', food.fat, (v) => setFood('fat', v), 5)}
-          {field('Carbs on training days (g)', carbsHard, (v) => setFood('carbsHard', v), 5)}
-          {field('Carbs on rest days (g)', carbsEasy, (v) => setFood('carbsEasy', v), 5)}
-          {field('Fiber (g)', fiber, (v) => setFood('fiber', v), 1)}
+          <div className="field">
+            <label>Also track</label>
+            <div className="pill-select">
+              {MACROS.filter((m) => OPTIONAL_MACROS.includes(m.id)).map((m) =>
+                pill(track[m.id], m.label, () => setTrack((t) => ({ ...t, [m.id]: !t[m.id] }))),
+              )}
+            </div>
+          </div>
+          {track.fat && field('Fat (g)', food.fat, (v) => setFood('fat', v), 5)}
+          {track.carbs && field('Carbs on training days (g)', carbsHard, (v) => setFood('carbsHard', v), 5)}
+          {track.carbs && field('Carbs on rest days (g)', carbsEasy, (v) => setFood('carbsEasy', v), 5)}
+          {track.fiber && field('Fiber (g)', fiber, (v) => setFood('fiber', v), 1)}
           <p className="subtle">
-            Carbs start as the calories left after protein and fat, fiber at 14 g per 1000 kcal; moderate days sit halfway. Change carbs, fiber and fat by day any time in Targets on Nutrition.
+            Carbs start as the calories left after protein and fat, fiber at 14 g per 1000 kcal; moderate days sit halfway. Change what you track and the targets by day any time in Targets on Nutrition.
           </p>
         </div>
       )}
