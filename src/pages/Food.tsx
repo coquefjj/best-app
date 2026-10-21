@@ -15,13 +15,13 @@ function uid() {
   return Math.random().toString(36).slice(2, 10)
 }
 
-type MealForm = { name: string; calories: string; protein: string; carbs: string; fat: string; mealSlot: FoodEntry['mealSlot'] }
+type MealForm = { name: string; calories: string; protein: string; carbs: string; fiber: string; fat: string; mealSlot: FoodEntry['mealSlot'] }
 type MealValues = Omit<FoodEntry, 'id'>
 
-const EMPTY_FORM: MealForm = { name: '', calories: '', protein: '', carbs: '', fat: '', mealSlot: 'breakfast' }
+const EMPTY_FORM: MealForm = { name: '', calories: '', protein: '', carbs: '', fiber: '', fat: '', mealSlot: 'breakfast' }
 
 function toForm(m: MealValues): MealForm {
-  return { name: m.name, calories: String(m.calories), protein: String(m.protein), carbs: String(m.carbs), fat: String(m.fat), mealSlot: m.mealSlot }
+  return { name: m.name, calories: String(m.calories), protein: String(m.protein), carbs: String(m.carbs), fiber: m.fiber ? String(m.fiber) : '', fat: String(m.fat), mealSlot: m.mealSlot }
 }
 
 function fromForm(f: MealForm): MealValues {
@@ -30,6 +30,8 @@ function fromForm(f: MealForm): MealValues {
     calories: Number(f.calories) || 0,
     protein: Number(f.protein) || 0,
     carbs: Number(f.carbs) || 0,
+    // Fiber is optional; left blank it stays off the entry.
+    ...(Number(f.fiber) ? { fiber: Number(f.fiber) } : {}),
     fat: Number(f.fat) || 0,
     mealSlot: f.mealSlot,
   }
@@ -67,6 +69,10 @@ function MealFields({ form, setForm, timeField }: { form: MealForm; setForm: (f:
         <div className="field" style={{ flex: 1 }}>
           <label>Carbs (g)</label>
           <input type="number" inputMode="decimal" value={form.carbs} onChange={(e) => setForm({ ...form, carbs: e.target.value })} />
+        </div>
+        <div className="field" style={{ flex: 1 }}>
+          <label>Fiber (g)</label>
+          <input type="number" inputMode="decimal" value={form.fiber} onChange={(e) => setForm({ ...form, fiber: e.target.value })} />
         </div>
         <div className="field" style={{ flex: 1 }}>
           <label>Fat (g)</label>
@@ -152,9 +158,10 @@ function FoodDay({ iso }: { iso: string }) {
       calories: acc.calories + e.calories,
       protein: acc.protein + e.protein,
       carbs: acc.carbs + e.carbs,
+      fiber: acc.fiber + (e.fiber ?? 0),
       fat: acc.fat + e.fat,
     }),
-    { calories: 0, protein: 0, carbs: 0, fat: 0 },
+    { calories: 0, protein: 0, carbs: 0, fiber: 0, fat: 0 },
   )
   const burned = data.workouts[iso]?.aerobic?.caloriesBurned ?? 0
 
@@ -248,7 +255,7 @@ function FoodDay({ iso }: { iso: string }) {
 
       <div className="card">
         <h2>Totals</h2>
-        <div className="stat-grid two-by-two">
+        <div className="stat-grid macro-grid">
           <div>
             <div className="stat-value">{Math.round(totals.calories)}</div>
             <div className="stat-label">kcal / {target.calories}</div>
@@ -260,6 +267,10 @@ function FoodDay({ iso }: { iso: string }) {
           <div>
             <div className="stat-value">{Math.round(totals.carbs)}g</div>
             <div className="stat-label">carbs / {target.carbs}g</div>
+          </div>
+          <div>
+            <div className="stat-value">{Math.round(totals.fiber)}g</div>
+            <div className="stat-label">fiber / {target.fiber}g</div>
           </div>
           <div>
             <div className="stat-value">{Math.round(totals.fat)}g</div>
@@ -296,7 +307,7 @@ function FoodDay({ iso }: { iso: string }) {
             <div className="food-entry" key={e.id}>
               <button className="entry-text" onClick={() => setEditingEntry(e.id)}>
                 {e.time && <span className="entry-time">{formatMinutes(hhmmToMinutes(e.time)!)}</span>}
-                {e.name} <span className="subtle">({slotInfo(e.mealSlot).label.toLowerCase()}) · {e.calories} kcal, {e.protein}g P · {e.carbs}g C · {e.fat}g F</span>
+                {e.name} <span className="subtle">({slotInfo(e.mealSlot).label.toLowerCase()}) · {e.calories} kcal, {e.protein}g P · {e.carbs}g C{e.fiber ? ` · ${e.fiber}g fiber` : ''} · {e.fat}g F</span>
               </button>
               <button className="icon-btn edit" aria-label={`Edit ${e.name}`} onClick={() => setEditingEntry(e.id)}>✎</button>
               <button className="icon-btn" aria-label={`Delete ${e.name}`} onClick={() => removeEntry(e.id)}>✕</button>
@@ -366,13 +377,14 @@ function FoodDay({ iso }: { iso: string }) {
           { label: 'Calories', unit: 'kcal', keys: ['caloriesEasy', 'caloriesModerate', 'caloriesHard'], step: 25 },
           { label: 'Protein', unit: 'g', keys: ['proteinEasy', 'proteinModerate', 'proteinHard'], step: 5 },
           { label: 'Carbs', unit: 'g', keys: ['carbsEasy', 'carbsModerate', 'carbsHard'], step: 5 },
+          { label: 'Fiber', unit: 'g', keys: ['fiberEasy', 'fiberModerate', 'fiberHard'], step: 1 },
           { label: 'Fat', unit: 'g', keys: ['fatEasy', 'fatModerate', 'fatHard'], step: 5 },
         ]}
         rows={[
           { label: 'Calories within ±', unit: 'kcal', target: 'calorieTolerance', min: 'calorieMinTolerance', step: 10 },
           { label: 'Protein', unit: 'g', min: 'proteinMin' },
         ]}
-        note="Easy days are Tuesday and Sunday; dumbbell and calisthenics travel days are moderate. Pick Easy, Moderate or Hard on Workout to change a day. Moderate starts halfway between easy and hard until you change it. On the Home calendar a day is green when every macro that counts is on target (carbs and fat within 10%), yellow when at least one reaches its minimum (within 25%), red when none does. Macros switched off are only tracked."
+        note="Easy days are Tuesday and Sunday; dumbbell and calisthenics travel days are moderate. Pick Easy, Moderate or Hard on Workout to change a day. Moderate starts halfway between easy and hard until you change it. On the Home calendar a day is green when every macro that counts is on target (carbs and fat within 10%, fiber at least its target), yellow when at least one reaches its minimum (within 25%, or 75% of fiber), red when none does. Macros switched off are only tracked."
       >
         <div className="targets-count">
           <div className="targets-head">Counts toward on target</div>

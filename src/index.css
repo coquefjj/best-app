@@ -646,8 +646,17 @@ input[type='checkbox']:checked {
   text-align: center;
 }
 
-.stat-grid.two-by-two {
-  grid-template-columns: repeat(2, 1fr);
+.stat-grid.macro-grid {
+  grid-template-columns: repeat(6, 1fr);
+}
+
+/* Calories and protein on top, carbs, fiber and fat below */
+.stat-grid.macro-grid > div {
+  grid-column: span 2;
+}
+
+.stat-grid.macro-grid > div:nth-child(-n + 2) {
+  grid-column: span 3;
 }
 
 .stat-grid > div {

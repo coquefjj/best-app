@@ -29,6 +29,10 @@ export interface Targets {
   fatEasy: number
   fatModerate: number
   fatHard: number
+  /** Fiber (g) by calorie day; a floor, so more is fine. */
+  fiberEasy: number
+  fiberModerate: number
+  fiberHard: number
   waterL: number
   waterMinL: number
   sleepHours: number
@@ -53,7 +57,13 @@ const MODERATE: [keyof Targets, keyof Targets, keyof Targets, (e: number, h: num
   ['proteinModerate', 'proteinEasy', 'proteinHard', half],
   ['carbsModerate', 'carbsEasy', 'carbsHard', half],
   ['fatModerate', 'fatEasy', 'fatHard', half],
+  ['fiberModerate', 'fiberEasy', 'fiberHard', half],
 ]
+
+/** Starting fiber: 14 g per 1000 kcal, to the nearest 5 g. */
+export function fiberFor(calories: number): number {
+  return Math.round((calories * 14) / 1000 / 5) * 5
+}
 
 /** Fernando's defaults; calories and protein come from his plan. */
 export const DEFAULT_TARGETS: Targets = {
@@ -73,6 +83,9 @@ export const DEFAULT_TARGETS: Targets = {
   fatEasy: NUTRITION_TARGETS.easy.fat,
   fatModerate: half(NUTRITION_TARGETS.easy.fat, NUTRITION_TARGETS.hard.fat),
   fatHard: NUTRITION_TARGETS.hard.fat,
+  fiberEasy: fiberFor(NUTRITION_TARGETS.easy.calories),
+  fiberModerate: half(fiberFor(NUTRITION_TARGETS.easy.calories), fiberFor(NUTRITION_TARGETS.hard.calories)),
+  fiberHard: fiberFor(NUTRITION_TARGETS.hard.calories),
   waterL: 2,
   waterMinL: 1.4,
   sleepHours: 8,
@@ -94,7 +107,7 @@ function followProtein(t: Targets, ...sources: (Partial<Targets> | undefined)[])
 
 export function defaultTargets(data: AppData): Targets {
   const { easy, hard } = activePlan().nutrition
-  // Carbs and fat: what onboarding set for the profile, otherwise the plan's.
+  // Carbs, fat and fiber: what onboarding set for the profile, otherwise the plan's.
   const macros = data.profile?.macros ?? { easy, hard }
   const t: Targets = {
     ...DEFAULT_TARGETS,
@@ -105,6 +118,8 @@ export function defaultTargets(data: AppData): Targets {
     carbsHard: macros.hard.carbs,
     fatEasy: macros.easy.fat,
     fatHard: macros.hard.fat,
+    fiberEasy: data.profile?.macros?.easy.fiber ?? fiberFor(easy.calories),
+    fiberHard: data.profile?.macros?.hard.fiber ?? fiberFor(hard.calories),
     ...data.profile?.baseTargets,
   }
   followProtein(t, data.profile?.baseTargets)
@@ -124,15 +139,16 @@ export function getTargets(data: AppData): Targets {
   return t
 }
 
-export type Macro = 'calories' | 'protein' | 'carbs' | 'fat'
+export type Macro = 'calories' | 'protein' | 'carbs' | 'fiber' | 'fat'
 export const MACROS: { id: Macro; label: string }[] = [
   { id: 'calories', label: 'Calories' },
   { id: 'protein', label: 'Protein' },
   { id: 'carbs', label: 'Carbs' },
+  { id: 'fiber', label: 'Fiber' },
   { id: 'fat', label: 'Fat' },
 ]
-/** Calories and protein count by default; carbs and fat are only tracked until switched on. */
-const DEFAULT_GRADED: Record<Macro, boolean> = { calories: true, protein: true, carbs: false, fat: false }
+/** Calories and protein count by default; carbs, fiber and fat are only tracked until switched on. */
+const DEFAULT_GRADED: Record<Macro, boolean> = { calories: true, protein: true, carbs: false, fiber: false, fat: false }
 
 export function gradedMacros(data: AppData): Record<Macro, boolean> {
   return { ...DEFAULT_GRADED, ...data.gradedMacros }
@@ -179,6 +195,7 @@ export interface DayNutritionTarget {
   protein: number
   proteinMin: number
   carbs: number
+  fiber: number
   fat: number
 }
 
@@ -186,12 +203,12 @@ export function proteinFor(t: Targets, level: DayLevel): number {
   return level === 'hard' ? t.proteinHard : level === 'moderate' ? t.proteinModerate : t.proteinEasy
 }
 
-export function macrosFor(t: Targets, level: DayLevel): { carbs: number; fat: number } {
+export function macrosFor(t: Targets, level: DayLevel): { carbs: number; fiber: number; fat: number } {
   return level === 'hard'
-    ? { carbs: t.carbsHard, fat: t.fatHard }
+    ? { carbs: t.carbsHard, fiber: t.fiberHard, fat: t.fatHard }
     : level === 'moderate'
-      ? { carbs: t.carbsModerate, fat: t.fatModerate }
-      : { carbs: t.carbsEasy, fat: t.fatEasy }
+      ? { carbs: t.carbsModerate, fiber: t.fiberModerate, fat: t.fatModerate }
+      : { carbs: t.carbsEasy, fiber: t.fiberEasy, fat: t.fatEasy }
 }
 
 /** The day's nutrition targets for its calorie day, from the Targets card on Nutrition. */
@@ -207,6 +224,7 @@ export function nutritionTarget(data: AppData, iso: string): DayNutritionTarget 
     protein: proteinFor(t, level),
     proteinMin: t.proteinMin,
     carbs: plan.carbs,
+    fiber: plan.fiber,
     fat: plan.fat,
   }
 }

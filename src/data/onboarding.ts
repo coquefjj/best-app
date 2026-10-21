@@ -40,6 +40,8 @@ export interface Suggested {
   /** Set by hand; otherwise the calories left after protein and fat. */
   carbsHard?: number
   carbsEasy?: number
+  /** Set by hand; otherwise 14 g per 1000 kcal on training days. */
+  fiber?: number
   waterL: number
   sleepHours: number
 }

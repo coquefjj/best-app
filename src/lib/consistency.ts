@@ -69,11 +69,12 @@ function gradeNutrition(data: AppData, iso: string): Grade {
   if (!entries.length) return 'none'
   const t = nutritionTarget(data, iso)
   const on = gradedMacros(data)
-  const sum = (k: 'calories' | 'protein' | 'carbs' | 'fat') => entries.reduce((a, e) => a + (e[k] || 0), 0)
+  const sum = (k: 'calories' | 'protein' | 'carbs' | 'fiber' | 'fat') => entries.reduce((a, e) => a + (e[k] || 0), 0)
   const levels: Level[] = []
   if (on.calories) levels.push(within(sum('calories'), t.calorieRange, t.calorieMinRange))
   if (on.protein) levels.push(atLeast(sum('protein'), t.protein, t.proteinMin))
   if (on.carbs) levels.push(near(sum('carbs'), t.carbs))
+  if (on.fiber) levels.push(atLeast(sum('fiber'), t.fiber, t.fiber * 0.75))
   if (on.fat) levels.push(near(sum('fat'), t.fat))
   return levels.length ? combine(levels) : 'none'
 }

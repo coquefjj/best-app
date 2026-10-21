@@ -43,6 +43,8 @@ export interface FoodEntry {
   calories: number
   protein: number
   carbs: number
+  /** Optional; missing on food logged before Oct 21 2026. */
+  fiber?: number
   fat: number
   mealSlot: 'preWorkout' | 'breakfast' | 'morningSnack' | 'lunch' | 'afternoonSnack' | 'dinner' | 'snack'
   /** Local time eaten as "HH:MM" (24 h), set when logged. Missing on food logged before Oct 1 2026. */
@@ -59,6 +61,7 @@ export interface SavedMeal {
   calories: number
   protein: number
   carbs: number
+  fiber?: number
   fat: number
   mealSlot: FoodEntry['mealSlot']
 }
@@ -130,8 +133,8 @@ export interface Profile {
   plan: import('./data/templates').PlanRef
   /** Targets onboarding set; changes on the Nutrition and Recovery pages go in `targets` on top. */
   baseTargets?: Partial<import('./lib/targets').Targets>
-  /** Carbs and fat by easy and hard day, when onboarding set them. */
-  macros?: { easy: { carbs: number; fat: number }; hard: { carbs: number; fat: number } }
+  /** Carbs, fat and fiber by easy and hard day, when onboarding set them (fiber since Oct 21 2026). */
+  macros?: { easy: { carbs: number; fat: number; fiber?: number }; hard: { carbs: number; fat: number; fiber?: number } }
   /** false hides sleep score and resting heart rate (no watch to read them from). */
   watch?: boolean
 }

@@ -164,8 +164,10 @@ export default function NutritionProgress() {
   const graded = gradedMacros(data)
   const inRange = avgBase.filter((d) => d.calories >= d.target.calorieRange[0] && d.calories <= d.target.calorieRange[1]).length
   const proteinHit = avgBase.filter((d) => d.protein >= d.target.proteinMin).length
-  const avg = (k: 'calories' | 'protein' | 'carbs' | 'fat') => average(avgBase.map((d) => d[k]))
-  const avgTarget = (k: 'calories' | 'protein' | 'carbs' | 'fat') => average(avgBase.map((d) => d.target[k]))
+  const fiberHit = avgBase.filter((d) => d.fiber >= d.target.fiber).length
+  const fiberLogged = avgBase.some((d) => d.fiber > 0)
+  const avg = (k: 'calories' | 'protein' | 'carbs' | 'fiber' | 'fat') => average(avgBase.map((d) => d[k]))
+  const avgTarget = (k: 'calories' | 'protein' | 'carbs' | 'fiber' | 'fat') => average(avgBase.map((d) => d.target[k]))
 
   return (
     <div className="report">
@@ -245,6 +247,7 @@ export default function NutritionProgress() {
             <div className="subtle report-note">Dark ticks are each day's target.</div>
             <MacroMeter label="Protein" eaten={avg('protein')} target={avgTarget('protein')} unit="g" />
             <MacroMeter label="Carbs" eaten={avg('carbs')} target={avgTarget('carbs')} unit="g" overIsBad={graded.carbs} />
+            <MacroMeter label="Fiber" eaten={avg('fiber')} target={avgTarget('fiber')} unit="g" />
             <MacroMeter label="Fat" eaten={avg('fat')} target={avgTarget('fat')} unit="g" overIsBad={graded.fat} />
             <ul className="report-rows">
               <li>
@@ -259,6 +262,14 @@ export default function NutritionProgress() {
                   {proteinHit} of {avgBase.length} days
                 </span>
               </li>
+              {fiberLogged && (
+                <li>
+                  <span className="report-row-name">Fiber reached</span>
+                  <span>
+                    {fiberHit} of {avgBase.length} days
+                  </span>
+                </li>
+              )}
             </ul>
             {complete.length > 0 && logged.some((d) => d.date === today) && (
               <div className="subtle report-note">Averages leave out today until it's over.</div>

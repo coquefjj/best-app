@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useStore } from '../lib/store'
-import { midpoint } from '../lib/targets'
+import { fiberFor, midpoint } from '../lib/targets'
 import { addDays, formatHuman, startOfWeek, todayISO } from '../lib/date'
 import { TEMPLATES, resolvePlan, type PlanRef } from '../data/templates'
 import { BLANK_DRAFT, HABIT_CHOICES, PRESETS, carbsFor, suggest, type About, type Draft } from '../data/onboarding'
@@ -49,6 +49,7 @@ export default function Onboarding() {
   const moderate = food.caloriesModerate ?? midpoint(food.caloriesEasy, food.caloriesHard)
   const carbsHard = food.carbsHard ?? carbsFor(food.caloriesHard, food.protein, food.fat)
   const carbsEasy = food.carbsEasy ?? carbsFor(food.caloriesEasy, food.protein, food.fat)
+  const fiber = food.fiber ?? fiberFor(food.caloriesHard)
   const setFood = (key: keyof typeof food, v: number | null) =>
     setDraft((d) => {
       const next = { ...d.food }
@@ -85,8 +86,8 @@ export default function Onboarding() {
           sleepHoursMin: Math.max(0, food.sleepHours - 1),
         },
         macros: {
-          easy: { fat: food.fat, carbs: carbsEasy },
-          hard: { fat: food.fat, carbs: carbsHard },
+          easy: { fat: food.fat, carbs: carbsEasy, fiber },
+          hard: { fat: food.fat, carbs: carbsHard, fiber },
         },
       },
     }
@@ -319,8 +320,9 @@ export default function Onboarding() {
           {field('Fat (g)', food.fat, (v) => setFood('fat', v), 5)}
           {field('Carbs on training days (g)', carbsHard, (v) => setFood('carbsHard', v), 5)}
           {field('Carbs on rest days (g)', carbsEasy, (v) => setFood('carbsEasy', v), 5)}
+          {field('Fiber (g)', fiber, (v) => setFood('fiber', v), 1)}
           <p className="subtle">
-            Carbs start as the calories left after protein and fat; moderate days sit halfway. Change fat and carbs by day any time in Targets on Nutrition.
+            Carbs start as the calories left after protein and fat, fiber at 14 g per 1000 kcal; moderate days sit halfway. Change carbs, fiber and fat by day any time in Targets on Nutrition.
           </p>
         </div>
       )}

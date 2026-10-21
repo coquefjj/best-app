@@ -18,6 +18,7 @@ export interface NutritionDay {
   calories: number
   protein: number
   carbs: number
+  fiber: number
   fat: number
   target: DayNutritionTarget
 }
@@ -53,7 +54,7 @@ export function nutritionDays(data: AppData, days: number, end = todayISO()): (N
       out.push(null)
       continue
     }
-    const sum = (k: 'calories' | 'protein' | 'carbs' | 'fat') => entries.reduce((acc, e) => acc + (e[k] || 0), 0)
+    const sum = (k: 'calories' | 'protein' | 'carbs' | 'fiber' | 'fat') => entries.reduce((acc, e) => acc + (e[k] || 0), 0)
     out.push({
       date,
       entries,
@@ -61,6 +62,7 @@ export function nutritionDays(data: AppData, days: number, end = todayISO()): (N
       calories: sum('calories'),
       protein: sum('protein'),
       carbs: sum('carbs'),
+      fiber: sum('fiber'),
       fat: sum('fat'),
       target: nutritionTarget(data, date),
     })
