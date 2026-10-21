@@ -5,6 +5,8 @@
 export interface Move {
   file: string
   points?: string[]
+  /** A steady cycle (cardio) rather than a rep: every frame gets the same time. */
+  cycle?: boolean
 }
 
 /** Keyed by the exercise name used in the plan. */
@@ -110,12 +112,18 @@ export const MOVES: Record<string, Move> = {
   // Library-only extras (data/library.ts); Dips is in the calisthenics travel sessions now.
   'Triceps pushdown (machine)': { file: 'triceps-pushdown-machine.png' },
   Dips: { file: 'dips.png' },
+  // Cardio entries in the library, logged as time and calories.
+  Running: { file: 'running.png', cycle: true },
+  Biking: { file: 'biking.png', cycle: true },
+  Swimming: { file: 'swimming.png', cycle: true },
+  Rowing: { file: 'rowing.png', cycle: true },
 }
 
 export const moveSrc = (m: Move) => `${import.meta.env.BASE_URL}img/moves/${m.file}`
 
 /** How long each frame shows: pause at the start and end positions of a rep. */
-export function frameDurations(frames: number): number[] {
+export function frameDurations(frames: number, cycle = false): number[] {
+  if (cycle) return Array(frames).fill(220)
   if (frames === 4) return [500, 220, 450, 220]
   if (frames <= 2) return Array(frames).fill(800)
   return Array(frames).fill(300)

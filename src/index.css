@@ -398,7 +398,7 @@ input[type='checkbox']:checked {
   color: var(--text-dim);
 }
 
-.field input, .field select, .quick-pick select, .field textarea, .set-row input:not([type='checkbox']), .targets-cell input {
+.field input, .field select, .quick-pick select, .field textarea, .set-row input:not([type='checkbox']), .cardio-row input[type='number'], .targets-cell input {
   background: var(--surface);
   border: 3px solid var(--ink);
   border-radius: 6px;
@@ -408,7 +408,7 @@ input[type='checkbox']:checked {
   width: 100%;
 }
 
-.field input:focus, .field select:focus, .set-row input:focus {
+.field input:focus, .field select:focus, .set-row input:focus, .cardio-row input:focus {
   outline: none;
   border-color: var(--accent-2);
   box-shadow: 0 0 0 2px var(--frame-inner);
@@ -543,6 +543,31 @@ input[type='checkbox']:checked {
 
 .set-row.no-weight {
   grid-template-columns: 34px 1fr 28px;
+}
+
+.cardio-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 28px;
+  gap: 8px;
+  align-items: end;
+  margin-top: 8px;
+}
+
+.cardio-row label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.cardio-row input[type='number'] {
+  width: 100%;
+  font-size: 1.05rem;
+  padding: 4px 8px;
+}
+
+.cardio-row input[type='checkbox'] {
+  margin-bottom: 8px;
 }
 
 .set-toggles {

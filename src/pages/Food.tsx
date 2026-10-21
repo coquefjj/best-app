@@ -163,7 +163,11 @@ function FoodDay({ iso }: { iso: string }) {
     }),
     { calories: 0, protein: 0, carbs: 0, fiber: 0, fat: 0 },
   )
-  const burned = data.workouts[iso]?.aerobic?.caloriesBurned ?? 0
+  // The day's cardio session plus any cardio added from the exercise library.
+  const workout = data.workouts[iso]
+  const burned =
+    (workout?.aerobic?.caloriesBurned ?? 0) +
+    Object.values(workout?.exercises ?? {}).reduce((sum, ex) => sum + (ex.mode === 'cardio' ? ex.sets[0]?.calories ?? 0 : 0), 0)
 
   const addEntry = (entry: Omit<FoodEntry, 'id'>) => {
     setData((prev) => ({

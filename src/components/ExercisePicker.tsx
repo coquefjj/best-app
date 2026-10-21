@@ -54,7 +54,7 @@ export default function ExercisePicker({ added, onPick, onClose }: { added: stri
                     <MoveIcon name={ex.name} />
                     <span className="lib-name">
                       {ex.name}
-                      <span className="subtle">{ex.target.sets} x {ex.target.reps}</span>
+                      <span className="subtle">{ex.mode === 'cardio' ? 'Time and calories' : `${ex.target.sets} x ${ex.target.reps}`}</span>
                     </span>
                     <span className="lib-add" aria-hidden="true">{count ? '✓' : '+'}</span>
                   </button>

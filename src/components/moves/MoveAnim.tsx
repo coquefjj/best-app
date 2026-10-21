@@ -36,7 +36,7 @@ export default function MoveAnim({ move, frames, size, label }: { move: Move; fr
 
   useEffect(() => {
     if (frames < 2 || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-    const durations = frameDurations(frames)
+    const durations = frameDurations(frames, move.cycle)
     let i = 0
     let timer = 0
     const next = () => {
@@ -48,7 +48,7 @@ export default function MoveAnim({ move, frames, size, label }: { move: Move; fr
     }
     next()
     return () => window.clearTimeout(timer)
-  }, [frames])
+  }, [frames, move.cycle])
 
   return (
     <div

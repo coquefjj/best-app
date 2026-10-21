@@ -5,14 +5,16 @@ export interface SetLog {
   reps: number | null
   /** Used instead of reps when the exercise is logged by time. */
   seconds?: number | null
+  /** Only on cardio entries: calories burned, from a watch or machine. */
+  calories?: number | null
   done: boolean
 }
 
 export interface ExerciseLog {
   chosenOption: string
   sets: SetLog[]
-  /** 'reps' when missing (logs saved before time-based sets existed). */
-  mode?: 'reps' | 'time'
+  /** 'reps' when missing (logs saved before time-based sets existed). 'cardio' is one entry of time and calories. */
+  mode?: 'reps' | 'time' | 'cardio'
   /** Whether sets take a weight; true when missing. */
   weighted?: boolean
 }

@@ -10,7 +10,8 @@ export interface LibraryExercise {
   /** The target from the plan it comes from, shown as a guide. */
   target: ExerciseSet
   weighted: boolean
-  mode: 'reps' | 'time'
+  /** 'cardio' logs a single entry of time and calories instead of sets. */
+  mode: 'reps' | 'time' | 'cardio'
 }
 
 export interface LibraryGroup {
@@ -25,6 +26,14 @@ const CONDITIONING = ['DB thruster', 'DB swing', 'Burpees', 'Box jump', 'Jump sq
 /** Exercises no plan uses yet, so they can still be added from the library. */
 const EXTRAS: (LibraryExercise & { group: string })[] = [
   { name: 'Triceps pushdown (machine)', cue: 'Elbows pinned to your sides, press down to straight arms', target: { sets: '3', reps: '10-12' }, weighted: true, mode: 'reps', group: 'Arms & shoulders' },
+  ...([
+    ['Running', 'Tall posture, quick light steps landing under your hips'],
+    ['Biking', 'Steady cadence, knees track over your toes'],
+    ['Swimming', 'Long body, breathe out underwater, relaxed kick'],
+    ['Rowing', 'Legs, then lean back, then arms; reverse on the way in'],
+  ] as const).map(([name, cue]) => ({
+    name, cue, target: { sets: '1', reps: 'time' }, weighted: false, mode: 'cardio' as const, group: 'Cardio',
+  })),
 ]
 
 /** Plan targets like "20-30s/side" are held for time, everything else is counted in reps. */
@@ -69,7 +78,7 @@ function build(active: PlanConfig): LibraryGroup[] {
     return 'Other'
   }
 
-  const order = [...MUSCLE_GROUPS.map((g) => g.name), 'Core & stability', 'Conditioning', 'Other']
+  const order = [...MUSCLE_GROUPS.map((g) => g.name), 'Core & stability', 'Conditioning', 'Cardio', 'Other']
   const groups = new Map<string, LibraryExercise[]>(order.map((n) => [n, []]))
   for (const ex of byName.values()) groups.get(groupOf(ex.name))!.push(ex)
   return order

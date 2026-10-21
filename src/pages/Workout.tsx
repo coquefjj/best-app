@@ -141,9 +141,10 @@ function WorkoutDay({ iso }: { iso: string }) {
         ...w.exercises,
         [id]: {
           chosenOption: lib.name,
-          mode: lastLog?.mode ?? lib.mode,
+          mode: lib.mode === 'cardio' ? 'cardio' : lastLog?.mode ?? lib.mode,
           weighted: lastLog?.weighted ?? lib.weighted,
-          sets: Array.from({ length: lastLog?.sets.length || parseInt(lib.target.sets) || 3 }, emptySet),
+          // Cardio is one entry of time and calories, not sets.
+          sets: lib.mode === 'cardio' ? [emptySet()] : Array.from({ length: lastLog?.sets.length || parseInt(lib.target.sets) || 3 }, emptySet),
         },
       },
     }))
@@ -397,6 +398,37 @@ function WorkoutDay({ iso }: { iso: string }) {
     )
   }
 
+  /** A cardio entry from the library: one row of minutes and calories burned. */
+  const renderCardio = (exId: string, log: ExerciseLog, lastLog: ExerciseLog | undefined) => {
+    const s = log.sets[0] ?? emptySet()
+    const last = lastLog?.sets[0]
+    return (
+      <div className="cardio-row">
+        <label>
+          <span className="subtle">Time (min)</span>
+          <input
+            type="number"
+            inputMode="decimal"
+            placeholder={last?.seconds != null ? `${Math.round(last.seconds / 60)} last` : 'min'}
+            value={s.seconds != null ? Math.round((s.seconds / 60) * 10) / 10 : ''}
+            onChange={(e) => updateSet(exId, 0, { seconds: e.target.value === '' ? null : Math.round(Number(e.target.value) * 60) })}
+          />
+        </label>
+        <label>
+          <span className="subtle">Calories (kcal)</span>
+          <input
+            type="number"
+            inputMode="numeric"
+            placeholder={last?.calories != null ? `${last.calories} last` : 'kcal'}
+            value={s.calories ?? ''}
+            onChange={(e) => updateSet(exId, 0, { calories: e.target.value === '' ? null : Number(e.target.value) })}
+          />
+        </label>
+        <input type="checkbox" aria-label="Done" checked={s.done} onChange={(e) => updateSet(exId, 0, { done: e.target.checked })} />
+      </div>
+    )
+  }
+
   const [demo, setDemo] = useState<{ name: string; cue?: string } | null>(null)
   const [pickerOpen, setPickerOpen] = useState(false)
   const added = workout.added ?? []
@@ -416,13 +448,15 @@ function WorkoutDay({ iso }: { iso: string }) {
                 <h3>{a.name}</h3>
                 <div className="subtle">
                   <span className="badge added-badge">Added</span>
-                  {lib ? ` Guide: ${lib.target.sets} x ${lib.target.reps}` : ''}
+                  {lib && log.mode !== 'cardio' ? ` Guide: ${lib.target.sets} x ${lib.target.reps}` : ''}
                 </div>
                 {lib?.cue && <div className="subtle">Cue: {lib.cue}</div>}
               </div>
               <button className="remove-added" aria-label={`Remove ${a.name} from this day`} onClick={() => removeAdded(a.id)}>✕</button>
             </div>
-            {renderSets(a.id, log, findLastByName(data.workouts, a.name, iso))}
+            {log.mode === 'cardio'
+              ? renderCardio(a.id, log, findLastByName(data.workouts, a.name, iso))
+              : renderSets(a.id, log, findLastByName(data.workouts, a.name, iso))}
           </div>
         )
       })}
