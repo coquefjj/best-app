@@ -70,8 +70,15 @@ export type HabitDayLog = Partial<Record<string, number | boolean>>
 export interface Habit {
   id: string
   label: string
-  /** 'minutes' takes any time you did; 'boolean' is a yes/no tick. */
-  type: 'minutes' | 'boolean'
+  /**
+   * 'minutes' takes any time you did; 'boolean' is a yes/no tick; 'count' takes a number
+   * (e.g. steps) and counts once it reaches `target`.
+   */
+  type: 'minutes' | 'boolean' | 'count'
+  /** Count habits only: the number to reach each day, e.g. 10000. */
+  target?: number
+  /** Count habits only: what is counted, e.g. "steps". */
+  unit?: string
 }
 
 export interface ProgressCheckIn {

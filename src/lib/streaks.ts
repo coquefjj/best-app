@@ -1,11 +1,18 @@
 import type { AppData, Habit } from '../types'
 import { addDays, todayISO } from './date'
 
-/** Whether a habit counts for the day: ticked, or any time logged (the streak is days, not minutes). */
+/**
+ * Whether a habit counts for the day: ticked, any time logged (the streak is days, not
+ * minutes), or a count that reached its target.
+ */
 export function habitDone(h: Habit, value: unknown): boolean {
   if (h.type === 'boolean') return value === true
+  if (h.type === 'count') return typeof value === 'number' && value >= (h.target || 1)
   return typeof value === 'number' && value > 0
 }
+
+/** "10,000 steps" for a count habit's daily target. */
+export const countTarget = (h: Habit) => `${(h.target || 1).toLocaleString('en-US')}${h.unit ? ` ${h.unit}` : ''}`
 
 const doneOn = (data: AppData, h: Habit, iso: string) => habitDone(h, data.habits[iso]?.[h.id])
 

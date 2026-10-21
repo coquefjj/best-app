@@ -9,6 +9,7 @@ import { GLASS_ML } from '../components/WaterGlasses'
 import RoomHeader from '../components/RoomHeader'
 import type { RoomId } from '../components/rooms'
 import { EMPTY_DATA, type AppData, type Habit } from '../types'
+import { countTarget } from '../lib/streaks'
 
 const STEPS: { room: RoomId; title: string }[] = [
   { room: 'entrance', title: 'Who are you?' },
@@ -103,11 +104,19 @@ export default function Onboarding() {
     set({ habits: draft.habits.some((x) => x.id === h.id) ? draft.habits.filter((x) => x.id !== h.id) : [...draft.habits, h] })
   const [customLabel, setCustomLabel] = useState('')
   const [customType, setCustomType] = useState<Habit['type']>('boolean')
+  const [customTarget, setCustomTarget] = useState('')
+  const [customUnit, setCustomUnit] = useState('')
+  const customTargetNum = Math.round(Number(customTarget))
+  const canAddCustom = !!customLabel.trim() && (customType !== 'count' || customTargetNum > 0)
   const addCustom = () => {
     const label = customLabel.trim()
-    if (!label) return
-    set({ habits: [...draft.habits, { id: `custom-${Date.now().toString(36)}`, label, type: customType }] })
+    if (!canAddCustom) return
+    const habit: Habit = { id: `custom-${Date.now().toString(36)}`, label, type: customType }
+    if (customType === 'count') Object.assign(habit, { target: customTargetNum, unit: customUnit.trim() || undefined })
+    set({ habits: [...draft.habits, habit] })
     setCustomLabel('')
+    setCustomTarget('')
+    setCustomUnit('')
   }
 
   const toggleTrainingDay = (day: number) => {
@@ -260,7 +269,7 @@ export default function Onboarding() {
 
       {step === 3 && (
         <div className="card">
-          <p className="subtle">Tick the habits to track each day. Minutes habits take any time you did.</p>
+          <p className="subtle">Tick the habits to track each day. Minutes habits take any time you did; count habits need their daily target.</p>
           {[...HABIT_CHOICES, ...draft.habits.filter((h) => !HABIT_CHOICES.some((c) => c.id === h.id))].map((h) => {
             const on = draft.habits.some((x) => x.id === h.id)
             return (
@@ -268,7 +277,7 @@ export default function Onboarding() {
                 <input type="checkbox" checked={on} onChange={() => toggleHabit(h)} onClick={(e) => e.stopPropagation()} />
                 <label>
                   {h.label}
-                  <span className="subtle"> {h.type === 'minutes' ? '(minutes)' : '(yes/no)'}</span>
+                  <span className="subtle"> {h.type === 'minutes' ? '(minutes)' : h.type === 'count' ? `(${countTarget(h)} a day)` : '(yes/no)'}</span>
                 </label>
               </div>
             )
@@ -280,8 +289,21 @@ export default function Onboarding() {
           <div className="pill-select">
             {pill(customType === 'boolean', 'Yes/no', () => setCustomType('boolean'))}
             {pill(customType === 'minutes', 'Minutes', () => setCustomType('minutes'))}
+            {pill(customType === 'count', 'Count', () => setCustomType('count'))}
           </div>
-          <button className="btn secondary full" style={{ marginTop: 8 }} onClick={addCustom} disabled={!customLabel.trim()}>
+          {customType === 'count' && (
+            <div className="habit-count-fields">
+              <div className="field">
+                <label>Daily target</label>
+                <input type="number" inputMode="numeric" min={1} placeholder="10000" value={customTarget} onChange={(e) => setCustomTarget(e.target.value)} />
+              </div>
+              <div className="field">
+                <label>Unit</label>
+                <input type="text" placeholder="steps" value={customUnit} onChange={(e) => setCustomUnit(e.target.value)} />
+              </div>
+            </div>
+          )}
+          <button className="btn secondary full" style={{ marginTop: 8 }} onClick={addCustom} disabled={!canAddCustom}>
             + Add habit
           </button>
         </div>

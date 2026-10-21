@@ -1443,6 +1443,40 @@ details.lift[open] > .lift-summary .lift-name::after {
   border-radius: 8px;
 }
 
+.habit-count input {
+  width: 96px;
+}
+
+.habit-goal {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.habit-goal .subtle {
+  flex-shrink: 0;
+}
+
+.habit-goal-bar {
+  flex: 1;
+  height: 12px;
+  background: var(--surface-2);
+  border: 2px solid var(--ink);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.habit-goal-bar i {
+  display: block;
+  height: 100%;
+  background: var(--orange);
+}
+
+.habit.done .habit-goal-bar i {
+  background: var(--accent);
+}
+
 .habit-time input:focus {
   outline: none;
   border-color: var(--accent-2);
@@ -1512,16 +1546,34 @@ details.lift[open] > .lift-summary .lift-name::after {
   margin-bottom: 16px;
 }
 
+.habit-edit-item {
+  border-bottom: 2px solid var(--surface-2);
+}
+
+.habit-edit-item:last-child {
+  border-bottom: none;
+}
+
 .habit-edit-row {
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 8px 0;
-  border-bottom: 2px solid var(--surface-2);
 }
 
-.habit-edit-row:last-child {
-  border-bottom: none;
+/* Count habits: daily target and unit under the name */
+.habit-edit-target {
+  padding-top: 0;
+}
+
+.habit-edit-target input[type='number'] {
+  flex: 0 1 96px;
+}
+
+.habit-count-fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
 }
 
 .habit-edit-row input {

@@ -26,7 +26,7 @@ export const HABIT_CHOICES: Habit[] = [
   { id: 'noAlcohol', label: 'No alcohol', type: 'boolean' },
   { id: 'journaling', label: 'Journaling', type: 'boolean' },
   { id: 'stretchingMin', label: 'Stretching', type: 'minutes' },
-  { id: 'steps10k', label: 'Walk 10k steps', type: 'boolean' },
+  { id: 'steps', label: 'Steps', type: 'count', target: 10000, unit: 'steps' },
   { id: 'noSugar', label: 'No sugar', type: 'boolean' },
 ]
 

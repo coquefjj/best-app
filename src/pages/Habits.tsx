@@ -4,7 +4,7 @@ import { useStore } from '../lib/store'
 import { todayISO, formatHuman, addDays } from '../lib/date'
 import RoomHeader from '../components/RoomHeader'
 import DaySwiper from '../components/DaySwiper'
-import { bestStreak, currentStreak, habitDone, recentDays } from '../lib/streaks'
+import { bestStreak, countTarget, currentStreak, habitDone, recentDays } from '../lib/streaks'
 import type { Habit } from '../types'
 
 const STRIP_DAYS = 14
@@ -28,7 +28,7 @@ function HabitsDay({ iso }: { iso: string }) {
 
   return (
     <div className="page room-page floor-office">
-      <RoomHeader room="office" title="Streaks" subtitle={`${doneCount} of ${list.length} logged`}>
+      <RoomHeader room="office" title="Streaks" subtitle={`${doneCount} of ${list.length} done`}>
         <div className="top-bar">
           <Link to={`/habits/${addDays(iso, -1)}`} className="arrow-btn" aria-label="Previous day">◀</Link>
           <strong>{formatHuman(iso)}</strong>
@@ -49,7 +49,7 @@ function HabitsDay({ iso }: { iso: string }) {
           <button className="btn secondary full habits-edit-btn" onClick={() => setEditing(true)}>
             Edit habits
           </button>
-          <p className="subtle habits-note">A day counts toward the streak when it's logged. Time habits count any amount.</p>
+          <p className="subtle habits-note">A day counts toward the streak when it's logged. Time habits count any amount; count habits count once you reach the target.</p>
         </>
       )}
     </div>
@@ -84,6 +84,19 @@ function HabitRow({
             checked={value === true}
             onChange={(e) => onChange(e.target.checked)}
           />
+        ) : h.type === 'count' ? (
+          <span className="habit-time habit-count">
+            <input
+              id={`habit-${h.id}-${iso}`}
+              type="number"
+              inputMode="numeric"
+              min={0}
+              placeholder="--"
+              value={typeof value === 'number' ? value : ''}
+              onChange={(e) => onChange(e.target.value === '' ? undefined : Math.max(0, Math.round(Number(e.target.value))))}
+            />
+            {h.unit && <span className="subtle">{h.unit}</span>}
+          </span>
         ) : (
           <span className="habit-time">
             <input
@@ -99,6 +112,16 @@ function HabitRow({
           </span>
         )}
       </div>
+      {h.type === 'count' && (
+        <div className="habit-goal">
+          <div className="habit-goal-bar">
+            <i style={{ width: `${Math.min(100, ((typeof value === 'number' ? value : 0) / (h.target || 1)) * 100)}%` }} />
+          </div>
+          <span className="subtle">
+            {(typeof value === 'number' ? value : 0).toLocaleString('en-US')} / {countTarget(h)}
+          </span>
+        </div>
+      )}
       <div className="habit-streak">
         <span>
           <strong className="streak-num">{streak}</strong> {streak === 1 ? 'day' : 'days'} in a row
@@ -119,15 +142,25 @@ function EditHabits({ onDone }: { onDone: () => void }) {
   const { data, setData } = useStore()
   const [name, setName] = useState('')
   const [type, setType] = useState<Habit['type']>('boolean')
+  const [target, setTarget] = useState('')
+  const [unit, setUnit] = useState('')
+  const targetNum = Math.round(Number(target))
+  const canAdd = !!name.trim() && (type !== 'count' || targetNum > 0)
 
   const setList = (fn: (list: Habit[]) => Habit[]) => setData((prev) => ({ ...prev, habitList: fn(prev.habitList) }))
 
   const add = () => {
     const label = name.trim()
-    if (!label) return
-    setList((list) => [...list, { id: `h-${Date.now().toString(36)}`, label, type }])
+    if (!canAdd) return
+    const habit: Habit = { id: `h-${Date.now().toString(36)}`, label, type }
+    if (type === 'count') Object.assign(habit, { target: targetNum, unit: unit.trim() || undefined })
+    setList((list) => [...list, habit])
     setName('')
+    setTarget('')
+    setUnit('')
   }
+
+  const update = (id: string, patch: Partial<Habit>) => setList((list) => list.map((x) => (x.id === id ? { ...x, ...patch } : x)))
 
   const remove = (h: Habit) => {
     if (window.confirm(`Remove "${h.label}"? Its past entries stay saved.`)) setList((list) => list.filter((x) => x.id !== h.id))
@@ -139,16 +172,39 @@ function EditHabits({ onDone }: { onDone: () => void }) {
         <h2>Your habits</h2>
         {data.habitList.length === 0 && <p className="subtle">No habits yet.</p>}
         {data.habitList.map((h) => (
-          <div className="habit-edit-row" key={h.id}>
-            <input
-              type="text"
-              aria-label="Habit name"
-              value={h.label}
-              onChange={(e) => setList((list) => list.map((x) => (x.id === h.id ? { ...x, label: e.target.value } : x)))}
-              onBlur={() => !h.label.trim() && setList((list) => list.map((x) => (x.id === h.id ? { ...x, label: 'Habit' } : x)))}
-            />
-            <span className="subtle habit-edit-type">{h.type === 'minutes' ? 'Time' : 'Yes/no'}</span>
-            <button className="habit-remove" aria-label={`Remove ${h.label}`} onClick={() => remove(h)}>✕</button>
+          <div className="habit-edit-item" key={h.id}>
+            <div className="habit-edit-row">
+              <input
+                type="text"
+                aria-label="Habit name"
+                value={h.label}
+                onChange={(e) => update(h.id, { label: e.target.value })}
+                onBlur={() => !h.label.trim() && update(h.id, { label: 'Habit' })}
+              />
+              <span className="subtle habit-edit-type">{h.type === 'minutes' ? 'Time' : h.type === 'count' ? 'Count' : 'Yes/no'}</span>
+              <button className="habit-remove" aria-label={`Remove ${h.label}`} onClick={() => remove(h)}>✕</button>
+            </div>
+            {h.type === 'count' && (
+              <div className="habit-edit-row habit-edit-target">
+                <span className="subtle">Target</span>
+                <input
+                  type="number"
+                  inputMode="numeric"
+                  min={1}
+                  aria-label={`${h.label} target`}
+                  value={h.target ?? ''}
+                  onChange={(e) => update(h.id, { target: e.target.value === '' ? undefined : Math.max(1, Math.round(Number(e.target.value))) })}
+                  onBlur={() => !h.target && update(h.id, { target: 1 })}
+                />
+                <input
+                  type="text"
+                  aria-label={`${h.label} unit`}
+                  placeholder="unit"
+                  value={h.unit ?? ''}
+                  onChange={(e) => update(h.id, { unit: e.target.value || undefined })}
+                />
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -160,7 +216,7 @@ function EditHabits({ onDone }: { onDone: () => void }) {
           <input
             id="new-habit"
             type="text"
-            placeholder="e.g. Cold shower"
+            placeholder={type === 'count' ? 'e.g. Steps' : 'e.g. Cold shower'}
             value={name}
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && add()}
@@ -168,9 +224,22 @@ function EditHabits({ onDone }: { onDone: () => void }) {
         </div>
         <div className="segmented habit-type" role="group" aria-label="How to log it">
           <button className={type === 'boolean' ? 'selected' : ''} onClick={() => setType('boolean')}>Yes / no</button>
-          <button className={type === 'minutes' ? 'selected' : ''} onClick={() => setType('minutes')}>Time (min)</button>
+          <button className={type === 'minutes' ? 'selected' : ''} onClick={() => setType('minutes')}>Time</button>
+          <button className={type === 'count' ? 'selected' : ''} onClick={() => setType('count')}>Count</button>
         </div>
-        <button className="btn full" disabled={!name.trim()} onClick={add}>+ Add habit</button>
+        {type === 'count' && (
+          <div className="habit-count-fields">
+            <div className="field">
+              <label htmlFor="new-habit-target">Daily target</label>
+              <input id="new-habit-target" type="number" inputMode="numeric" min={1} placeholder="10000" value={target} onChange={(e) => setTarget(e.target.value)} />
+            </div>
+            <div className="field">
+              <label htmlFor="new-habit-unit">Unit</label>
+              <input id="new-habit-unit" type="text" placeholder="steps" value={unit} onChange={(e) => setUnit(e.target.value)} />
+            </div>
+          </div>
+        )}
+        <button className="btn full" disabled={!canAdd} onClick={add}>+ Add habit</button>
       </div>
 
       <button className="btn secondary full habits-edit-btn" onClick={onDone}>Done</button>

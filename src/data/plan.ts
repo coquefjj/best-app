@@ -428,7 +428,7 @@ export const HABIT_DEFS = [
  * remove them in the app; the list is saved as `habitList`. `minutes` habits take any
  * time and the streak counts days, not minutes.
  */
-export const DEFAULT_HABITS: { id: string; label: string; type: 'minutes' | 'boolean' }[] = [
+export const DEFAULT_HABITS: { id: string; label: string; type: 'minutes' | 'boolean' | 'count' }[] = [
   { id: 'readingMin', label: 'Reading', type: 'minutes' },
   { id: 'meditationMin', label: 'Meditation', type: 'minutes' },
   { id: 'noSocialMedia', label: 'No social media', type: 'boolean' },
