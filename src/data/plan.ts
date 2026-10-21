@@ -113,8 +113,13 @@ export const travelGearOf = (dayType: DayType): TravelGear | undefined => TRAVEL
  */
 export const SWAP_SESSIONS: { dayType: DayType; short: string }[] = [
   { dayType: 'aerobicEasy', short: 'Easy cardio' },
+  { dayType: 'cardio', short: 'Cardio' },
   { dayType: 'rest', short: 'Rest + mobility' },
 ]
+
+/** Kinds of cardio a day swapped to Cardio can be; HIIT gets hard-day calories, the rest moderate. */
+export const CARDIO_OPTIONS = ['Running', 'Bike', 'Swim', 'Rowing', 'HIIT']
+export const CARDIO_HARD_OPTIONS = ['HIIT']
 
 export const SWAP_REASONS = [
   { id: 'tired', label: 'Tired' },

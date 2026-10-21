@@ -4,7 +4,7 @@ import { getDayInfo } from '../lib/session'
 import { calorieReason, dayLevel, DAY_LEVELS, type DayLevel } from '../lib/targets'
 import { useState } from 'react'
 import { formatHuman, addDays, todayISO, formatClock, formatDuration, parseDuration, weekdayOf } from '../lib/date'
-import { MOBILITY_DAILY, TRAVEL_SESSIONS, TRAVEL_TEMPLATES, TRAVEL_GEARS, travelGearOf, SWAP_SESSIONS, SWAP_REASONS, SWAP_REASONS_SOFTER, SWAP_REASONS_FROM_REST, type DayType, type SwapReason, type TravelGear } from '../data/plan'
+import { MOBILITY_DAILY, TRAVEL_SESSIONS, TRAVEL_TEMPLATES, TRAVEL_GEARS, travelGearOf, SWAP_SESSIONS, SWAP_REASONS, CARDIO_OPTIONS, SWAP_REASONS_SOFTER, SWAP_REASONS_FROM_REST, type DayType, type SwapReason, type TravelGear } from '../data/plan'
 import { activePlan } from '../data/templates'
 import RoomHeader from '../components/RoomHeader'
 import DaySwiper from '../components/DaySwiper'
@@ -210,6 +210,7 @@ function WorkoutDay({ iso }: { iso: string }) {
       ? [...new Set(Object.keys(plan.week).sort((a, b) => ((+a + 6) % 7) - ((+b + 6) % 7)).map((wd) => plan.week[+wd]))]
           .filter((t) => t !== 'rest')
           .map((t) => ({ dayType: t, short: plan.sessions[t].label.split(' —')[0].replace(/ \(.*\)$/, '') }))
+          .concat(plan.sessions.cardio ? [{ dayType: 'cardio', short: 'Cardio' }] : [])
       : SWAP_SESSIONS.filter((t) => plan.swapTo.includes(t.dayType) && t.dayType !== plannedType)
   const swapReasons = (plannedType === 'rest' ? SWAP_REASONS_FROM_REST : SWAP_REASONS_SOFTER).map((id) => SWAP_REASONS.find((r) => r.id === id)!)
   const setSwap = (to: DayType | null, reason: SwapReason | null = swap?.reason ?? null) => {
@@ -264,6 +265,18 @@ function WorkoutDay({ iso }: { iso: string }) {
               </button>
             ))}
           </div>
+          {swap?.to === 'cardio' && (
+            <>
+              <div className="subtle">Which cardio?</div>
+              <div className="pill-select" aria-label="Cardio type">
+                {CARDIO_OPTIONS.map((opt) => (
+                  <button key={opt} className={workout.aerobic?.chosenOption === opt ? 'selected' : ''} onClick={() => setAerobic({ chosenOption: opt })}>
+                    {opt}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
           {swap && (
             <>
               <div className="subtle">Why?</div>
@@ -466,7 +479,8 @@ function WorkoutDay({ iso }: { iso: string }) {
       {modalityOptions && (
         <div className="card">
           {cardHead("Pick today's session")}
-          <div className="pill-select">
+          {/* The open swap panel already shows the cardio picks. */}
+          {!(swapOpen && swap?.to === 'cardio') && <div className="pill-select">
             {modalityOptions.map((opt) => (
               <button
                 key={opt}
@@ -476,7 +490,7 @@ function WorkoutDay({ iso }: { iso: string }) {
                 {opt}
               </button>
             ))}
-          </div>
+          </div>}
           {workout.aerobic?.chosenOption && (
             <>
               <div className="field">

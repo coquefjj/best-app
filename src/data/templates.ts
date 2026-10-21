@@ -12,6 +12,7 @@ import {
   TRAVEL_EASY_RUN_OPTIONS,
   TRAVEL_QUALITY_RUN_OPTIONS,
   TRAVEL_LONG_RUN_OPTIONS,
+  CARDIO_OPTIONS,
   PLAN_START_DATE,
   PLAN_LENGTH_DAYS,
   type DayType,
@@ -73,6 +74,8 @@ export const TEMPLATES: { id: TemplateId; name: string; blurb: string }[] = [
 ]
 
 const REST: PlanSession = { label: 'Rest + long flexibility session', hard: false }
+/** Not on any week; offered by Swap. Moderate calories unless it's HIIT (dayLevel in lib/targets.ts). */
+const CARDIO: PlanSession = { label: 'Cardio', hard: false, moderate: true, modalityOptions: CARDIO_OPTIONS }
 
 function hybrid100(ref: PlanRef): PlanConfig {
   const sessions: Record<DayType, PlanSession> = {}
@@ -82,6 +85,7 @@ function hybrid100(ref: PlanRef): PlanConfig {
   sessions.aerobicEasy.modalityOptions = AEROBIC_EASY_OPTIONS
   sessions.hardConditioning.modalityOptions = HARD_CONDITIONING_OPTIONS
   sessions.longEndurance.modalityOptions = LONG_ENDURANCE_OPTIONS
+  sessions.cardio = CARDIO
   for (const t of TRAVEL_SESSIONS) {
     if (t.dayType === 'rest') continue
     sessions[t.dayType] = { label: t.label, hard: t.dayType !== 'travelEasyRun', exercises: SESSIONS_BY_TYPE[t.dayType] }
@@ -102,7 +106,7 @@ function hybrid100(ref: PlanRef): PlanConfig {
     phases: PHASES,
     deloadWeeks: [7, 14],
     travel: true,
-    swapTo: ['aerobicEasy', 'rest'],
+    swapTo: ['aerobicEasy', 'cardio', 'rest'],
     nutrition: {
       easy: { calories: NUTRITION_TARGETS.easy.calories, protein: NUTRITION_TARGETS.easy.protein, fat: NUTRITION_TARGETS.easy.fat, carbs: NUTRITION_TARGETS.easy.carbs },
       hard: { calories: NUTRITION_TARGETS.hard.calories, protein: NUTRITION_TARGETS.hard.protein, fat: NUTRITION_TARGETS.hard.fat, carbs: NUTRITION_TARGETS.hard.carbs },
@@ -174,12 +178,13 @@ function split3(ref: PlanRef): PlanConfig {
       splitDay3: { label: 'Day 3 — Chest, biceps, triceps, back', hard: true, exercises: SPLIT_DAY_3 },
       // Not on the week; offered by Swap.
       aerobicEasy: { label: 'Easy aerobic (Zone 2)', hard: false, modalityOptions: AEROBIC_EASY_OPTIONS },
+      cardio: CARDIO,
       rest: REST,
     },
     phases: [],
     deloadWeeks: [],
     travel: false,
-    swapTo: ['aerobicEasy', 'rest'],
+    swapTo: ['aerobicEasy', 'cardio', 'rest'],
     nutrition: {
       easy: { calories: 2500, protein: 155, fat: 80, carbs: 290 },
       hard: { calories: 2850, protein: 155, fat: 80, carbs: 375 },

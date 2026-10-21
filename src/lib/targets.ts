@@ -1,5 +1,5 @@
 import type { AppData } from '../types'
-import { NUTRITION_TARGETS } from '../data/plan'
+import { NUTRITION_TARGETS, CARDIO_HARD_OPTIONS } from '../data/plan'
 import { activePlan } from '../data/templates'
 import { getDayInfo } from './session'
 
@@ -161,7 +161,9 @@ export interface DayLevelInfo {
 export function dayLevel(data: AppData, iso: string): DayLevelInfo {
   const info = getDayInfo(iso, data)
   const planned = getDayInfo(iso)
-  const auto = sessionLevel(info.dayType, info.hard)
+  // A day swapped to Cardio is moderate, or hard when the cardio picked is HIIT.
+  const cardioPick = info.dayType === 'cardio' ? data.workouts[iso]?.aerobic?.chosenOption : undefined
+  const auto = cardioPick && CARDIO_HARD_OPTIONS.includes(cardioPick) ? 'hard' : sessionLevel(info.dayType, info.hard)
   const pick = data.dayLevels?.[iso]
   return { level: pick ?? auto, auto, planned: sessionLevel(planned.dayType, planned.hard), picked: pick != null }
 }
@@ -231,7 +233,8 @@ export function calorieReason(data: AppData, iso: string): CalorieReason {
   const calories = caloriesFor(t, lv.level)
   const plannedCalories = caloriesFor(t, lv.planned)
   const kind = `${DAY_LEVELS.find((l) => l.id === lv.level)!.label} day`
-  const session = info.label.split(' —')[0]
+  const cardioPick = info.dayType === 'cardio' ? data.workouts[iso]?.aerobic?.chosenOption : undefined
+  const session = cardioPick ? `${cardioPick} cardio` : info.label.split(' —')[0]
   let why: string | undefined
   if (lv.picked) why = `${kind}: picked on Workout`
   else if (info.swap) why = `${kind}: swapped ${info.swap.fromShort} for ${session}`
