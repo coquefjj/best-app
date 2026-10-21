@@ -1,3 +1,4 @@
+import { parseNum } from './num'
 import type { AppData } from '../types'
 
 /**
@@ -21,8 +22,8 @@ export function weighIns(data: AppData): { date: string; kg: number }[] {
 
 /** Reads "78.4" or "78,4"; null when it isn't a sensible weight. */
 export function parseKg(text: string): number | null {
-  const n = Number(text.trim().replace(',', '.'))
-  return Number.isFinite(n) && n >= 20 && n <= 400 ? +n.toFixed(1) : null
+  const n = parseNum(text)
+  return n != null && n >= 20 && n <= 400 ? +n.toFixed(1) : null
 }
 
 export const showKg = (kg: number) => `${(+kg.toFixed(1)).toString()} kg`

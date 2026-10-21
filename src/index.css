@@ -398,7 +398,7 @@ input[type='checkbox']:checked {
   color: var(--text-dim);
 }
 
-.field input, .field select, .quick-pick select, .field textarea, .set-row input:not([type='checkbox']), .cardio-row input[type='number'], .targets-cell input {
+.field input, .field select, .quick-pick select, .field textarea, .set-row input:not([type='checkbox']), .cardio-row input:not([type='checkbox']), .targets-cell input {
   background: var(--surface);
   border: 3px solid var(--ink);
   border-radius: 6px;
@@ -560,7 +560,7 @@ input[type='checkbox']:checked {
   min-width: 0;
 }
 
-.cardio-row input[type='number'] {
+.cardio-row input:not([type='checkbox']) {
   width: 100%;
   font-size: 1.05rem;
   padding: 4px 8px;
@@ -1600,7 +1600,7 @@ details.lift[open] > .lift-summary .lift-name::after {
   padding-top: 0;
 }
 
-.habit-edit-target input[type='number'] {
+.habit-edit-target input[inputmode='numeric'] {
   flex: 0 1 96px;
 }
 

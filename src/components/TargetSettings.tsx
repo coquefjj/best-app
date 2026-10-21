@@ -1,4 +1,5 @@
 import { useState, type ReactNode } from 'react'
+import { parseNum } from '../lib/num'
 import { useStore } from '../lib/store'
 import { defaultTargets, getTargets, type Targets } from '../lib/targets'
 
@@ -33,9 +34,8 @@ export default function TargetSettings({ byDay = [], rows, note, children }: { b
   const defaults = defaultTargets(data)
 
   const set = (key: keyof Targets, raw: string) => {
-    if (raw === '') return
-    const v = Number(raw)
-    if (!Number.isFinite(v) || v < 0) return
+    const v = parseNum(raw)
+    if (v == null || v < 0) return
     setData((prev) => ({ ...prev, targets: { ...prev.targets, [key]: v } }))
   }
 
@@ -56,10 +56,9 @@ export default function TargetSettings({ byDay = [], rows, note, children }: { b
     <input
       // An unset moderate field follows easy and hard, so it re-mounts to show the new value.
       key={`${key}-${resets}-${follows(key) ? t[key] : ''}`}
-      type="number"
-      inputMode="decimal"
-      step={step}
-      min={0}
+      type="text"
+      inputMode={Number.isInteger(step) ? 'numeric' : 'decimal'}
+      autoComplete="off"
       aria-label={label}
       defaultValue={t[key]}
       onChange={(e) => set(key, e.target.value)}

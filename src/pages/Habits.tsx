@@ -1,4 +1,6 @@
 import { useState } from 'react'
+import NumberInput from '../components/NumberInput'
+import { parseNum } from '../lib/num'
 import { Link, useParams } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { todayISO, formatHuman, addDays } from '../lib/date'
@@ -86,27 +88,22 @@ function HabitRow({
           />
         ) : h.type === 'count' ? (
           <span className="habit-time habit-count">
-            <input
+            <NumberInput
               id={`habit-${h.id}-${iso}`}
-              type="number"
-              inputMode="numeric"
-              min={0}
+              integer
               placeholder="--"
-              value={typeof value === 'number' ? value : ''}
-              onChange={(e) => onChange(e.target.value === '' ? undefined : Math.max(0, Math.round(Number(e.target.value))))}
+              value={typeof value === 'number' ? value : null}
+              onChange={(n) => onChange(n == null ? undefined : Math.max(0, Math.round(n)))}
             />
             {h.unit && <span className="subtle">{h.unit}</span>}
           </span>
         ) : (
           <span className="habit-time">
-            <input
+            <NumberInput
               id={`habit-${h.id}-${iso}`}
-              type="number"
-              inputMode="numeric"
-              min={0}
               placeholder="--"
-              value={typeof value === 'number' ? value : ''}
-              onChange={(e) => onChange(e.target.value === '' ? undefined : Math.max(0, Number(e.target.value)))}
+              value={typeof value === 'number' ? value : null}
+              onChange={(n) => onChange(n == null ? undefined : Math.max(0, n))}
             />
             <span className="subtle">min</span>
           </span>
@@ -144,7 +141,7 @@ function EditHabits({ onDone }: { onDone: () => void }) {
   const [type, setType] = useState<Habit['type']>('boolean')
   const [target, setTarget] = useState('')
   const [unit, setUnit] = useState('')
-  const targetNum = Math.round(Number(target))
+  const targetNum = Math.round(parseNum(target, true) ?? 0)
   const canAdd = !!name.trim() && (type !== 'count' || targetNum > 0)
 
   const setList = (fn: (list: Habit[]) => Habit[]) => setData((prev) => ({ ...prev, habitList: fn(prev.habitList) }))
@@ -187,13 +184,11 @@ function EditHabits({ onDone }: { onDone: () => void }) {
             {h.type === 'count' && (
               <div className="habit-edit-row habit-edit-target">
                 <span className="subtle">Target</span>
-                <input
-                  type="number"
-                  inputMode="numeric"
-                  min={1}
+                <NumberInput
+                  integer
                   aria-label={`${h.label} target`}
-                  value={h.target ?? ''}
-                  onChange={(e) => update(h.id, { target: e.target.value === '' ? undefined : Math.max(1, Math.round(Number(e.target.value))) })}
+                  value={h.target}
+                  onChange={(n) => update(h.id, { target: n == null ? undefined : Math.max(1, Math.round(n)) })}
                   onBlur={() => !h.target && update(h.id, { target: 1 })}
                 />
                 <input
@@ -231,7 +226,7 @@ function EditHabits({ onDone }: { onDone: () => void }) {
           <div className="habit-count-fields">
             <div className="field">
               <label htmlFor="new-habit-target">Daily target</label>
-              <input id="new-habit-target" type="number" inputMode="numeric" min={1} placeholder="10000" value={target} onChange={(e) => setTarget(e.target.value)} />
+              <input id="new-habit-target" type="text" inputMode="numeric" autoComplete="off" placeholder="10000" value={target} onChange={(e) => setTarget(e.target.value)} />
             </div>
             <div className="field">
               <label htmlFor="new-habit-unit">Unit</label>

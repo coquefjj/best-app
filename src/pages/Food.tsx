@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react'
 import { useStore } from '../lib/store'
 import { todayISO, formatHuman, addDays, nowHHMM, hhmmToMinutes, formatMinutes } from '../lib/date'
+import { parseNum } from '../lib/num'
 import { MACROS, OPTIONAL_MACROS, calorieReason, gradedMacros, nutritionTarget, trackedMacros, type Macro } from '../lib/targets'
 import type { FoodEntry } from '../types'
 import RoomHeader from '../components/RoomHeader'
@@ -27,12 +28,12 @@ function toForm(m: MealValues): MealForm {
 function fromForm(f: MealForm): MealValues {
   return {
     name: f.name.trim(),
-    calories: Number(f.calories) || 0,
-    protein: Number(f.protein) || 0,
-    carbs: Number(f.carbs) || 0,
+    calories: parseNum(f.calories) || 0,
+    protein: parseNum(f.protein) || 0,
+    carbs: parseNum(f.carbs) || 0,
     // Fiber is optional; left blank it stays off the entry.
-    ...(Number(f.fiber) ? { fiber: Number(f.fiber) } : {}),
-    fat: Number(f.fat) || 0,
+    ...(parseNum(f.fiber) ? { fiber: parseNum(f.fiber)! } : {}),
+    fat: parseNum(f.fat) || 0,
     mealSlot: f.mealSlot,
   }
 }
@@ -65,12 +66,12 @@ function MealFields({ form, setForm, timeField }: { form: MealForm; setForm: (f:
       <div className="row">
         <div className="field" style={{ flex: 1 }}>
           <label>Calories</label>
-          <input type="number" inputMode="decimal" value={form.calories} onChange={(e) => setForm({ ...form, calories: e.target.value })} />
+          <input type="text" inputMode="decimal" autoComplete="off" value={form.calories} onChange={(e) => setForm({ ...form, calories: e.target.value })} />
         </div>
         {tracked.protein && (
           <div className="field" style={{ flex: 1 }}>
             <label>Protein (g)</label>
-            <input type="number" inputMode="decimal" value={form.protein} onChange={(e) => setForm({ ...form, protein: e.target.value })} />
+            <input type="text" inputMode="decimal" autoComplete="off" value={form.protein} onChange={(e) => setForm({ ...form, protein: e.target.value })} />
           </div>
         )}
       </div>
@@ -79,7 +80,7 @@ function MealFields({ form, setForm, timeField }: { form: MealForm; setForm: (f:
           {optional.map((m) => (
             <div className="field" style={{ flex: 1 }} key={m}>
               <label>{MACRO_LABEL[m]} (g)</label>
-              <input type="number" inputMode="decimal" value={form[m]} onChange={(e) => setForm({ ...form, [m]: e.target.value })} />
+              <input type="text" inputMode="decimal" autoComplete="off" value={form[m]} onChange={(e) => setForm({ ...form, [m]: e.target.value })} />
             </div>
           ))}
         </div>

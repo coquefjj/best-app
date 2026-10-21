@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { MACROS, OPTIONAL_MACROS, fiberFor, midpoint, type Macro } from '../lib/targets'
 import { addDays, formatHuman, startOfWeek, todayISO } from '../lib/date'
+import { parseNum } from '../lib/num'
+import NumberInput from '../components/NumberInput'
 import { TEMPLATES, resolvePlan, type PlanRef } from '../data/templates'
 import { BLANK_DRAFT, HABIT_CHOICES, PRESETS, carbsFor, suggest, type About, type Draft } from '../data/onboarding'
 import { GLASS_ML } from '../components/WaterGlasses'
@@ -33,7 +35,6 @@ const WEEKDAYS: { day: number; short: string }[] = [
 ]
 
 const nextMonday = () => addDays(startOfWeek(todayISO()), 7)
-const num = (v: string) => (v === '' ? null : Number(v))
 
 /** Sets up a new profile one room at a time: plan, habits, eating and recovery targets. */
 export default function Onboarding() {
@@ -110,7 +111,7 @@ export default function Onboarding() {
   const [customType, setCustomType] = useState<Habit['type']>('boolean')
   const [customTarget, setCustomTarget] = useState('')
   const [customUnit, setCustomUnit] = useState('')
-  const customTargetNum = Math.round(Number(customTarget))
+  const customTargetNum = Math.round(parseNum(customTarget, true) ?? 0)
   const canAddCustom = !!customLabel.trim() && (customType !== 'count' || customTargetNum > 0)
   const addCustom = () => {
     const label = customLabel.trim()
@@ -144,7 +145,7 @@ export default function Onboarding() {
   const field = (label: string, value: number | null, onChange: (v: number | null) => void, step = 1) => (
     <div className="field">
       <label>{label}</label>
-      <input type="number" inputMode="decimal" step={step} min={0} value={value ?? ''} onChange={(e) => onChange(num(e.target.value))} />
+      <NumberInput integer={Number.isInteger(step)} value={value} onChange={(n) => onChange(n != null && n < 0 ? null : n)} />
     </div>
   )
 
@@ -299,7 +300,7 @@ export default function Onboarding() {
             <div className="habit-count-fields">
               <div className="field">
                 <label>Daily target</label>
-                <input type="number" inputMode="numeric" min={1} placeholder="10000" value={customTarget} onChange={(e) => setCustomTarget(e.target.value)} />
+                <input type="text" inputMode="numeric" autoComplete="off" placeholder="10000" value={customTarget} onChange={(e) => setCustomTarget(e.target.value)} />
               </div>
               <div className="field">
                 <label>Unit</label>

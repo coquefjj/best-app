@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import NumberInput from '../components/NumberInput'
 import { Link, useParams } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { todayISO, formatHuman, addDays } from '../lib/date'
@@ -45,11 +46,9 @@ function RecoveryDay({ iso }: { iso: string }) {
         {HABIT_DEFS.filter((h) => h.id !== 'water' && (watch || h.id === 'sleepHours')).map((h) => (
           <div className="field" key={h.id}>
             <label>{h.label}{h.unit ? ` (${h.unit})` : ''}</label>
-            <input
-              type="number"
-              inputMode="decimal"
-              value={(day[h.id] as number) ?? ''}
-              onChange={(e) => setValue(h.id, e.target.value === '' ? undefined : Number(e.target.value))}
+            <NumberInput
+              value={day[h.id] as number | undefined}
+              onChange={(n) => setValue(h.id, n ?? undefined)}
             />
           </div>
         ))}

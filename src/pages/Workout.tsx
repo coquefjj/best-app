@@ -3,6 +3,7 @@ import { useStore } from '../lib/store'
 import { getDayInfo } from '../lib/session'
 import { calorieReason, dayLevel, DAY_LEVELS, type DayLevel } from '../lib/targets'
 import { useState } from 'react'
+import NumberInput from '../components/NumberInput'
 import { formatHuman, addDays, todayISO, formatClock, formatDuration, parseDuration, weekdayOf } from '../lib/date'
 import { MOBILITY_DAILY, TRAVEL_SESSIONS, TRAVEL_TEMPLATES, TRAVEL_GEARS, travelGearOf, SWAP_SESSIONS, SWAP_REASONS, CARDIO_OPTIONS, SWAP_REASONS_SOFTER, SWAP_REASONS_FROM_REST, type DayType, type SwapReason, type TravelGear } from '../data/plan'
 import { activePlan } from '../data/templates'
@@ -355,12 +356,10 @@ function WorkoutDay({ iso }: { iso: string }) {
             <div className={`set-row${weighted ? '' : ' no-weight'}`} key={idx}>
               <span className="set-num">#{idx + 1}</span>
               {weighted && (
-                <input
-                  type="number"
-                  inputMode="decimal"
+                <NumberInput
                   placeholder={lastSet?.weight != null ? `${lastSet.weight} kg last` : 'kg'}
-                  value={s.weight ?? ''}
-                  onChange={(e) => updateSet(exId, idx, { weight: e.target.value === '' ? null : Number(e.target.value) })}
+                  value={s.weight}
+                  onChange={(n) => updateSet(exId, idx, { weight: n })}
                 />
               )}
               {mode === 'time' ? (
@@ -370,12 +369,11 @@ function WorkoutDay({ iso }: { iso: string }) {
                   onChange={(sec) => updateSet(exId, idx, { seconds: sec })}
                 />
               ) : (
-                <input
-                  type="number"
-                  inputMode="numeric"
+                <NumberInput
+                  integer
                   placeholder={lastSet?.reps != null ? `${lastSet.reps} reps last` : 'reps'}
-                  value={s.reps ?? ''}
-                  onChange={(e) => updateSet(exId, idx, { reps: e.target.value === '' ? null : Number(e.target.value) })}
+                  value={s.reps}
+                  onChange={(n) => updateSet(exId, idx, { reps: n == null ? null : Math.round(n) })}
                 />
               )}
               <input
@@ -406,22 +404,19 @@ function WorkoutDay({ iso }: { iso: string }) {
       <div className="cardio-row">
         <label>
           <span className="subtle">Time (min)</span>
-          <input
-            type="number"
-            inputMode="decimal"
+          <NumberInput
             placeholder={last?.seconds != null ? `${Math.round(last.seconds / 60)} last` : 'min'}
-            value={s.seconds != null ? Math.round((s.seconds / 60) * 10) / 10 : ''}
-            onChange={(e) => updateSet(exId, 0, { seconds: e.target.value === '' ? null : Math.round(Number(e.target.value) * 60) })}
+            value={s.seconds != null ? Math.round((s.seconds / 60) * 10) / 10 : null}
+            onChange={(n) => updateSet(exId, 0, { seconds: n == null ? null : Math.round(n * 60) })}
           />
         </label>
         <label>
           <span className="subtle">Calories (kcal)</span>
-          <input
-            type="number"
-            inputMode="numeric"
+          <NumberInput
+            integer
             placeholder={last?.calories != null ? `${last.calories} last` : 'kcal'}
-            value={s.calories ?? ''}
-            onChange={(e) => updateSet(exId, 0, { calories: e.target.value === '' ? null : Number(e.target.value) })}
+            value={s.calories}
+            onChange={(n) => updateSet(exId, 0, { calories: n == null ? null : Math.round(n) })}
           />
         </label>
         <input type="checkbox" aria-label="Done" checked={s.done} onChange={(e) => updateSet(exId, 0, { done: e.target.checked })} />
@@ -529,27 +524,24 @@ function WorkoutDay({ iso }: { iso: string }) {
             <>
               <div className="field">
                 <label>Duration (min)</label>
-                <input
-                  type="number"
-                  value={workout.aerobic.durationMin ?? ''}
-                  onChange={(e) => setAerobic({ durationMin: e.target.value === '' ? null : Number(e.target.value) })}
+                <NumberInput
+                  value={workout.aerobic.durationMin}
+                  onChange={(n) => setAerobic({ durationMin: n })}
                 />
               </div>
               <div className="field">
                 <label>Distance (km, optional)</label>
-                <input
-                  type="number"
-                  value={workout.aerobic.distanceKm ?? ''}
-                  onChange={(e) => setAerobic({ distanceKm: e.target.value === '' ? null : Number(e.target.value) })}
+                <NumberInput
+                  value={workout.aerobic.distanceKm}
+                  onChange={(n) => setAerobic({ distanceKm: n })}
                 />
               </div>
               <div className="field">
                 <label>Calories burned (kcal, optional)</label>
-                <input
-                  type="number"
-                  inputMode="numeric"
-                  value={workout.aerobic.caloriesBurned ?? ''}
-                  onChange={(e) => setAerobic({ caloriesBurned: e.target.value === '' ? null : Number(e.target.value) })}
+                <NumberInput
+                  integer
+                  value={workout.aerobic.caloriesBurned}
+                  onChange={(n) => setAerobic({ caloriesBurned: n == null ? null : Math.round(n) })}
                 />
               </div>
               <div className="field">
