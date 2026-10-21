@@ -6,7 +6,7 @@ import type { FoodEntry } from '../types'
 import RoomHeader from '../components/RoomHeader'
 import DaySwiper from '../components/DaySwiper'
 import NutritionProgress from '../components/NutritionProgress'
-import TargetSettings, { type DayTargetRow } from '../components/TargetSettings'
+import TargetSettings, { type DayTargetRow, type TargetRow } from '../components/TargetSettings'
 import WeightCard from '../components/WeightCard'
 import { MEAL_SLOTS, PICKABLE_SLOTS, nearestSlot, slotInfo } from '../data/meals'
 import { Link, useParams } from 'react-router-dom'
@@ -37,13 +37,15 @@ function fromForm(f: MealForm): MealValues {
   }
 }
 
+/** Macros on the second row of the form and Totals, below calories and protein. */
+const GRAM_ROW: Macro[] = ['carbs', 'fiber', 'fat']
 const MACRO_LABEL = Object.fromEntries(MACROS.map((m) => [m.id, m.label])) as Record<Macro, string>
 
 // Meal first, then the time eaten (when given), then the food itself
 function MealFields({ form, setForm, timeField }: { form: MealForm; setForm: (f: MealForm) => void; timeField?: ReactNode }) {
   // Untracked macros are hidden; what an entry already has stays in the form and is saved as it was.
   const tracked = trackedMacros(useStore().data)
-  const optional = OPTIONAL_MACROS.filter((m) => tracked[m])
+  const optional = GRAM_ROW.filter((m) => tracked[m])
   return (
     <>
       <div className="field">
@@ -65,10 +67,12 @@ function MealFields({ form, setForm, timeField }: { form: MealForm; setForm: (f:
           <label>Calories</label>
           <input type="number" inputMode="decimal" value={form.calories} onChange={(e) => setForm({ ...form, calories: e.target.value })} />
         </div>
-        <div className="field" style={{ flex: 1 }}>
-          <label>Protein (g)</label>
-          <input type="number" inputMode="decimal" value={form.protein} onChange={(e) => setForm({ ...form, protein: e.target.value })} />
-        </div>
+        {tracked.protein && (
+          <div className="field" style={{ flex: 1 }}>
+            <label>Protein (g)</label>
+            <input type="number" inputMode="decimal" value={form.protein} onChange={(e) => setForm({ ...form, protein: e.target.value })} />
+          </div>
+        )}
       </div>
       {optional.length > 0 && (
         <div className="row">
@@ -238,10 +242,11 @@ function FoodDay({ iso }: { iso: string }) {
   }
 
   const tracked = trackedMacros(data)
-  const optional = OPTIONAL_MACROS.filter((m) => tracked[m])
+  const optional = GRAM_ROW.filter((m) => tracked[m])
   const entryMacros = (e: FoodEntry) =>
     [
-      `${e.calories} kcal, ${e.protein}g P`,
+      `${e.calories} kcal`,
+      tracked.protein && `${e.protein}g P`,
       tracked.carbs && `${e.carbs}g C`,
       tracked.fiber && e.fiber && `${e.fiber}g fiber`,
       tracked.fat && `${e.fat}g F`,
@@ -262,7 +267,7 @@ function FoodDay({ iso }: { iso: string }) {
   return (
     <div className="page room-page floor-kitchen">
 
-      <RoomHeader room="kitchen" title="Food log" subtitle={`Target today: ${target.calories} kcal · ${target.protein} g protein`}>
+      <RoomHeader room="kitchen" title="Food log" subtitle={`Target today: ${target.calories} kcal${tracked.protein ? ` · ${target.protein} g protein` : ''}`}>
         <div className="top-bar">
           <Link to={`/food/${addDays(iso, -1)}`} className="arrow-btn" aria-label="Previous day">◀</Link>
           <strong>{formatHuman(iso)}</strong>
@@ -273,14 +278,16 @@ function FoodDay({ iso }: { iso: string }) {
       <div className="card">
         <h2>Totals</h2>
         <div className="stat-grid macro-grid">
-          <div>
+          <div style={tracked.protein ? undefined : { gridColumn: 'span 6' }}>
             <div className="stat-value">{Math.round(totals.calories)}</div>
             <div className="stat-label">kcal / {target.calories}</div>
           </div>
-          <div>
-            <div className="stat-value">{Math.round(totals.protein)}g</div>
-            <div className="stat-label">protein / {target.protein}g</div>
-          </div>
+          {tracked.protein && (
+            <div>
+              <div className="stat-value">{Math.round(totals.protein)}g</div>
+              <div className="stat-label">protein / {target.protein}g</div>
+            </div>
+          )}
           {optional.map((m) => (
             // Carbs, fiber and fat share the second row, however many are tracked.
             <div key={m} style={{ gridColumn: `span ${6 / optional.length}` }}>
@@ -387,14 +394,14 @@ function FoodDay({ iso }: { iso: string }) {
       <TargetSettings
         byDay={([
           { label: 'Calories', unit: 'kcal', keys: ['caloriesEasy', 'caloriesModerate', 'caloriesHard'], step: 25 },
-          { label: 'Protein', unit: 'g', keys: ['proteinEasy', 'proteinModerate', 'proteinHard'], step: 5 },
+          { label: 'Protein', unit: 'g', keys: ['proteinEasy', 'proteinModerate', 'proteinHard'], step: 5, macro: 'protein' },
           { label: 'Carbs', unit: 'g', keys: ['carbsEasy', 'carbsModerate', 'carbsHard'], step: 5, macro: 'carbs' },
           { label: 'Fiber', unit: 'g', keys: ['fiberEasy', 'fiberModerate', 'fiberHard'], step: 1, macro: 'fiber' },
           { label: 'Fat', unit: 'g', keys: ['fatEasy', 'fatModerate', 'fatHard'], step: 5, macro: 'fat' },
         ] as (DayTargetRow & { macro?: Macro })[]).filter((r) => !r.macro || tracked[r.macro])}
         rows={[
           { label: 'Calories within ±', unit: 'kcal', target: 'calorieTolerance', min: 'calorieMinTolerance', step: 10 },
-          { label: 'Protein', unit: 'g', min: 'proteinMin' },
+          ...(tracked.protein ? [{ label: 'Protein', unit: 'g', min: 'proteinMin' } as TargetRow] : []),
         ]}
         note="Easy days are Tuesday and Sunday; dumbbell and calisthenics travel days are moderate. Pick Easy, Moderate or Hard on Workout to change a day. Moderate starts halfway between easy and hard until you change it. On the Home calendar a day is green when every macro that counts is on target (carbs and fat within 10%, fiber at least its target), yellow when at least one reaches its minimum (within 25%, or 75% of fiber), red when none does. Macros that don't count are only tracked; untracked ones are hidden from logging, totals and Progress."
       >

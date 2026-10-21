@@ -246,7 +246,7 @@ export default function NutritionProgress() {
             />
             <ChartDates from={firstISO} to={today} indent={44} />
             <div className="subtle report-note">Dark ticks are each day's target.</div>
-            <MacroMeter label="Protein" eaten={avg('protein')} target={avgTarget('protein')} unit="g" />
+            {tracked.protein && <MacroMeter label="Protein" eaten={avg('protein')} target={avgTarget('protein')} unit="g" />}
             {tracked.carbs && <MacroMeter label="Carbs" eaten={avg('carbs')} target={avgTarget('carbs')} unit="g" overIsBad={graded.carbs} />}
             {tracked.fiber && <MacroMeter label="Fiber" eaten={avg('fiber')} target={avgTarget('fiber')} unit="g" />}
             {tracked.fat && <MacroMeter label="Fat" eaten={avg('fat')} target={avgTarget('fat')} unit="g" overIsBad={graded.fat} />}
@@ -257,12 +257,14 @@ export default function NutritionProgress() {
                   {inRange} of {avgBase.length} days
                 </span>
               </li>
-              <li>
-                <span className="report-row-name">Protein reached</span>
-                <span>
-                  {proteinHit} of {avgBase.length} days
-                </span>
-              </li>
+              {tracked.protein && (
+                <li>
+                  <span className="report-row-name">Protein reached</span>
+                  <span>
+                    {proteinHit} of {avgBase.length} days
+                  </span>
+                </li>
+              )}
               {fiberLogged && (
                 <li>
                   <span className="report-row-name">Fiber reached</span>

@@ -147,13 +147,13 @@ export const MACROS: { id: Macro; label: string }[] = [
   { id: 'fiber', label: 'Fiber' },
   { id: 'fat', label: 'Fat' },
 ]
-/** Macros a profile can stop tracking; calories and protein are always tracked. */
-export const OPTIONAL_MACROS: Macro[] = ['carbs', 'fiber', 'fat']
-/** Carbs and fat are tracked by default; fiber until switched on. */
+/** Macros a profile can stop tracking; calories are always tracked. */
+export const OPTIONAL_MACROS: Macro[] = ['protein', 'carbs', 'fiber', 'fat']
+/** Protein, carbs and fat are tracked by default; fiber until switched on. */
 const DEFAULT_TRACKED: Record<Macro, boolean> = { calories: true, protein: true, carbs: true, fiber: false, fat: true }
 
 export function trackedMacros(data: AppData): Record<Macro, boolean> {
-  return { ...DEFAULT_TRACKED, ...data.trackedMacros, calories: true, protein: true }
+  return { ...DEFAULT_TRACKED, ...data.trackedMacros, calories: true }
 }
 
 /** Calories and protein count by default; carbs, fiber and fat are only tracked until switched on. */

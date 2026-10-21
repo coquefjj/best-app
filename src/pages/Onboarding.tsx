@@ -71,7 +71,7 @@ export default function Onboarding() {
     const data: AppData = {
       ...EMPTY_DATA,
       habitList: draft.habits,
-      trackedMacros: { carbs: track.carbs, fiber: track.fiber, fat: track.fat },
+      trackedMacros: { protein: track.protein, carbs: track.carbs, fiber: track.fiber, fat: track.fat },
       profile: {
         name: draft.name.trim(),
         about: draft.about,
@@ -319,7 +319,6 @@ export default function Onboarding() {
           {field('Calories on training days (kcal)', food.caloriesHard, (v) => setFood('caloriesHard', v), 50)}
           {field('Calories on moderate days (kcal)', moderate, (v) => setFood('caloriesModerate', v), 25)}
           {field('Calories on rest days (kcal)', food.caloriesEasy, (v) => setFood('caloriesEasy', v), 50)}
-          {field('Protein (g)', food.protein, (v) => setFood('protein', v), 5)}
           <div className="field">
             <label>Also track</label>
             <div className="pill-select">
@@ -328,6 +327,7 @@ export default function Onboarding() {
               )}
             </div>
           </div>
+          {track.protein && field('Protein (g)', food.protein, (v) => setFood('protein', v), 5)}
           {track.fat && field('Fat (g)', food.fat, (v) => setFood('fat', v), 5)}
           {track.carbs && field('Carbs on training days (g)', carbsHard, (v) => setFood('carbsHard', v), 5)}
           {track.carbs && field('Carbs on rest days (g)', carbsEasy, (v) => setFood('carbsEasy', v), 5)}
@@ -371,7 +371,7 @@ export default function Onboarding() {
           <div className="card">
             <div className="card-kicker">Nutrition</div>
             <div className="subtle">
-              {food.caloriesHard} kcal training days · {moderate} kcal moderate days · {food.caloriesEasy} kcal rest days · {food.protein} g protein
+              {food.caloriesHard} kcal training days · {moderate} kcal moderate days · {food.caloriesEasy} kcal rest days{track.protein ? ` · ${food.protein} g protein` : ''}
             </div>
           </div>
           <div className="card">

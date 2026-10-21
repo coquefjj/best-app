@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { todayISO, formatHuman, formatClock } from '../lib/date'
 import { getDayInfo } from '../lib/session'
-import { nutritionTarget } from '../lib/targets'
+import { nutritionTarget, trackedMacros } from '../lib/targets'
 import { activePlan } from '../data/templates'
 import RoomHeader from '../components/RoomHeader'
 import WaterGlasses from '../components/WaterGlasses'
@@ -119,11 +119,15 @@ export default function Today() {
 
       <div className="card">
         <h2>Nutrition</h2>
-        <div className="bar-label">
-          <span className="tag">Protein</span>
-          <span className="subtle">{Math.round(totals.protein)} / {nTarget.protein} g</span>
-        </div>
-        <div className="progress-bar"><div style={{ width: `${proteinPct}%` }} /></div>
+        {trackedMacros(data).protein && (
+          <>
+            <div className="bar-label">
+              <span className="tag">Protein</span>
+              <span className="subtle">{Math.round(totals.protein)} / {nTarget.protein} g</span>
+            </div>
+            <div className="progress-bar"><div style={{ width: `${proteinPct}%` }} /></div>
+          </>
+        )}
         <div className="bar-label">
           <span className="tag">Calories</span>
           <span className="subtle">{Math.round(totals.calories)} / {nTarget.calories} kcal</span>
