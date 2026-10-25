@@ -1154,13 +1154,6 @@ input[type='checkbox']:checked {
   height: auto;
   display: block;
   image-rendering: pixelated;
-  filter: grayscale(1) brightness(0.95);
-  opacity: 0.55;
-  transition: filter 0.15s steps(2), opacity 0.15s steps(2);
-}
-.water-glass.full img {
-  filter: none;
-  opacity: 1;
 }
 .water-glass:active img { transform: translateY(2px); }
 

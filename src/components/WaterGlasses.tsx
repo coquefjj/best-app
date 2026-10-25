@@ -45,7 +45,8 @@ export default function WaterGlasses({ iso }: { iso: string }) {
             aria-pressed={i < count}
             onClick={() => tap(i)}
           >
-            <img src={`${import.meta.env.BASE_URL}img/water-glass.png`} alt="" draggable={false} />
+            {/* The empty look is baked into its own image: CSS filters left these blank on some phones */}
+            <img src={`${import.meta.env.BASE_URL}img/${i < count ? 'water-glass' : 'water-glass-empty'}.png`} alt="" draggable={false} />
           </button>
         ))}
       </div>
