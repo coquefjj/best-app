@@ -20,10 +20,11 @@ export function weighIns(data: AppData): { date: string; kg: number }[] {
     .filter((w): w is { date: string; kg: number } => w.kg != null)
 }
 
-/** Reads "78.4" or "78,4"; null when it isn't a sensible weight. */
+/** Reads "79.65" or "79,65" (kept to 2 decimals); null when it isn't a sensible weight. */
 export function parseKg(text: string): number | null {
   const n = parseNum(text)
-  return n != null && n >= 20 && n <= 400 ? +n.toFixed(1) : null
+  return n != null && n >= 20 && n <= 400 ? +n.toFixed(2) : null
 }
 
-export const showKg = (kg: number) => `${(+kg.toFixed(1)).toString()} kg`
+/** Always 2 decimals, e.g. "79.65 kg" or "80.00 kg". */
+export const showKg = (kg: number) => `${kg.toFixed(2)} kg`

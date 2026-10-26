@@ -123,7 +123,7 @@ function WeightTrend({ data, range, today }: { data: AppData; range: RangeDays; 
           </div>
           {change != null && start && (
             <div className="subtle">
-              {Math.abs(change) < 0.05
+              {Math.abs(change) < 0.005
                 ? `Same as ${formatHuman(start.date)}`
                 : `${change > 0 ? '+' : '−'}${showKg(Math.abs(change))} since ${formatHuman(start.date)}`}
             </div>

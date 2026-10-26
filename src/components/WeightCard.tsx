@@ -60,7 +60,7 @@ export default function WeightCard({ iso }: { iso: string }) {
             <span className="weight-value">{showKg(kg)}</span>
             {previous && (
               <span className="subtle">
-                {Math.abs(kg - previous.kg) < 0.05
+                {Math.abs(kg - previous.kg) < 0.005
                   ? `Same as ${formatHuman(previous.date)}`
                   : `${kg > previous.kg ? '+' : '−'}${showKg(Math.abs(kg - previous.kg))} since ${formatHuman(previous.date)}`}
               </span>
